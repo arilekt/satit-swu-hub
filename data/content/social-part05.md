@@ -3,7 +3,11 @@ id: social-part05
 title: "PART 05 · สังคมศึกษา"
 duration: "เรียนครั้งละประมาณ 20 นาที"
 video_url: "https://www.youtube.com/watch?v=YB9_6Y31dq0"
-content_status: "video-ready-summary-pending"
+video_match:
+  status: "unconfirmed"
+  evidence: "รหัสคลิปมาจากรายการที่คุณพ่อส่ง เรียงตามลำดับ PART"
+  unconfirmed: "ยังดึงชื่อคลิปมาตรวจแบบตรงตัวไม่ได้ และยังไม่ได้เทียบเนื้อหากับ PDF"
+analysis_status: "pending"
 ---
 
 ## ภารกิจวิดีโอ PART 05 📺

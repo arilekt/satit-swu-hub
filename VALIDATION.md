@@ -54,3 +54,10 @@ All 13 ID → Markdown/config mappings PASS. Renderer tested for correct iframe 
 ## Content/exam-only progress
 
 Intro and PDF guide steps removed in every subject. Counts: Social 14 (13 PART + 1 mock), English 11, Science 7, Thai 9, Math 12, total 53. Tests PASS for retained old PART completions, ignored removed-step records, historical exam attempt completion, repeat exams counted once, mini-quiz excluded, persistent exam completion after 100-history rotation, and recommending the mock after ready lessons.
+
+## v0.3.0 lesson room, PART menu, chapter quizzes
+
+- `node tests/core.cjs` PASS รวมชุดใหม่: 52 PART มีแบบทดสอบท้ายบท 20 ข้อ, รวม 105 ภารกิจ, แนะนำแบบทดสอบต่อจากบทเมื่อไฟล์พร้อม, ทุก PART สังคมมี video_match/analysis_status
+- Chromium (Playwright) ผ่าน local server โดยใช้ marked/js-yaml/DOMPurify จาก npm แทน CDN: 1680×1000, 1024×1366, 768×1024, 390×844 ไม่มี horizontal overflow และไม่มี page error วิดีโออยู่บนสุดของเนื้อหา YouTube ถูกบล็อกในสภาพแวดล้อมทดสอบ จึงยังไม่ได้ยืนยันการเล่นคลิป
+- mission_cli: ทดสอบ outline กับ PDF สังเคราะห์ 6 หน้า (หาหัว PART 3 จุด, ไม่นับคำว่า PART กลางประโยค), generate --kind quiz, validate ปฏิเสธ 19 ข้อ, import quiz อัปเดต config, import บทเรียนเก็บ video_url/video_match เดิม ยังไม่ได้รันกับ PDF จริง
+- ชื่อคลิป (YouTube oEmbed ผ่าน noembed, 3 ต.ค. 2569): Oh7BB9fiWxk = “สรุปเนื้อหาสังคมศึกษา Part 02”, lwrMYO1pP40 = “สรุปเนื้อหาสังคมศึกษา Part 03” ช่อง BBA ตรงกับเลข PART คลิปอื่นยังตรวจแบบตรงตัวไม่ได้

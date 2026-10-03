@@ -1,6 +1,7 @@
 /* Local-only progress. Storage failures are always visible to the learner. */
 (() => {
   'use strict';
+  const Catalog = window.Catalog;
   const KEY = 'satit-swu-hub:v1';
   const blank = () => ({version:1, completed:[], attempts:[], examDate:null, resultDate:null});
   let state = blank(), writable = true;
@@ -46,7 +47,7 @@
     setExamDate(value) {state.examDate=dateValid(value)?value:null;save();},
     resultDate:()=>state.resultDate,
     setResultDate(value) {state.resultDate=dateValid(value)?value:null;save();},
-    stats(config) { const ids=config.subjects.flatMap(s=>s.steps.map(x=>x.id));const done=ids.filter(id=>this.has(id)).length;return {done,total:ids.length,percent:Math.round(done/ids.length*100)}; },
-    summary(config) { const all=this.stats(config);return ['สรุปภารกิจของ'+config.learner,'เรียนจบ '+all.done+'/'+all.total+' ภารกิจ ('+all.percent+'%)',...config.subjects.map(s=>s.name+': '+s.steps.filter(x=>this.has(x.id)).length+'/'+s.steps.length),...state.attempts.slice(-5).map(a=>'ข้อสอบ '+a.title+': '+a.score+'/'+a.total+' ('+new Date(a.date).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok'})+')')].join('\n'); }
+    stats(config) { const ids=config.subjects.flatMap(s=>Catalog.items(s).map(x=>x.id));const done=ids.filter(id=>this.has(id)).length;return {done,total:ids.length,percent:Math.round(done/ids.length*100)}; },
+    summary(config) { const all=this.stats(config);return ['สรุปภารกิจของ'+config.learner,'เรียนจบ '+all.done+'/'+all.total+' ภารกิจ ('+all.percent+'%)',...config.subjects.map(s=>{const all=Catalog.items(s);return s.name+': '+all.filter(x=>this.has(x.id)).length+'/'+all.length;}),...state.attempts.slice(-5).map(a=>'ข้อสอบ '+a.title+': '+a.score+'/'+a.total+' ('+new Date(a.date).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok'})+')')].join('\n'); }
   };
 })();

@@ -3,7 +3,11 @@ id: social-part12
 title: "PART 12 · สังคมศึกษา"
 duration: "เรียนครั้งละประมาณ 20 นาที"
 video_url: "https://www.youtube.com/watch?v=jTc5Cyj4jiY"
-content_status: "video-ready-summary-pending"
+video_match:
+  status: "unconfirmed"
+  evidence: "รหัสคลิปมาจากรายการที่คุณพ่อส่ง เรียงตามลำดับ PART"
+  unconfirmed: "ยังดึงชื่อคลิปมาตรวจแบบตรงตัวไม่ได้ และยังไม่ได้เทียบเนื้อหากับ PDF"
+analysis_status: "pending"
 ---
 
 ## ภารกิจวิดีโอ PART 12 📺

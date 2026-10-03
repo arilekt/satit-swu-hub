@@ -26,6 +26,26 @@ python -m venv .venv
 
 RUN คือชื่อโฟลเดอร์ที่สคริปต์พิมพ์ออกมา สำหรับ exam เพิ่ม --kind exam ใน import ด้วย --replace คือคำสั่งอนุญาตแทนที่บทเดิม ใช้ id เดิมเมื่อปรับบท ไม่เพิ่มจำนวน steps โดยอัตโนมัติ ตรวจ Git diff และหน้าเว็บก่อนส่งขึ้น main
 
+## PDF ทั้งเล่ม → บทเรียนต่อ PART → ข้อสอบท้ายบท 20 ข้อ
+
+ต้องติดตั้ง requirements ใหม่ (เพิ่ม pypdf) แล้วทำตามลำดับ:
+
+```powershell
+# 1) แยก PDF เป็นข้อความรายหน้า หาหัว PART และทำตารางหลักฐานจับคู่วิดีโอ
+.\.venv\Scripts\python tools/mission_cli.py outline local/inbox/social/social.pdf --subject social
+# 2) บทเรียนของแต่ละ PART จากข้อความช่วงหน้านั้น
+.\.venv\Scripts\python tools/mission_cli.py generate local/pdf/RUN/social-part01.txt --step social-part01
+# 3) ข้อสอบท้ายบท 20 ข้อ (ตรวจว่าได้ 20 ข้อพอดีตอน validate/import)
+.\.venv\Scripts\python tools/mission_cli.py generate local/pdf/RUN/social-part01.txt --step social-part01-quiz --kind quiz
+.\.venv\Scripts\python tools/mission_cli.py import local/drafts/RUN/draft.md --step social-part01-quiz --kind quiz
+```
+
+- `outline` เขียน `local/pdf/RUN/mapping.md`: PART | ช่วงหน้า PDF | หัวข้อที่พบ | วิดีโอ | สถานะจับคู่ ถ้าหาหัว PART ไม่เจอหรือหน้าเป็นภาพ (PDF สแกน) จะบอกไว้ ต้องเปิด PDF ตรวจเอง
+- ช่วงหน้าเดาจากหัว PART ถัดไป ตรวจกับสารบัญก่อนใช้
+- import บทเรียนเก็บ `video_url` และ `video_match` เดิมไว้ และอัปเดต `chapter_title` ใน config เป็นสถานะ `pdf-draft` (เมนูยังขึ้น “รอยืนยัน” จนกว่าคุณพ่อเปลี่ยน `chapter_status` เป็น `confirmed`)
+- ใน Markdown บทเรียน `video_match.status` ใช้ `confirmed` / `partial` / `unconfirmed` พร้อม `evidence` และ `unconfirmed` เป็นข้อความ หน้าเว็บแสดงใต้คลิป
+- `analysis_status`: `pending` → `pdf-draft` (AI สรุป รอตรวจ) → `pdf-verified` (คุณพ่อตรวจแล้ว); `sample-unverified` คือสรุปตัวอย่างเดิม
+
 ## เรียก OpenAI API (ตัวเลือก)
 
 เฉพาะเมื่อใส่ --use-api สคริปต์จะส่งเนื้อหาเอกสาร/ภาพไป OpenAI และมีค่าใช้จ่ายตาม API ใส่ key ผ่าน environment ของ terminal เท่านั้น เลือก model ที่บัญชีใช้ได้และรองรับชนิดไฟล์ มี store=False และไม่สร้าง remote file ค้างไว้ สคริปต์ไม่ OCR เอง: PDF/ภาพส่งตรงให้โมเดลอ่าน การอ่านภาพอาจผิด ต้องตรวจ draft

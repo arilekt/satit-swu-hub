@@ -6,14 +6,15 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const read = name => fs.readFileSync(path.join(root,name),'utf8');
-for(const name of ['app','tracker','quiz-engine'])new vm.Script(read('js/'+name+'.js'));
+for(const name of ['app','tracker','quiz-engine','catalog'])new vm.Script(read('js/'+name+'.js'));
 const config=JSON.parse(read('data/config.json'));
 assert.deepEqual(config.subjects.map(s=>s.steps.length),[14,11,7,9,12]);
-for(const subject of config.subjects)for(const step of [...subject.steps,...subject.exams])if(step.file)assert.ok(fs.existsSync(path.join(root,step.file)));
+const catalogContext={window:{}};vm.createContext(catalogContext);vm.runInContext(read('js/catalog.js'),catalogContext);const Catalog=catalogContext.window.Catalog;
+for(const subject of config.subjects)for(const step of [...Catalog.items(subject),...subject.exams])if(step.file)assert.ok(fs.existsSync(path.join(root,step.file)));
 const stored=new Map();
 function tracker(){
   const c={localStorage:{getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)},window:{dispatchEvent(){}},CustomEvent:class{},Event:class{},setTimeout(){}};
-  vm.createContext(c);vm.runInContext(read('js/tracker.js'),c);return c.window.Tracker;
+  c.window.Catalog=Catalog;vm.createContext(c);vm.runInContext(read('js/tracker.js'),c);return c.window.Tracker;
 }
 let t=tracker();t.toggle('social-part01');t.addAttempt({id:'mock',title:'mock',score:1,total:2,answers:[{question:'Q',selected:0,correct:1}]});
 t=tracker();assert.equal(t.has('social-part01'),true);assert.equal(t.stats(config).done,1);assert.equal(t.attempts()[0].score,1);assert.equal(t.exportData().attempts[0].answers[0].selected,0);
@@ -97,7 +98,7 @@ assert.ok(escaped.includes('SUMMARY:A\\,B\\;C\\\\D\\nE'));
 console.log('PASS: 5 fair activities, sorted primary exam/result calendar, Bangkok-to-UTC times, exclusive all-day end, ICS escaping and UTF-8 folding');
 
 for(const name of ['dashboard','parent','calendar','countdown'])new vm.Script(read('js/'+name+'.js'));
-const dashboardContext={window:{},Countdown:countdown};
+const dashboardContext={window:{Catalog},Countdown:countdown};
 vm.createContext(dashboardContext);vm.runInContext(read('js/dashboard.js'),dashboardContext);
 const dashboard=dashboardContext.window.Dashboard;
 const fresh={has:()=>false};
@@ -155,10 +156,24 @@ assert.equal(config.subjects.reduce((n,s)=>n+s.steps.length,0),53);
 assert.ok(config.subjects.every(s=>s.steps.every(step=>!/-intro$|-pdf-guide$/.test(step.id))));
 assert.equal(dashboard.recommendation(config,{has:id=>id.startsWith('social-part')},'2026-10-03').step.id,'social-mock01');
 stored.set('satit-swu-hub:v1',JSON.stringify({version:1,completed:['social-intro','social-pdf-guide','social-part01'],attempts:[{id:'social-mock01',title:'Old mock',score:0,total:1,date:'2026-10-01T00:00:00Z'}],examDate:null,resultDate:null}));
-let migrated=tracker();assert.equal(migrated.stats(config).done,2);assert.equal(migrated.stats(config).total,53);
+let migrated=tracker();assert.equal(migrated.stats(config).done,2);assert.equal(migrated.stats(config).total,105);
 assert.equal(migrated.has('social-part01'),true);assert.equal(migrated.has('social-mock01'),true);
 migrated.addAttempt({id:'social-mock01',title:'Mock again',score:1,total:1});assert.equal(migrated.stats(config).done,2);
 migrated.addAttempt({id:'social-part02:mini',title:'Mini',score:1,total:1});assert.equal(migrated.has('social-part02'),false);
 for(let i=0;i<101;i++)migrated.addAttempt({id:'other-mock-'+i,title:'Other',score:1,total:1});
 assert.equal(tracker().has('social-mock01'),true);assert.equal(tracker().stats(config).done,2);
 console.log('PASS: no intro/PDF steps, 53 total units, old PART progress retained, historical exam migration, repeated exams counted once, mini-quiz excluded and exam completion retained after history rotation');
+
+const lessons=config.subjects.flatMap(s=>s.steps.filter(step=>step.type==='lesson'));
+assert.equal(lessons.length,52);
+for(const lesson of lessons){assert.match(lesson.title,/^PART \d{2}$/);assert.equal(lesson.quiz.id,lesson.id+'-quiz');assert.equal(lesson.quiz.type,'exam');assert.equal(lesson.quiz.questions,20);}
+const socialItems=Catalog.items(config.subjects[0]).map(x=>x.id);
+assert.deepEqual(socialItems.slice(0,4),['social-part01','social-part01-quiz','social-part02','social-part02-quiz']);
+assert.equal(socialItems.at(-1),'social-mock01');
+assert.equal(Catalog.parentOf(config.subjects[0],'social-part05-quiz').id,'social-part05');
+assert.equal(Catalog.parentOf(config.subjects[0],'social-mock01'),null);
+const withQuiz={...config,subjects:config.subjects.map((s,i)=>i?s:{...s,steps:s.steps.map(step=>step.id==='social-part01'?{...step,quiz:{...step.quiz,file:'./data/exams/x.md'}}:step)})};
+assert.equal(dashboard.recommendation(withQuiz,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part01-quiz');
+assert.equal(dashboard.subjectTarget(withQuiz.subjects[0],{has:id=>id==='social-part01'}).id,'social-part01-quiz');
+for(let i=1;i<=13;i++){const meta=read('data/content/social-part'+String(i).padStart(2,'0')+'.md');assert.match(meta,/\nvideo_match:\n  status: "(confirmed|partial|unconfirmed)"\n  evidence: "/);assert.match(meta,/\nanalysis_status: "(sample-unverified|pending|pdf-draft|pdf-verified)"/);}
+console.log('PASS: 52 PART lessons each followed by a 20-question end-of-chapter quiz, 105 progress units, quiz recommended after its lesson once ready, video-match evidence and analysis status on every Social PART');
