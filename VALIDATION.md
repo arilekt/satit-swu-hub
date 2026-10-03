@@ -1,15 +1,56 @@
-# Validation and delivery status
+# Validation status — dashboard v0.2.0
 
-- JavaScript syntax: PASS (app.js, tracker.js, quiz-engine.js).
-- Catalogue: PASS — 62 lesson steps, 5 subjects, counts 15/13/9/11/14; mock exams kept separate.
-- File references: PASS — all non-null configured Markdown files exist.
-- Core harness: PASS — LocalStorage reload, undo completion, separate exam progress, detailed JSON export, invalid answer-index rejection, score, duplicate-submit guard, deadline expiry and abandonment cleanup.
-- Python syntax: PASS via Python ast.parse.
-- Manual code review: date formatting uses Bangkok formatToParts, quiz deadline rechecked after confirmation, Markdown sanitized, quiz text inserted through textContent, API secrets kept in local environment, drafts validated before import, backups saved before edits.
-- Python CLI runtime: NOT VERIFIED. Bundled Python lacks PyYAML and the package installer could not obtain it in this environment. Install tools/requirements.txt on the owner's machine before running CLI.
-- Browser layout / Safari on real iPad: NOT VERIFIED. Browser automation could not start in this environment. Use the README manual checks.
-- OpenAI API request: NOT RUN. No source document was sent to an AI API.
-- Source PDF analysis: NOT RUN. Lesson files are demonstration content; uploaded screenshots provided course counts and visible PART durations only.
-- Git commit / push / GitHub Pages deployment: NOT RUN. Commands supplied in README.
+## Passed
 
-Run core checks with `node tests/core.cjs`. This is a mocked DOM harness, not a Safari integration test.
+- All seven feature JavaScript modules plus build-info.js: syntax checked.
+- Node core harness: 53-step content/exam catalogue, Markdown file paths, original LocalStorage reload/undo, combined lesson/exam progress, detailed result export.
+- Quiz engine: invalid answer index, score, duplicate submit, deadline, abandoned-attempt cleanup.
+- Calendar countdown: calendar months/days, month ends, leap year, Bangkok calendar-day source, today/past dates and Thai Buddhist year.
+- Milestones: Pre-Test through exam day, next-day transition, unknown/future/today/past results, simultaneous real-exam countdown.
+- Recommendation logic: only ready lessons, next incomplete lesson, approximate study duration, review and no-content states.
+- Parent event editor: invalid/impossible dates, incomplete/reversed times, duplicate IDs, add/update/delete, reload persistence, reset.
+- Progress restore: validated replacement, rejected bad scores/dates without overwriting valid stored data.
+- Calendar export: 5 fair entries, sorted exam/result entries, Bangkok-to-UTC time, exclusive all-day end, ICS text escaping and UTF-8 folding.
+- Python build stamping: three unittest cases, manifest/HTML consistency, versioned assets, Thai timezone, invalid version and missing marker rejection.
+
+## Browser checks actually run
+
+Headless installed Chrome using a local HTTP server at the GitHub Pages project subpath:
+
+- Dashboard loads, shows correct Thai date, primary Pre-Test, real exam, 5 progress links and ready lesson recommendation.
+- No horizontal overflow at 1024×1366 and 390×844; screenshots inspected.
+- Dashboard/lesson/parent navigation and parent menu separation.
+- Added activity persists after full reload and appears on Dashboard.
+- Activities JSON download works.
+- Personal result date persists after reload and reset works.
+- Invalid imported activity date is rejected without replacing existing events.
+- Simulated 30 Nov 2026: unknown result date is shown, exam countdown continues; supplied 5 Dec result date is counted.
+- Footer shows stamped loaded build; simulated newer manifest shows refresh link without changing loaded build label.
+- No browser page errors in the tested paths.
+
+## Limits
+
+- External CDNs and Google Fonts could not be reached in this environment; their requests were blocked in the browser checks. Dashboard and parent tools use project CSS/JS and passed without them. Actual Markdown rendering, video playback and quiz UI with the CDN libraries were not integration tested here. The classroom displayed the intended error/retry state.
+- Actual Safari on iPad has not been tested. Browser layout checks used Chrome with touch-sized viewports.
+- Native Apple Calendar import not tested.
+- Python mission_cli runtime needs tools/requirements.txt; bundled runtime lacks PyYAML. Python syntax passed previously, but full AI authoring/import workflow is not verified.
+- No AI API request was sent. Source PDF analysis not run; existing social lessons are examples.
+- Existing progress key retained. Parent activity/config edits are local until exported and deployed.
+- Git commit, push and GitHub Pages deployment have not been performed for this redesign.
+
+## Repeatable checks
+
+```powershell
+node tests/core.cjs
+python -m unittest discover -s tests -p test_build.py
+```
+
+Before release: try Safari portrait/landscape, load Social PART 01 video, complete/undo a lesson, reload progress, submit a quiz, export/restore a backup and compare the displayed build ID after deployment.
+
+## Social video release
+
+All 13 ID → Markdown/config mappings PASS. Renderer tested for correct iframe ID, controls, inline playback parameter, no autoplay, referrer and fallback links. Actual YouTube playback not verified. PART 03–13 summaries pending; PART 01–02 summaries labeled unverified against videos.
+
+## Content/exam-only progress
+
+Intro and PDF guide steps removed in every subject. Counts: Social 14 (13 PART + 1 mock), English 11, Science 7, Thai 9, Math 12, total 53. Tests PASS for retained old PART completions, ignored removed-step records, historical exam attempt completion, repeat exams counted once, mini-quiz excluded, persistent exam completion after 100-history rotation, and recommending the mock after ready lessons.

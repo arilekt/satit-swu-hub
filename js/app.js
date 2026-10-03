@@ -1,61 +1,114 @@
 (() => {
-  'use strict';
-  let config,current=null,request=0,lastHash='',statusTimeout;
-  const $=id=>document.getElementById(id);
-  const element=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
-  function notify(text){$('status').textContent=text;clearTimeout(statusTimeout);statusTimeout=setTimeout(()=>$('status').textContent='',9000);}
-  window.addEventListener('storage-warning',e=>notify(e.detail));
-  async function get(path,json=false){const response=await fetch(path);if(!response.ok)throw new Error('โหลดไฟล์ไม่ได้ ('+response.status+')');return json?response.json():response.text();}
-  function parse(source){const normalized=source.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n');const match=normalized.match(/^---\n([\s\S]*?)\n---(?:\n|$)([\s\S]*)$/);if(!match)throw new Error('ไม่พบ YAML Frontmatter');const meta=jsyaml.load(match[1]);if(!meta||typeof meta!=='object'||Array.isArray(meta)||typeof meta.title!=='string')throw new Error('Frontmatter ต้องมี title');return {meta,body:match[2]};}
-  function renderMarkdown(body){const box=element('article',undefined,'prose');box.innerHTML=DOMPurify.sanitize(marked.parse(body),{FORBID_TAGS:['iframe','style','form','input','button'],FORBID_ATTR:['style']});box.querySelectorAll('a').forEach(a=>{a.rel='noopener noreferrer';});return box;}
-  function update(){
-    if(!config)return;const stats=Tracker.stats(config);$('overall').textContent=stats.percent+'%';$('overall-bar').max=stats.total;$('overall-bar').value=stats.done;$('completed-count').textContent=stats.done+' / '+stats.total+' ภารกิจ';
-    const nav=$('subjects');nav.replaceChildren();
-    config.subjects.forEach(s=>{const link=element('a',undefined,'subject'+(current&&s.id===current.subject.id?' active':''));link.href='#'+s.id+'/'+s.steps[0].id;if(current&&s.id===current.subject.id)link.setAttribute('aria-current','true');link.append(element('span',s.icon+' '+s.name),element('small',s.steps.filter(x=>Tracker.has(x.id)).length+'/'+s.steps.length));nav.append(link);});
-    if(current){$('lessons').replaceChildren();[...current.subject.steps,...(current.subject.exams||[])].forEach(step=>{const done=step.type==='exam'?Tracker.attempts().some(a=>a.id===step.id):Tracker.has(step.id),link=element('a',undefined,'lesson'+(step.id===current.step.id?' active':''));link.href='#'+current.subject.id+'/'+step.id;const circle=element('span',done?'✓':'', 'circle'+(done?' done':''));circle.setAttribute('aria-hidden','true');link.append(circle,element('span',step.title+(step.source_duration_minutes?' ('+step.source_duration_minutes+' นาที)':'')+(done?' · เรียนจบแล้ว':'')));if(step.id===current.step.id)link.setAttribute('aria-current','page');$('lessons').append(link);});}
-    const date=Tracker.examDate()||config.exam_date;$('exam-date').value=date||'';
-    if(date){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const dateParts=Object.fromEntries(parts.map(p=>[p.type,p.value]));const today=dateParts.year+'-'+dateParts.month+'-'+dateParts.day;const days=Math.round((new Date(date+'T00:00:00+07:00')-new Date(today+'T00:00:00+07:00'))/86400000);$('countdown').textContent=days>0?'อีก '+days+' วัน สู่วันสอบ':days===0?'วันนี้คือวันสอบ สู้ ๆ นะ!':'ผ่านวันสอบเป้าหมายแล้ว';}else $('countdown').textContent='ตั้งวันสอบเพื่อเริ่มนับถอยหลัง';
-    const button=$('complete-button');if(button&&current)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';
-  }
-  function video(url){
-    const box=element('div',undefined,'video');
-    if(url){let u;try{u=new URL(url);}catch(_){throw new Error('video_url ไม่ถูกต้อง');}
-      if(u.protocol!=='https:')throw new Error('วิดีโอต้องใช้ HTTPS');
-      let id=null;if(u.hostname==='youtu.be')id=u.pathname.slice(1);else if(['www.youtube.com','youtube.com','www.youtube-nocookie.com'].includes(u.hostname))id=u.searchParams.get('v')||(u.pathname.match(/^\/embed\/([^/]+)$/)||[])[1];
-      if(id&&/^[\w-]{11}$/.test(id)){const frame=element('iframe');frame.src='https://www.youtube-nocookie.com/embed/'+id;frame.title='วิดีโอประกอบบทเรียน';frame.allow='fullscreen; picture-in-picture';frame.setAttribute('allowfullscreen','');frame.referrerPolicy='strict-origin-when-cross-origin';box.append(frame);}
-      else if(/\.mp4$/i.test(u.pathname)){const player=element('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=u.href;box.append(player);}
-      else{const link=element('a','เปิดวิดีโอประกอบบทเรียน');link.href=u.href;link.target='_blank';link.rel='noopener noreferrer';box.append(link);}
-    }else box.append(element('span','▷','play'),element('strong','พื้นที่วิดีโอของบทเรียน'),element('small','อ่านสรุปด้านล่างได้เลย · เพิ่มลิงก์วิดีโอได้ภายหลัง'));
-    return box;
-  }
-  async function route(){
-    if(!config)return;
-    if(QuizEngine.isActive()&&location.hash!==lastHash){if(!confirm('กำลังทำข้อสอบ หากเปลี่ยนบท คำตอบรอบนี้จะไม่ถูกบันทึก ต้องการออกไหม?')){history.replaceState(null,'',lastHash);return;}}
-    QuizEngine.dispose();lastHash=location.hash;const token=++request;
-    const [subjectId,stepId]=location.hash.slice(1).split('/');const subject=config.subjects.find(s=>s.id===subjectId)||config.subjects[0];const step=[...subject.steps,...(subject.exams||[])].find(s=>s.id===stepId)||subject.steps[0];current={subject,step};update();
-    const main=$('main');main.replaceChildren(element('p','กำลังโหลดภารกิจ…'));
-    try {
-      if(!step.file){main.replaceChildren(element('span',subject.name,'tag'),element('h2',step.title,'title'),element('p','บทนี้กำลังเตรียมเนื้อหา ยังไม่สามารถติ๊กเรียนจบได้'+(step.source_duration_minutes?' · เวลาในคอร์สต้นทาง '+step.source_duration_minutes+' นาที':''),'notice'));return;}
-      const data=parse(await get(step.file));if(token!==request)return;
-      if(data.meta.id!==step.id)throw new Error('id ในบทเรียนไม่ตรงกับ config');
-      if(step.type==='exam')QuizEngine.validate(data.meta.questions);
-      if(data.meta.quick_quiz)QuizEngine.validate(data.meta.quick_quiz);
-      main.replaceChildren(element('span',subject.name+' / '+(step.type==='exam'?'สนามซ้อม': 'MISSION '+String(subject.steps.indexOf(step)+1).padStart(2,'0')),'tag'),element('h2',data.meta.title,'title'),element('p','⏱ '+(data.meta.duration||'เรียนตามจังหวะของพอใจ')+' · ทีละก้าวก็ไปถึงได้','meta'));
-      if(step.type!=='exam')main.append(video(data.meta.video_url));
-      main.append(renderMarkdown(data.body));
-      if(step.type==='exam'||data.meta.quick_quiz){const panel=element('section',undefined,'quiz-panel');panel.append(element('h3',step.type==='exam'?'สนามซ้อมข้อสอบ':'เช็กความเข้าใจเล็ก ๆ'));main.append(panel);QuizEngine.mount(panel,{id:step.id+(step.type==='exam'?'':':mini'),title:data.meta.title,time_limit_minutes:data.meta.time_limit_minutes||5},step.type==='exam'?data.meta.questions:data.meta.quick_quiz);}
-      if(step.type!=='exam'){const complete=element('button',undefined,'primary complete');complete.id='complete-button';complete.onclick=()=>{Tracker.toggle(step.id);notify(Tracker.has(step.id)?'เก่งมาก! ทำภารกิจสำเร็จอีกหนึ่งก้าว 🌱':'ยกเลิกสถานะเรียนจบแล้ว');};main.append(complete);update();}
-    }catch(error){if(token!==request)return;main.replaceChildren(element('h2','เปิดภารกิจไม่ได้'),element('p',error.message,'notice'));const retry=element('button','ลองโหลดใหม่','secondary');retry.onclick=route;main.append(retry);}
-  }
-  window.addEventListener('progress-changed',()=>{
-    update();
-  });
-  window.addEventListener('hashchange',route);
-  window.addEventListener('beforeunload',e=>{if(QuizEngine.isActive()){e.preventDefault();e.returnValue='';}});
-  $('exam-date').onchange=e=>Tracker.setExamDate(e.target.value);
-  $('copy-summary').onclick=async()=>{if(!config)return;const text=Tracker.summary(config);try{await navigator.clipboard.writeText(text);notify('คัดลอกแล้ว ส่งให้คุณพ่อได้เลย');}catch(_){const area=element('textarea');area.value=text;area.setAttribute('aria-label','สรุปสำหรับคุณพ่อ');area.readOnly=true;area.style.width='100%';$('main').prepend(area);area.focus();area.select();notify('แตะค้างที่ข้อความแล้วเลือกคัดลอก');}};
-  $('export-progress').onclick=()=>{const blob=new Blob([JSON.stringify(Tracker.exportData(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=element('a');link.href=url;link.download='satit-progress.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);notify('ส่งออกผลเรียนแล้ว เก็บไฟล์ส่งให้คุณพ่อเพื่อวิเคราะห์ได้');};
-  $('history-button').onclick=()=>{if(!config)return;if(QuizEngine.isActive()&&!confirm('ออกจากข้อสอบเพื่อดูประวัติไหม? รอบนี้จะไม่ถูกบันทึก'))return;QuizEngine.dispose();request++;const main=$('main');main.replaceChildren(element('h2','ประวัติสนามซ้อม','title'));const attempts=Tracker.attempts().reverse();if(!attempts.length)main.append(element('p','ยังไม่มีประวัติ ลองทำ mini-quiz แรกกันนะ'));attempts.forEach(a=>{const card=element('div',undefined,'answer');card.append(element('strong',a.title+' · '+a.score+'/'+a.total),element('p',new Date(a.date).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})));main.append(card);});const back=element('button','กลับไปบทเรียน','secondary');back.onclick=route;main.append(back);};
-  async function init(){try{if(!window.marked||!window.jsyaml||!window.DOMPurify)throw new Error('โหลดเครื่องมือจาก CDN ไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่');config=await get('./data/config.json',true);if(!Array.isArray(config.subjects)||!config.subjects.length)throw new Error('config ไม่ถูกต้อง');await route();setInterval(update,60000);}catch(error){$('main').replaceChildren(element('h2','เริ่มต้นเว็บไม่ได้'),element('p',error.message,'notice'));}}
-  init();
+'use strict';
+let config,current=null,page='dashboard',request=0,lastHash='',statusTimeout;
+const $=id=>document.getElementById(id);
+const element=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
+function notify(text){$('status').textContent=text;clearTimeout(statusTimeout);statusTimeout=setTimeout(()=>$('status').textContent='',10000);}
+window.addEventListener('storage-warning',e=>notify(e.detail));
+async function get(path,json=false){const response=await fetch(path,{cache:'no-store'});if(!response.ok)throw Error('โหลดไฟล์ไม่ได้ ('+response.status+')');return json?response.json():response.text();}
+function parse(source){const match=source.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').match(/^---\n([\s\S]*?)\n---(?:\n|$)([\s\S]*)$/);if(!match)throw Error('ไม่พบ YAML Frontmatter');const meta=jsyaml.load(match[1]);if(!meta||typeof meta!=='object'||Array.isArray(meta)||typeof meta.title!=='string')throw Error('Frontmatter ต้องมี title');return {meta,body:match[2]};}
+async function ensureMarkdown(){const ready=()=>window.marked&&window.jsyaml&&window.DOMPurify;if(ready())return;await new Promise((resolve,reject)=>{const start=Date.now();const timer=setInterval(()=>{if(ready()){clearInterval(timer);resolve();}else if(Date.now()-start>8000){clearInterval(timer);reject(Error("โหลดเครื่องมืออ่านบทเรียนไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง"));}},100);});}
+function renderMarkdown(body){const box=element('article',undefined,'prose');box.innerHTML=DOMPurify.sanitize(marked.parse(body),{FORBID_TAGS:['iframe','style','form','input','button'],FORBID_ATTR:['style']});box.querySelectorAll('a').forEach(a=>a.rel='noopener noreferrer');return box;}
+function updateSidebar(){
+  if(!current)return;
+  $('subjects').replaceChildren();
+  config.subjects.forEach(subject=>{const link=element('a',undefined,'subject'+(subject.id===current.subject.id?' active':''));link.href='#'+subject.id+'/'+Dashboard.subjectTarget(subject,Tracker).id;link.append(element('span',subject.icon+' '+subject.name),element('small',subject.steps.filter(s=>Tracker.has(s.id)).length+'/'+subject.steps.length));if(subject.id===current.subject.id)link.setAttribute('aria-current','true');$('subjects').append(link);});
+  $('lessons').replaceChildren();
+  [...current.subject.steps,...(current.subject.exams||[])].forEach(step=>{const done=Tracker.has(step.id),link=element('a',undefined,'lesson'+(step.id===current.step.id?' active':''));link.href='#'+current.subject.id+'/'+step.id;const circle=element('span',done?'✓':'','circle'+(done?' done':''));circle.setAttribute('aria-hidden','true');link.append(circle,element('span',step.title+(done?' · จบแล้ว':'')));if(step.id===current.step.id)link.setAttribute('aria-current','page');$('lessons').append(link);});
+}
+function update(){
+ if(!config)return;
+ Dashboard.render(config,ParentTools.activities(),Tracker);
+ if(page==='parent')ParentTools.render(config,Tracker);
+ if(page==='lesson'){updateSidebar();const button=$('complete-button');if(button)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';}
+}
+function video(url){
+ const box=element('div',undefined,'video');
+ if(!url){box.append(element('span','▷','play'),element('strong','ยังไม่มีวิดีโอในบทนี้'),element('small','อ่านสรุปด้านล่างได้เลย'));return {box};}
+ let u;try{u=new URL(url);}catch(_){throw Error('video_url ไม่ถูกต้อง');}
+ if(u.protocol!=='https:')throw Error('วิดีโอต้องใช้ HTTPS');
+ let id=null;if(u.hostname==='youtu.be')id=u.pathname.slice(1);else if(['www.youtube.com','youtube.com','www.youtube-nocookie.com'].includes(u.hostname))id=u.searchParams.get('v')||(u.pathname.match(/^\/embed\/([^/]+)$/)||[])[1];
+ if(id&&/^[\w-]{11}$/.test(id)){const frame=element('iframe');frame.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=0&controls=1&playsinline=1&rel=0';frame.title='วิดีโอประกอบบทเรียน';frame.allow='accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen; web-share';frame.setAttribute('allowfullscreen','');frame.referrerPolicy='strict-origin-when-cross-origin';box.append(frame);const link=element('a','เปิดบน YouTube หากวิดีโอไม่แสดง ↗','video-link');link.href='https://www.youtube.com/watch?v='+id;link.target='_blank';link.rel='noopener noreferrer';return {box,link};}
+ if(/\.mp4$/i.test(u.pathname)){const player=element('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=u.href;box.append(player);}
+ else{const link=element('a','เปิดวิดีโอประกอบบทเรียน ↗');link.href=u.href;link.target='_blank';link.rel='noopener noreferrer';box.append(link);}
+ return {box};
+}
+function show(kind){
+ page=kind;
+ for(const id of ['dashboard','lesson','parent'])$(id+'-page').hidden=id!==kind;
+ for(const [id,kindName] of [['dashboard','dashboard'],['learn','lesson'],['parent','parent']]){const a=$('nav-'+id);if(kind===kindName)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
+}
+async function route(){
+ if(!config)return;
+ if(QuizEngine.isActive()&&location.hash!==lastHash&&!confirm('เปลี่ยนหน้าตอนนี้ไหม? ข้อสอบรอบที่ยังไม่ส่งจะไม่ถูกบันทึก')){history.replaceState(null,'',lastHash);return;}
+ QuizEngine.dispose();lastHash=location.hash;const token=++request;
+ const [subjectId,stepId]=location.hash.slice(1).split('/');
+ if(!subjectId||subjectId==='dashboard'||subjectId==='main'){show('dashboard');update();return;}
+ if(subjectId==='parent'){show('parent');update();return;}
+ const subject=subjectId==='learn'?(current?.subject||config.subjects[0]):config.subjects.find(s=>s.id===subjectId);
+ if(!subject){show('dashboard');update();notify('ไม่พบหน้านี้ กลับบ้านของพอใจก่อนนะ');return;}
+ const step=[...subject.steps,...(subject.exams||[])].find(s=>s.id===stepId)||(subjectId==='learn'&&current?current.step:Dashboard.subjectTarget(subject,Tracker));
+ current={subject,step};show('lesson');update();
+ const main=$('lesson-content');main.replaceChildren(element('p','กำลังเปิดภารกิจ…'));
+ try{
+  if(!step.file){main.replaceChildren(element('span',subject.name,'tag'),element('h2',step.title,'title'),element('p','บทนี้กำลังเตรียมเนื้อหา ลองเลือกบทที่พร้อมก่อนนะ','notice'));return;}
+  await ensureMarkdown();if(token!==request)return;
+  const data=parse(await get(step.file));if(token!==request)return;
+  if(data.meta.id!==step.id)throw Error('id ในบทเรียนไม่ตรงกับ config');
+  if(step.type==='exam')QuizEngine.validate(data.meta.questions);
+  if(data.meta.quick_quiz)QuizEngine.validate(data.meta.quick_quiz);
+  main.replaceChildren(element('span',subject.name+' / '+(step.type==='exam'?'สนามซ้อม':'MISSION '+String(subject.steps.indexOf(step)+1).padStart(2,'0')),'tag'),element('h2',data.meta.title,'title'),element('p','⏱ '+(data.meta.duration||'เรียนตามจังหวะของเรา'),'meta'));
+  if(step.type!=='exam'){const media=video(data.meta.video_url);main.append(media.box);if(media.link)main.append(media.link);}
+  main.append(renderMarkdown(data.body));
+  if(step.type==='exam'||data.meta.quick_quiz){const panel=element('section',undefined,'quiz-panel');panel.append(element('h3',step.type==='exam'?'สนามซ้อมข้อสอบ':'เช็กความเข้าใจเล็ก ๆ'));main.append(panel);QuizEngine.mount(panel,{id:step.id+(step.type==='exam'?'':':mini'),title:data.meta.title,time_limit_minutes:data.meta.time_limit_minutes||5},step.type==='exam'?data.meta.questions:data.meta.quick_quiz);}
+  if(step.type!=='exam'){const complete=element('button',undefined,'primary complete');complete.id='complete-button';complete.onclick=()=>{Tracker.toggle(step.id);notify(Tracker.has(step.id)?'สำเร็จอีกหนึ่งก้าวแล้วพอใจ! 🌱':'ยกเลิกสถานะเรียนจบแล้ว');};main.append(complete);update();}
+ }catch(error){if(token!==request)return;main.replaceChildren(element('h2','ยังเปิดภารกิจไม่ได้'),element('p',error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;main.append(retry);}
+}
+function parentRefresh(){update();notify('บันทึกกิจกรรมบนเครื่องนี้แล้ว');}
+window.addEventListener('progress-changed',update);
+window.addEventListener('activities-changed',parentRefresh);
+window.addEventListener('hashchange',()=>{const intendedHash=location.hash;route().then(()=>{if(location.hash===intendedHash){$('main').focus({preventScroll:true});window.scrollTo({top:0,behavior:'auto'});}});});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)update();});
+window.addEventListener('beforeunload',e=>{if(QuizEngine.isActive()){e.preventDefault();e.returnValue='';}});
+document.querySelector('.skip').onclick=e=>{e.preventDefault();$('main').focus();};
+$('exam-date').onchange=e=>Tracker.setExamDate(e.target.value);
+$('result-date').onchange=e=>Tracker.setResultDate(e.target.value);
+$('reset-exam-date').onclick=()=>Tracker.setExamDate(null);
+$('reset-result-date').onclick=()=>Tracker.setResultDate(null);
+$('download-calendar').onclick=()=>{if(config)MissionCalendar.download(MissionCalendar.list(config,ParentTools.activities(),Tracker));};
+$('cancel-edit-event').onclick=()=>{$('event-form').reset();$('event-id').value='';};
+$('event-form').onsubmit=e=>{
+ e.preventDefault();try{
+ const id=$('event-id').value||'event-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+ const existing=ParentTools.activities().events.find(x=>x.id===id)||{};
+ const event={...existing,id};for(const key of ['title','date','location','start','end','description'])event[key]=$('event-'+key).value;
+ ParentTools.upsert(event);$('event-form').reset();$('event-id').value='';parentRefresh();
+ }catch(error){notify('ยังบันทึกไม่ได้: '+error.message);}
+};
+$('export-config').onclick=()=>{const next=JSON.parse(JSON.stringify(config)),regular=next.admissions.programs.find(p=>p.id===next.admissions.primary_program);regular.exam_date=Tracker.examDate()||regular.exam_date;regular.pretest_results_date=Tracker.resultDate()||regular.pretest_results_date;next.exam_date=regular.exam_date;ParentTools.downloadJSON(next,'config.json');};
+$('export-activities').onclick=()=>ParentTools.downloadJSON(ParentTools.activities(),'activities.json');
+$('reset-activities').onclick=()=>{if(confirm('กลับไปใช้กิจกรรมจากเว็บไหม? การแก้บนเครื่องนี้จะถูกล้าง ควรส่งออกก่อน'))try{ParentTools.reset();update();notify('ใช้กิจกรรมจากเว็บแล้ว');}catch(error){notify(error.message);}};
+$('import-activities').onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{if(file.size>1024*1024)throw Error('ไฟล์ใหญ่เกิน 1 MB');const data=ParentTools.validate(JSON.parse(await file.text()));if(!confirm('นำเข้า '+data.events.length+' กิจกรรมแทนรายการบนเครื่องนี้ไหม? ควรส่งออกของเดิมก่อน'))return;ParentTools.replace(data);parentRefresh();}catch(error){notify('นำเข้าไม่ได้: '+error.message);}finally{e.target.value='';}
+};
+$('copy-summary').onclick=async()=>{if(!config)return;const text=Tracker.summary(config);try{await navigator.clipboard.writeText(text);notify('คัดลอกสรุปแล้ว');}catch(_){$('summary-fallback').hidden=false;$('summary-fallback').value=text;$('summary-fallback').focus();$('summary-fallback').select();notify('แตะค้างแล้วเลือกคัดลอกข้อความ');}};
+$('export-progress').onclick=()=>ParentTools.downloadJSON(Tracker.exportData(),'satit-progress.json');
+$('import-progress').onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{if(file.size>2*1024*1024)throw Error('ไฟล์ใหญ่เกิน 2 MB');const data=JSON.parse(await file.text());Tracker.validateBackup(data);if(!confirm('กู้คืนผลเรียนจากไฟล์แทนข้อมูลเครื่องนี้ไหม? กรุณากดสำรองผลเรียนก่อน'))return;Tracker.restore(data);notify('กู้คืนผลเรียนแล้ว');}catch(error){notify('กู้คืนไม่ได้: '+error.message);}finally{e.target.value='';}
+};
+$('history-button').onclick=()=>{
+ const list=$('quiz-history');list.replaceChildren(element('h3','ประวัติสนามซ้อม'));
+ const attempts=Tracker.attempts().reverse();if(!attempts.length)list.append(element('p','ยังไม่มีประวัติข้อสอบ','muted'));
+ for(const attempt of attempts){const row=element('div',undefined,'answer');row.append(element('strong',attempt.title+' · '+attempt.score+'/'+attempt.total),element('p',new Date(attempt.date).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})));list.append(row);}
+};
+async function init(){
+ try{
+ config=await get('./data/config.json',true);if(!Array.isArray(config.subjects)||!config.subjects.length)throw Error('config ไม่ถูกต้อง');
+ let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
+ ParentTools.init(activities);await route();setInterval(update,60000);
+ }catch(error){$('daily-mission').replaceChildren(element('p','เริ่มต้นเว็บไม่ได้: '+error.message,'notice'));notify(error.message);}
+}
+init();
 })();

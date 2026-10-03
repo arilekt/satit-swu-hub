@@ -1,112 +1,86 @@
 # Satit SWU Mission Hub
 
-แดชบอร์ดเตรียมสอบเข้า ม.1 สำหรับพอใจ ใช้ Safari บน iPad เป็นหลัก Static SPA ไม่ต้อง build หรือมี backend เนื้อหาในชุดเริ่มต้นเป็นตัวอย่าง ไม่ใช่ข้อสอบหรือหลักสูตรทางการของโรงเรียน
+เว็บเตรียมสอบ ม.1 ของพอใจ อายุ 11 ปี เน้น Safari บน iPad ธีมเทา–แดงที่ได้แรงบันดาลใจจาก มศว ไม่ใช่เว็บทางการของโรงเรียน
 
-## โครงสร้าง
+## หน้าและการใช้งาน
 
-- `index.html` — Dashboard และพื้นที่แสดงบทเรียน
-- `css/style.css` — Prompt, responsive layout, ปุ่มสัมผัสขนาดอย่างน้อย 48px
-- `js/app.js` — hash router, fetch Markdown, YAML metadata, วิดีโอ, สรุปส่งคุณพ่อ
-- `js/tracker.js` — LocalStorage progress และประวัติข้อสอบล่าสุด 100 ครั้ง
-- `js/quiz-engine.js` — สุ่มลำดับคำถาม จับเวลาตาม deadline ตรวจคะแนนและเฉลย
-- `data/config.json` — 62 steps: สังคม 15 อังกฤษ 13 วิทย์ 9 ไทย 11 คณิต 14
-- `data/content/` — ตัวอย่างบทสังคม 4 บท
-- `data/exams/social-mock01.md` — ข้อสอบตัวอย่าง 5 ข้อ
+- `#dashboard` (หน้าแรก): วันปัจจุบันของกรุงเทพฯ, Pre-Test เด่นที่สุด, สอบจริงนับถอยหลังคู่กัน, progress 5 วิชา, ภารกิจวันนี้ และวันกิจกรรมอื่น
+- `#learn` หรือ `#social/social-part01`: ห้องเรียน Markdown, วิดีโอ, mini-quiz, ปุ่มเรียนจบ และสนามซ้อม
+- `#parent`: เพิ่ม/แก้/ลบกิจกรรม ตั้งวันสอบ/ประกาศผล ส่งออกไฟล์กิจกรรม/config สำรองและกู้คืนผลเรียน ดูประวัติข้อสอบ และคู่มือ local AI
 
-ไฟล์อยู่ที่ root ของ repository ได้เลย ไม่ต้องสร้างโฟลเดอร์ satit-swu-hub ซ้อนอีกชั้น PDF ที่มีใน workspace ไม่ถูกอ่านหรือสรุปเป็นบทเรียนนี้ และถูกกันไม่ให้เพิ่มเข้า Git ด้วย .gitignore
+หลังวัน Pre-Test ส่วนหลักเปลี่ยนเป็นเตือนตรวจผล หากยังไม่กำหนดวันประกาศผล จะแสดงรอยืนยันวันที่ ไม่มีการเดาวันที่ การเตือนอยู่ในหน้าเว็บขณะเปิด ไม่ส่ง push notification เมื่อปิดเว็บ
+
+เมนูคุณพ่อแยกการใช้งาน ไม่มีระบบล็อกอินหรือการยืนยันตัวตน ห้ามใส่ API key หรือ GitHub token ลงหน้าเว็บ
+
+## โครงสร้างข้อมูล
+
+- `data/config.json`: รายวิชา 53 บท: สังคม 14 (เนื้อหา 13 + ข้อสอบ 1), อังกฤษ 11, วิทย์ 7, ไทย 9, คณิต 12, กำหนดสอบ และ daily_plan
+- `data/content/*.md`: YAML frontmatter + Markdown; บทสังคม PART 01–13; สรุป PART 01–02 เป็นตัวอย่าง ไม่ได้สรุปจาก PDF ต้นฉบับ
+- `data/exams/*.md`: ข้อสอบพร้อม answer index เริ่มที่ 0 และเฉลย
+- `data/activities.json`: กิจกรรม เช่น SATIT ACADEMIC FAIR 12–13 ธันวาคม 2569
+- `data/build.json`: เวอร์ชัน build และเวลาอัปเดต
+- `js/dashboard.js`: เลือกบทที่มีไฟล์และยังไม่จบ โดยพิจารณาสัดส่วน progress; วิชาเท่ากันหมุนตามวัน หากเรียนบทพร้อมทั้งหมดแล้วแนะนำทบทวน
+- `js/parent.js`: ตรวจ schema กิจกรรมและเก็บรายการที่แก้บนเครื่อง
+- `js/app.js`: hash router, หน้าบทเรียน, UI handlers
+- `js/tracker.js`: progress, ประวัติข้อสอบ 100 ครั้งล่าสุด, JSON backup/restore
+
+ภารกิจวันนี้ใช้เวลาโดยประมาณจาก study_minutes ใน config และจำกัดตาม daily_plan.session_minutes (ค่าเริ่มต้น 20 นาที) ไม่ใช่การประเมินจาก AI หรือหลักฐานว่าเด็กอ่อนวิชานั้น ไม่แนะนำบทที่ file เป็น null เนื้อหาและข้อสอบอยู่ใน subjects[].steps และนับ progress ด้วยกัน ส่งข้อสอบจบหนึ่งรอบถือว่าจบหนึ่งบท ไม่กำหนดคะแนนผ่านและการทำซ้ำไม่นับเพิ่ม
+
+## วิธีเก็บข้อมูลบน GitHub Pages
+
+GitHub Pages ให้บริการ static HTML/CSS/JS ไม่มี backend database ในตัว เลือกใช้ JSON/Markdown เป็นข้อมูลกลางและ LocalStorage เป็นข้อมูลบนเครื่อง ดู [การออกแบบข้อมูล](docs/DATA-ARCHITECTURE.md)
+
+- Progress ใช้ key `satit-swu-hub:v1` เดิม รักษาความคืบหน้าก่อนปรับ Dashboard
+- กิจกรรมที่แก้ผ่านเมนูคุณพ่อใช้ key `satit-swu-hub:activities:v1` บนเครื่องนั้น
+- แก้กิจกรรมบนคอมพิวเตอร์จะยังไม่เปลี่ยน iPad โดยอัตโนมัติ ให้ส่งออก activities.json แล้วแทนไฟล์ data/activities.json และ commit/push
+- หากเคยแก้กิจกรรมบน iPad ให้กดกลับไปใช้กิจกรรมจากเว็บหลังเผยแพร่ไฟล์กลาง
+- ตั้งวันสอบ/วันผลบนเครื่องแล้วส่งออก config.json ได้เพื่อนำไปแทนไฟล์กลาง
+- ผลเรียนไม่ถูกส่งขึ้น repository สำรอง JSON แล้วกู้คืนบนอีกเครื่องจากเมนูคุณพ่อได้ การกู้คืนแทนข้อมูลเดิม ต้องสำรองก่อน
+- LocalStorage อาจหายเมื่อล้างข้อมูล Safari หรือปิดโหมดส่วนตัว จึงควรสำรองเป็นระยะ
+
+## เอกสารและ AI บนเครื่อง
+
+วางเอกสารใน local/inbox/social, english, science, thai หรือ math แล้วใช้ [tools/README.md](tools/README.md) รับ PDF/ภาพ สร้าง AI draft ตรวจและนำเข้า Markdown หรือวิเคราะห์ผลข้อสอบ
+
+local/, .venv/, PDF และ .env ถูก ignore ไม่เก็บ PDF ตัวเต็มหรือประวัติส่วนตัวใน Git
+
+video_url รองรับ YouTube watch/share/embed, HTTPS MP4 และลิงก์ HTTPS อื่น ถ้า Embed แสดงไม่ได้ มีลิงก์เปิด YouTube ประกอบ เนื้อหา Markdown กรองด้วย DOMPurify คำถาม/กิจกรรมใช้ textContent
 
 ## เปิดทดสอบ
-
-ต้องเปิดผ่าน HTTP เพราะ fetch ใช้กับ file:// ไม่ได้ หากมี Python:
 
 ```powershell
 python -m http.server 8080
 ```
 
-เปิด http://localhost:8080 บนเครื่อง หรือ http://IP-ของเครื่อง:8080 บน iPad ที่อยู่ Wi-Fi เดียวกัน ใช้อินเทอร์เน็ตสำหรับ Tailwind CDN, marked, js-yaml, DOMPurify และ Google Fonts CSS หลักมีรูปแบบสำรองเมื่อ Tailwind ไม่พร้อม แต่ Markdown engine ต้องโหลด CDN สำเร็จ
-
-## เพิ่มบทที่พี่อัปโหลด
-
-1. ใส่ Markdown ใน data/content หรือ data/exams
-2. แก้ step ที่มีอยู่ใน config: ตั้ง title และ file เช่น `./data/content/english-part01.md`
-3. ใช้ id เดิมของ step ใน Frontmatter เพื่อไม่ให้ประวัติสูญหาย ตั้ง type เป็น lesson หรือ exam
-4. ถ้ายังไม่มีเนื้อหาให้ file เป็น null เว็บจะแสดงว่ากำลังเตรียมและไม่ให้ติ๊กจบ
-
-ตัวอย่างบทเรียน:
-
-```yaml
----
-id: english-part01
-title: "English PART 01"
-duration: "15 นาที"
-video_url: ""
-time_limit_minutes: 5
-quick_quiz:
-  - question: "Which word is a greeting?"
-    options: ["Hello", "Table", "Blue"]
-    answer: 0
-    explanation: "Hello ใช้ทักทาย"
----
-## Key Takeaways
-- สรุปบทเรียนที่ต้องการ
-```
-
-answer เป็นเลข index เริ่มที่ 0 ไม่ใช่ 1 คำถามและคำอธิบายเป็น plain text สำหรับข้อสอบให้เปลี่ยน quick_quiz เป็น questions และตั้ง type: exam ใน config ทุกคำถามต้องมี question, options อย่างน้อยสองตัวเลือก, answer ที่อยู่ในช่วง, explanation
-
-video_url รองรับ YouTube watch/share/embed, HTTPS .mp4 และ URL HTTPS อื่นเป็นลิงก์เปิดใหม่ ยังไม่มีวิดีโอจริงในตัวอย่าง เว็บกรอง HTML ด้วย DOMPurify ก่อนแสดง ไม่อนุญาต iframe ดิบจาก Markdown
-
-## วันสอบและข้อมูลบน iPad
-
-exam_date ใน config เป็น null เพราะยังไม่มีวันสอบที่ยืนยัน ใส่ YYYY-MM-DD เมื่อทราบวันจริง หรือเลือกวันที่ใน Header บน iPad (ค่านี้มีผลเฉพาะเครื่อง) นับถอยหลังตามวันของ Asia/Bangkok
-
-ข้อมูลอยู่ใน LocalStorage key satit-swu-hub:v1 ไม่ซิงก์ข้ามเครื่อง ไม่ส่งขึ้นเซิร์ฟเวอร์ การล้างข้อมูล Safari เปลี่ยนโดเมน/พอร์ต หรือใช้โหมดส่วนตัวอาจทำให้ประวัติหาย คัดลอกสรุปส่งคุณพ่อเป็นระยะ หาก Clipboard API ใช้ไม่ได้ เว็บแสดงกล่องข้อความให้เลือกคัดลอกเอง การออกระหว่างทำข้อสอบไม่บันทึกรอบที่ยังไม่ส่ง
-
-## ตรวจด้วยมือก่อนใช้งาน
-
-- เปิดเว็บใน Safari แนวตั้งและแนวนอน เลือกครบ 5 วิชา และเปิดบทตัวอย่างทุกบท
-- ติ๊กเรียนจบแล้ว refresh: วงกลมและจำนวนรวมต้องคงเดิม ยกเลิกได้
-- ตรวจบทที่ file เป็น null: ไม่มีปุ่มเรียนจบ
-- ทำ mini-quiz และ mock: ตรวจเฉลย คะแนน ประวัติ และการทำซ้ำ
-- ทดสอบหมดเวลาและสลับแอปกลับ: เวลาคำนวณจาก deadline ไม่หยุดเมื่ออยู่เบื้องหลัง
-- เปลี่ยนบทระหว่างข้อสอบ: มีคำถามยืนยัน ยกเลิกแล้วยังทำต่อได้
-- ตั้งวันสอบ ลองวันวันนี้/อดีต/อนาคต และคัดลอกสรุป
-- จำลอง CDN หรือไฟล์ Markdown โหลดไม่สำเร็จ: ต้องแสดงข้อความผิดพลาด
-
-## ส่งขึ้น main
-
-ใช้จากโฟลเดอร์โปรเจกต์ กรณีเป็นโฟลเดอร์ใหม่และ remote ยังไม่มีประวัติ:
+เปิด http://localhost:8080 หรือ IP ของคอมพิวเตอร์บน Wi-Fi เดียวกันผ่าน iPad ใช้ HTTP แทน file:// เพราะต้อง fetch ไฟล์ หน้า Dashboard ใช้ CSS หลักของโปรเจกต์ ส่วน CDN ที่โหลดไม่สำเร็จไม่บล็อก Dashboard; หน้าบทเรียนต้องโหลด marked, js-yaml และ DOMPurify ได้
 
 ```powershell
-git init
-git branch -M main
-git remote add origin https://github.com/arilekt/satit-swu-hub.git
-git add index.html css js data tools tests README.md VALIDATION.md .gitignore .nojekyll
-git commit -m "Build Satit SWU Mission Hub"
-git push -u origin main
+node tests/core.cjs
 ```
 
-ถ้ามี origin อยู่แล้ว ใช้ `git remote -v` ตรวจ หากต้องแก้ URL ใช้ `git remote set-url origin https://github.com/arilekt/satit-swu-hub.git` แทน remote add หาก remote มีประวัติอยู่แล้ว ให้ clone และนำไฟล์ไปใส่ใน checkout นั้นก่อน commit อย่า force push
+ตรวจครบทั้งข้อมูลเดิมและ modules ใหม่ รายละเอียดตรวจจริง/ข้อจำกัดอยู่ใน [VALIDATION.md](VALIDATION.md)
 
-หาก Git แจ้งว่าไม่มีชื่อผู้ commit ให้ตั้ง git config user.name และ user.email ด้วยข้อมูลของพี่
+## Build และการเผยแพร่
 
-## GitHub Pages
+ท้ายหน้าแสดง version, build id และเวลาไทยจาก HTML ที่โหลดจริง ไม่ใช้เวลาที่เปิดหน้าเว็บ หาก manifest บอกว่ามี build ใหม่ จะแสดงลิงก์เปิดเวอร์ชันล่าสุด
 
-ใน repository เลือก Settings → Pages → Deploy from a branch → main → /(root) → Save เมื่อ deploy สำเร็จเปิด https://arilekt.github.io/satit-swu-hub/
+ทุกครั้งหลังแก้โค้ดและทดสอบ ให้ stamp ก่อน commit:
 
-เส้นทางไฟล์เป็น relative และ routing ใช้ hash จึงรองรับ project subpath ของ GitHub Pages และการ reload หน้าบทเรียน ไม่มี PDF ตัวเต็มใน Git
+```powershell
+python tools/stamp_build.py --version 0.2.0
+git add index.html css js data tools tests docs README.md VALIDATION.md
+git commit -m "Redesign Porjai dashboard and add parent tools"
+git push origin main
+```
 
-## AI และเครื่องมือ local
+สคริปต์ stamp ไม่ต้องมี dependencies เพิ่ม เปลี่ยนเวอร์ชันเมื่อออก release ใหม่และสร้าง build id ตามเวลาไทย พร้อม cache version ของ CSS/JS
 
-ดู [tools/README.md](tools/README.md) สำหรับรับ PDF/ภาพ สร้าง draft บทเรียน/ข้อสอบ ตรวจและนำเข้าเว็บ และวิเคราะห์ไฟล์ผลเรียน JSON จาก iPad ค่าเริ่มต้นเป็น manual AI packet; API ทำงานเฉพาะเมื่อสั่ง --use-api ไม่มี backend หรือ API key ในเว็บ
+ถ้าเริ่ม repository ใหม่ ใช้ git init, git branch -M main และ git remote add origin https://github.com/arilekt/satit-swu-hub.git ก่อนคำสั่งด้านบน หาก remote มีประวัติ ให้ใช้ checkout ที่ clone มาและอย่า force push
 
-เวลา git add ให้เพิ่ม tools ด้วย: `git add tools`
+GitHub Settings → Pages → Deploy from a branch → main → /(root) เมื่อ deploy สำเร็จเปิด https://arilekt.github.io/satit-swu-hub/ เทียบ build ท้ายหน้ากับ data/build.json ของ release นั้น
 
-## รายการจากภาพคอร์ส
+## วิดีโอสังคม PART 01–13
 
-แต่ละวิชาใช้ 2 steps แรกเป็นคำแนะนำและคู่มือเอกสาร แล้วตามด้วย PART: สังคม 13, อังกฤษ 11, วิทย์ 7, ไทย 9, คณิต 12 ข้อสอบอยู่ใน subjects[].exams แยกจาก steps ไม่เพิ่ม Overall % เวลาของอังกฤษ/วิทย์/ไทย/คณิตใน config ถอดจากภาพเป็น source_duration_minutes ไม่ใช่เวลาของบทสรุป Markdown ตัวอย่าง ยังไม่มีภาพรายการ PART สังคมครบจึงไม่กำหนดเวลาสังคม
+ใส่ครบตามรหัส YouTube ที่คุณพ่อส่ง ทุก PART มีไฟล์ Markdown และกดเรียนจบได้ PART 03–13 มีวิดีโอและแนวทางจดโน้ต ส่วนสรุป/mini-quiz ยังเตรียมอยู่ PART 01–02 เป็นสรุปตัวอย่างเดิม ยังไม่ได้ตรวจเทียบกับวิดีโอ
 
-วางเอกสารต้นฉบับใน local/inbox/social, local/inbox/english, local/inbox/science, local/inbox/thai, local/inbox/math โฟลเดอร์ local ถูก ignore ทั้งหมด หาก clone ใหม่ สร้างโฟลเดอร์ด้วย `New-Item -ItemType Directory -Force local/inbox/social,local/inbox/english,local/inbox/science,local/inbox/thai,local/inbox/math`
-
-## Automated core checks
-
-รัน `node tests/core.cjs` ตรวจ syntax, catalogue, persistence, คะแนน, deadline, การออกจากข้อสอบ และส่งออกผลรายข้อ โดยใช้ mock DOM การทดสอบนี้ไม่ยืนยัน layout หรือ Safari จริง
+สร้าง iframe ของเว็บเราเอง ใช้ controls=1, playsinline=1, autoplay=0 พร้อมลิงก์เปิด YouTube ไม่คัดลอก origin/widget_referrer ของเว็บคอร์สภายนอก [YouTube player parameters](https://developers.google.com/youtube/player_parameters) การแมป URL ผ่านการทดสอบ ยังไม่ยืนยันการเล่นหรือสิทธิ์ Embed ทั้ง 13 คลิป

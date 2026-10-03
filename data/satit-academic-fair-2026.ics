@@ -1,0 +1,87 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Satit SWU Mission Hub//Calendar//TH
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:fair-registration-day1@satit-swu-hub
+DTSTAMP:20261003T090611Z
+DTSTART:20261212T013000Z
+DTEND:20261212T083000Z
+SUMMARY:SATIT ACADEMIC FAIR · ลงทะเบียนเข้าร
+ ่วมงานนิทรรศการ (วันที่ 1)
+DESCRIPTION:กิจกรรม onsite · ลงทะเบียนเ
+ ข้าร่วมงาน\nถอดจากภาพกำหนด
+ การและโปสเตอร์ที่คุณพ่อส
+ ่ง · เวลาประเทศไทย
+LOCATION:ยังไม่ระบุจุดลงทะเบียน
+ ในภาพ
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fair-literacy@satit-swu-hub
+DTSTAMP:20261003T090611Z
+DTSTART:20261212T030000Z
+DTEND:20261212T050000Z
+SUMMARY:Literacy Without Borders: Connecting Educators\, Culturem and ideas
+DESCRIPTION:การบรรยายพิเศษ · onsite · ชื
+ ่อภาษาอังกฤษถอดตามภาพ ควร
+ ตรวจชื่อกับผู้จัดอีกครั้
+ ง\nถอดจากภาพกำหนดการและโปส
+ เตอร์ที่คุณพ่อส่ง · เวลาปร
+ ะเทศไทย
+LOCATION:เวทีกลาง ห้อง Hall 8 ชั้น LG ศ
+ ูนย์ประชุมแห่งชาติสิริกิ
+ ติ์
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fair-registration-day2@satit-swu-hub
+DTSTAMP:20261003T090611Z
+DTSTART:20261213T013000Z
+DTEND:20261213T083000Z
+SUMMARY:SATIT ACADEMIC FAIR · ลงทะเบียนเข้าร
+ ่วมงานนิทรรศการ (วันที่ 2)
+DESCRIPTION:กิจกรรม onsite · ลงทะเบียนเ
+ ข้าร่วมงาน\nถอดจากภาพกำหนด
+ การและโปสเตอร์ที่คุณพ่อส
+ ่ง · เวลาประเทศไทย
+LOCATION:ยังไม่ระบุจุดลงทะเบียน
+ ในภาพ
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fair-learning@satit-swu-hub
+DTSTAMP:20261003T090611Z
+DTSTART:20261213T020000Z
+DTEND:20261213T033000Z
+SUMMARY:แนวคิดการจัดการเรียนรู
+ ้เพื่อส่งเสริมความฉลาดรู
+ ้ของผู้เรียนในศตวรรษที่ 21
+DESCRIPTION:การเสวนาทางวิชาการ · onsit
+ e\nถอดจากภาพกำหนดการและโปส
+ เตอร์ที่คุณพ่อส่ง · เวลาปร
+ ะเทศไทย
+LOCATION:เวทีกลาง ห้อง Hall 8 ชั้น LG ศ
+ ูนย์ประชุมแห่งชาติสิริกิ
+ ติ์
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:fair-gen-alpha@satit-swu-hub
+DTSTAMP:20261003T090611Z
+DTSTART:20261213T060000Z
+DTEND:20261213T070000Z
+SUMMARY:Smart Talk กับ Gen Alpha: สื่อสารอย่า
+ งฉลาดรู้สำหรับครูและผู้ป
+ กครองยุคใหม่
+DESCRIPTION:การบรรยายพิเศษ · onsite\nถอด
+ จากภาพกำหนดการและโปสเตอร
+ ์ที่คุณพ่อส่ง · เวลาประเทศ
+ ไทย
+LOCATION:เวทีกลาง ห้อง Hall 8 ชั้น LG ศ
+ ูนย์ประชุมแห่งชาติสิริกิ
+ ติ์
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,51 @@
+{
+  "title": "SATIT ACADEMIC FAIR 2026",
+  "source_note": "ถอดจากภาพกำหนดการและโปสเตอร์ที่คุณพ่อส่ง · เวลาประเทศไทย",
+  "events": [
+    {
+      "id": "fair-registration-day1",
+      "date": "2026-12-12",
+      "start": "08:30",
+      "end": "15:30",
+      "title": "SATIT ACADEMIC FAIR · ลงทะเบียนเข้าร่วมงานนิทรรศการ (วันที่ 1)",
+      "location": "ยังไม่ระบุจุดลงทะเบียนในภาพ",
+      "description": "กิจกรรม onsite · ลงทะเบียนเข้าร่วมงาน"
+    },
+    {
+      "id": "fair-literacy",
+      "date": "2026-12-12",
+      "start": "10:00",
+      "end": "12:00",
+      "title": "Literacy Without Borders: Connecting Educators, Culturem and ideas",
+      "location": "เวทีกลาง ห้อง Hall 8 ชั้น LG ศูนย์ประชุมแห่งชาติสิริกิติ์",
+      "description": "การบรรยายพิเศษ · onsite · ชื่อภาษาอังกฤษถอดตามภาพ ควรตรวจชื่อกับผู้จัดอีกครั้ง"
+    },
+    {
+      "id": "fair-registration-day2",
+      "date": "2026-12-13",
+      "start": "08:30",
+      "end": "15:30",
+      "title": "SATIT ACADEMIC FAIR · ลงทะเบียนเข้าร่วมงานนิทรรศการ (วันที่ 2)",
+      "location": "ยังไม่ระบุจุดลงทะเบียนในภาพ",
+      "description": "กิจกรรม onsite · ลงทะเบียนเข้าร่วมงาน"
+    },
+    {
+      "id": "fair-learning",
+      "date": "2026-12-13",
+      "start": "09:00",
+      "end": "10:30",
+      "title": "แนวคิดการจัดการเรียนรู้เพื่อส่งเสริมความฉลาดรู้ของผู้เรียนในศตวรรษที่ 21",
+      "location": "เวทีกลาง ห้อง Hall 8 ชั้น LG ศูนย์ประชุมแห่งชาติสิริกิติ์",
+      "description": "การเสวนาทางวิชาการ · onsite"
+    },
+    {
+      "id": "fair-gen-alpha",
+      "date": "2026-12-13",
+      "start": "13:00",
+      "end": "14:00",
+      "title": "Smart Talk กับ Gen Alpha: สื่อสารอย่างฉลาดรู้สำหรับครูและผู้ปกครองยุคใหม่",
+      "location": "เวทีกลาง ห้อง Hall 8 ชั้น LG ศูนย์ประชุมแห่งชาติสิริกิติ์",
+      "description": "การบรรยายพิเศษ · onsite"
+    }
+  ]
+}
