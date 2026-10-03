@@ -1,0 +1,38 @@
+/* Local-only progress. Storage failures are always visible to the learner. */
+(() => {
+  'use strict';
+  const KEY = 'satit-swu-hub:v1';
+  const blank = () => ({version:1, completed:[], attempts:[], examDate:null});
+  let state = blank(), writable = true;
+  const dateValid = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !isNaN(new Date(value+'T00:00:00+07:00').getTime());
+  function warning(message) { window.dispatchEvent(new CustomEvent('storage-warning', {detail:message})); }
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (!data || data.version !== 1 || !Array.isArray(data.completed) || !Array.isArray(data.attempts)) throw new Error('invalid state');
+      state = {version:1, completed:[...new Set(data.completed.filter(x=>typeof x==='string'))], attempts:data.attempts.filter(x=>x && typeof x.id==='string' && typeof x.date==='string' && Number.isFinite(x.score) && Number.isInteger(x.total) && x.total>0 && x.score>=0 && x.score<=x.total).slice(-100), examDate:dateValid(data.examDate)?data.examDate:null};
+    }
+  } catch (_) {
+    writable = false;
+    setTimeout(()=>warning('อ่านข้อมูลเดิมไม่ได้ ใช้งานชั่วคราวได้ แต่ยังบันทึกไม่ได้ กรุณาตรวจการอนุญาตพื้นที่จัดเก็บใน Safari หรือสำรองข้อมูลเดิมก่อนล้างข้อมูลเว็บ'),0);
+  }
+  function save() {
+    if (writable) {
+      try { localStorage.setItem(KEY,JSON.stringify(state)); }
+      catch (_) { warning('บันทึกไม่สำเร็จ ความคืบหน้ารอบนี้อยู่ชั่วคราว กรุณาเปิดพื้นที่จัดเก็บหรือออกจากโหมดส่วนตัว'); }
+    } else warning('ข้อมูลรอบนี้ยังไม่ถูกบันทึกลงเครื่อง');
+    window.dispatchEvent(new Event('progress-changed'));
+  }
+  window.Tracker = {
+    has:id=>state.completed.includes(id),
+    toggle(id) { state.completed = this.has(id)?state.completed.filter(x=>x!==id):[...state.completed,id]; save(); },
+    addAttempt(attempt) { state.attempts.push({...attempt,date:new Date().toISOString()});state.attempts=state.attempts.slice(-100);save(); },
+    attempts:()=>JSON.parse(JSON.stringify(state.attempts)),
+    exportData:()=>JSON.parse(JSON.stringify({...state,exported_at:new Date().toISOString()})),
+    examDate:()=>state.examDate,
+    setExamDate(value) {state.examDate=dateValid(value)?value:null;save();},
+    stats(config) { const ids=config.subjects.flatMap(s=>s.steps.map(x=>x.id));const done=ids.filter(id=>this.has(id)).length;return {done,total:ids.length,percent:Math.round(done/ids.length*100)}; },
+    summary(config) { const all=this.stats(config);return ['สรุปภารกิจของ'+config.learner,'เรียนจบ '+all.done+'/'+all.total+' ภารกิจ ('+all.percent+'%)',...config.subjects.map(s=>s.name+': '+s.steps.filter(x=>this.has(x.id)).length+'/'+s.steps.length),...state.attempts.slice(-5).map(a=>'ข้อสอบ '+a.title+': '+a.score+'/'+a.total+' ('+new Date(a.date).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok'})+')')].join('\n'); }
+  };
+})();

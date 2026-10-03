@@ -1,0 +1,464 @@
+{
+  "learner": "พอใจ",
+  "exam_date": null,
+  "subjects": [
+    {
+      "id": "social",
+      "name": "สังคม",
+      "icon": "🌏",
+      "steps": [
+        {
+          "id": "social-intro",
+          "title": "3 ข้อแนะนำก่อนเริ่มเรียน",
+          "file": "./data/content/social-intro.md",
+          "type": "lesson"
+        },
+        {
+          "id": "social-pdf-guide",
+          "title": "คู่มือเอกสารสรุป",
+          "file": "./data/content/social-pdf-guide.md",
+          "type": "lesson"
+        },
+        {
+          "id": "social-part01",
+          "title": "PART 01 · พุทธศาสนา",
+          "file": "./data/content/social-part01.md",
+          "type": "lesson"
+        },
+        {
+          "id": "social-part02",
+          "title": "PART 02 · หน้าที่พลเมือง",
+          "file": "./data/content/social-part02.md",
+          "type": "lesson"
+        },
+        {
+          "id": "social-part03",
+          "title": "PART 03",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part04",
+          "title": "PART 04",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part05",
+          "title": "PART 05",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part06",
+          "title": "PART 06",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part07",
+          "title": "PART 07",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part08",
+          "title": "PART 08",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part09",
+          "title": "PART 09",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part10",
+          "title": "PART 10",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part11",
+          "title": "PART 11",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part12",
+          "title": "PART 12",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "social-part13",
+          "title": "PART 13",
+          "file": null,
+          "type": "lesson"
+        }
+      ],
+      "exams": [
+        {
+          "id": "social-mock01",
+          "title": "สนามซ้อม · ข้อสอบสังคม 01",
+          "file": "./data/exams/social-mock01.md",
+          "type": "exam"
+        }
+      ]
+    },
+    {
+      "id": "english",
+      "name": "อังกฤษ",
+      "icon": "💬",
+      "steps": [
+        {
+          "id": "english-intro",
+          "title": "3 ข้อแนะนำก่อนเริ่มเรียน",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "english-pdf-guide",
+          "title": "คู่มือเอกสารสรุป",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "english-part01",
+          "title": "PART 01",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "english-part02",
+          "title": "PART 02",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 62
+        },
+        {
+          "id": "english-part03",
+          "title": "PART 03",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "english-part04",
+          "title": "PART 04",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "english-part05",
+          "title": "PART 05",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "english-part06",
+          "title": "PART 06",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 64
+        },
+        {
+          "id": "english-part07",
+          "title": "PART 07",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "english-part08",
+          "title": "PART 08",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "english-part09",
+          "title": "PART 09",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 63
+        },
+        {
+          "id": "english-part10",
+          "title": "PART 10",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "english-part11",
+          "title": "PART 11",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 63
+        }
+      ],
+      "exams": []
+    },
+    {
+      "id": "science",
+      "name": "วิทย์",
+      "icon": "🔬",
+      "steps": [
+        {
+          "id": "science-intro",
+          "title": "3 ข้อแนะนำก่อนเริ่มเรียน",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "science-pdf-guide",
+          "title": "คู่มือเอกสารสรุป",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "science-part01",
+          "title": "PART 01",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 104
+        },
+        {
+          "id": "science-part02",
+          "title": "PART 02",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 139
+        },
+        {
+          "id": "science-part03",
+          "title": "PART 03",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 178
+        },
+        {
+          "id": "science-part04",
+          "title": "PART 04",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 78
+        },
+        {
+          "id": "science-part05",
+          "title": "PART 05",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 104
+        },
+        {
+          "id": "science-part06",
+          "title": "PART 06",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 83
+        },
+        {
+          "id": "science-part07",
+          "title": "PART 07",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 43
+        }
+      ],
+      "exams": []
+    },
+    {
+      "id": "thai",
+      "name": "ไทย",
+      "icon": "📖",
+      "steps": [
+        {
+          "id": "thai-intro",
+          "title": "3 ข้อแนะนำก่อนเริ่มเรียน",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "thai-pdf-guide",
+          "title": "คู่มือเอกสารสรุป",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "thai-part01",
+          "title": "PART 01",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "thai-part02",
+          "title": "PART 02",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "thai-part03",
+          "title": "PART 03",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 62
+        },
+        {
+          "id": "thai-part04",
+          "title": "PART 04",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "thai-part05",
+          "title": "PART 05",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "thai-part06",
+          "title": "PART 06",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "thai-part07",
+          "title": "PART 07",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "thai-part08",
+          "title": "PART 08",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "thai-part09",
+          "title": "PART 09",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 62
+        }
+      ],
+      "exams": []
+    },
+    {
+      "id": "math",
+      "name": "คณิต",
+      "icon": "📐",
+      "steps": [
+        {
+          "id": "math-intro",
+          "title": "3 ข้อแนะนำก่อนเริ่มเรียน",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "math-pdf-guide",
+          "title": "คู่มือเอกสารสรุป",
+          "file": null,
+          "type": "lesson"
+        },
+        {
+          "id": "math-part01",
+          "title": "PART 01",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 62
+        },
+        {
+          "id": "math-part02",
+          "title": "PART 02",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "math-part03",
+          "title": "PART 03",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 63
+        },
+        {
+          "id": "math-part04",
+          "title": "PART 04",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 63
+        },
+        {
+          "id": "math-part05",
+          "title": "PART 05",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 63
+        },
+        {
+          "id": "math-part06",
+          "title": "PART 06",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        },
+        {
+          "id": "math-part07",
+          "title": "PART 07",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 63
+        },
+        {
+          "id": "math-part08",
+          "title": "PART 08",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "math-part09",
+          "title": "PART 09",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 60
+        },
+        {
+          "id": "math-part10",
+          "title": "PART 10",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 62
+        },
+        {
+          "id": "math-part11",
+          "title": "PART 11",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 63
+        },
+        {
+          "id": "math-part12",
+          "title": "PART 12",
+          "file": null,
+          "type": "lesson",
+          "source_duration_minutes": 61
+        }
+      ],
+      "exams": []
+    }
+  ]
+}

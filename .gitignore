@@ -1,0 +1,9 @@
+*.pdf
+*.PDF
+node_modules/
+.DS_Store
+local/
+.venv/
+__pycache__/
+.env
+.env.*
