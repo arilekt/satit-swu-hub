@@ -135,7 +135,7 @@ async function init(){
  try{
  config=await get('./data/config.json',true);if(!Array.isArray(config.subjects)||!config.subjects.length)throw Error('config ไม่ถูกต้อง');
  let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
- ParentTools.init(activities);await route();setInterval(update,60000);
+ ParentTools.init(activities);if(window.MissionSync)MissionSync.init(config);await route();setInterval(update,60000);
  }catch(error){$('daily-mission').replaceChildren(element('p','เริ่มต้นเว็บไม่ได้: '+error.message,'notice'));notify(error.message);}
 }
 init();

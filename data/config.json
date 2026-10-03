@@ -964,5 +964,10 @@
   "daily_plan": {
     "session_minutes": 20,
     "break_minutes": 5
+  },
+  "sync": {
+    "google_client_id": "",
+    "apps_script_url": "",
+    "note": "ค่าสาธารณะ ไม่ใช่รหัสลับ ใส่หลังทำตาม docs/GOOGLE-SHEET-SYNC.md เว้นว่างไว้ = เก็บผลเรียนเฉพาะเครื่อง"
   }
 }
