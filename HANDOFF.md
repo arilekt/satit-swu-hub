@@ -1,7 +1,7 @@
 # HANDOFF - Satit SWU Hub Content Status
 
 **Last Updated:** 2026-10-05  
-**Status:** Math PART 01-12 published from the PDF-based set (lessons + 240 exam questions) ✅  
+**Status:** Math PART 01-12 and Science PART 01-07 published from the PDF-based set (lessons + 380 exam questions) ✅  
 **Branch:** claude/project-thread-nj7kqq
 
 ---
@@ -10,7 +10,8 @@
 
 Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Complete & Validated**: Math PART 01-12 (240 ข้อ, PDF-based) ✅
-- **Pending**: Science (7 PART), Thai (9 PART), English (11 PART)
+- **Complete & Validated**: Science PART 01-07 (140 ข้อ, PDF-based) ✅
+- **Pending**: Thai (9 PART), English (11 PART)
 - **Exists**: Social Studies (13 PART + 1 mock exam) - needs validation
 
 ---
@@ -23,10 +24,10 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - Checks: every one of the 240 questions re-solved from scratch, all keys correct; 6 wrong-option explanations fixed (P02 Q7, P05 Q11, P06 Q12, P11 Q8, P12 Q6, Q11). `validate_content.py --subject math` 0 errors. Video ids match the owner's list for all 12 PARTs.
 - Owner priority for the rest: Science → Thai → Social → English. PDF-based drafts for every subject already exist in `local/private/data/` (validation.json: 1,040 questions, 0 errors).
 
-### ⏳ Science (วิทย์) - NEXT (replace what is on main)
-- **Status**: main has a general-knowledge set from ed2aef0 (wrong titles, e.g. PART 01 "สมบัติของสาร" but the PDF PART 01 is "สิ่งมีชีวิตและการทำงานของพืช", no exams). Replace it with the PDF-based draft in local/private, the same way as math (lessons + exams, re-solve every answer).
-- **Content**: 7 PART chapters expected
-- **Action**: Create content + 15-20 ข้อ per PART, validate before push
+### ✅ Science (วิทย์) - PART 01-07 COMPLETE (lessons + exams, v0.9.0)
+- Source: the PDF-based set in `local/private/data/` copied into `data/content/science-partNN.md` and `data/exams/science-partNN-exam.md`, replacing the general-knowledge set from ed2aef0 (its titles did not match the PDF). Owner chose option A on 2026-10-05: public GitHub, rewritten summaries, no PDF copies.
+- Exam ids `science-partNN-quiz`, 20 questions each, 30 minutes; lessons carry `chapter_title` and `analysis_status: "pdf-verified"`. Video ids and source_duration_minutes unchanged.
+- Checks: all 140 questions re-solved, all keys correct; lessons proofread. One note added in PART 03 (the PDF lists หัวล้าน as X-linked; most textbooks treat it as sex-influenced). Known PDF typos already corrected in the drafts: CaCO₃ (PDF Ca₂CO₃), N₂O (PDF NO₂), Saturn now has the most confirmed moons.
 
 ### ⏳ Thai (ไทย) - DRAFT (Local Only)
 - **Status**: Not started (files in local/private if needed)

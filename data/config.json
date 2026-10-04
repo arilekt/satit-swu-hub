@@ -455,15 +455,15 @@
           "file": "./data/content/science-part01.md",
           "type": "lesson",
           "source_duration_minutes": 104,
-          "chapter_title": "สมบัติของสาร",
+          "chapter_title": "อาณาจักรสิ่งมีชีวิตและโลกของพืช",
           "chapter_status": "completed",
           "quiz": {
             "id": "science-part01-quiz",
             "title": "แบบทดสอบท้ายบท · PART 01",
-            "file": null,
+            "file": "./data/exams/science-part01-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=q-KOoEI3r7U"
         },
@@ -473,15 +473,15 @@
           "file": "./data/content/science-part02.md",
           "type": "lesson",
           "source_duration_minutes": 139,
-          "chapter_title": "สถานะของสาร",
+          "chapter_title": "สัตว์ การสืบพันธุ์ ระบบร่างกาย และเซลล์",
           "chapter_status": "completed",
           "quiz": {
             "id": "science-part02-quiz",
             "title": "แบบทดสอบท้ายบท · PART 02",
-            "file": null,
+            "file": "./data/exams/science-part02-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=9O7PeEyrSN4"
         },
@@ -491,15 +491,15 @@
           "file": "./data/content/science-part03.md",
           "type": "lesson",
           "source_duration_minutes": 178,
-          "chapter_title": "การแยกสาร",
+          "chapter_title": "การตอบสนอง ระบบนิเวศ พันธุกรรม และสารอาหาร",
           "chapter_status": "completed",
           "quiz": {
             "id": "science-part03-quiz",
             "title": "แบบทดสอบท้ายบท · PART 03",
-            "file": null,
+            "file": "./data/exams/science-part03-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=N_LpYW5XNLg"
         },
@@ -509,15 +509,15 @@
           "file": "./data/content/science-part04.md",
           "type": "lesson",
           "source_duration_minutes": 78,
-          "chapter_title": "ธาตุและสารประกอบ",
+          "chapter_title": "สสาร การแยกสาร กรด–เบส และการทดลอง",
           "chapter_status": "completed",
           "quiz": {
             "id": "science-part04-quiz",
             "title": "แบบทดสอบท้ายบท · PART 04",
-            "file": null,
+            "file": "./data/exams/science-part04-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=Jr1HBDFXTmc"
         },
@@ -527,15 +527,15 @@
           "file": "./data/content/science-part05.md",
           "type": "lesson",
           "source_duration_minutes": 104,
-          "chapter_title": "ปฏิกิริยาเคมี",
+          "chapter_title": "เครื่องกลอย่างง่าย การเคลื่อนที่ ความดัน และลมฟ้าอากาศ",
           "chapter_status": "completed",
           "quiz": {
             "id": "science-part05-quiz",
             "title": "แบบทดสอบท้ายบท · PART 05",
-            "file": null,
+            "file": "./data/exams/science-part05-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=Mc2aYSJNMdY"
         },
@@ -545,15 +545,15 @@
           "file": "./data/content/science-part06.md",
           "type": "lesson",
           "source_duration_minutes": 83,
-          "chapter_title": "กรด เบส และเกลือ",
+          "chapter_title": "ไฟฟ้า แสง เสียง ความร้อน และงาน",
           "chapter_status": "completed",
           "quiz": {
             "id": "science-part06-quiz",
             "title": "แบบทดสอบท้ายบท · PART 06",
-            "file": null,
+            "file": "./data/exams/science-part06-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=AzD0VnGGQM8"
         },
@@ -563,15 +563,15 @@
           "file": "./data/content/science-part07.md",
           "type": "lesson",
           "source_duration_minutes": 43,
-          "chapter_title": "พลังงาน",
+          "chapter_title": "ระบบสุริยะ ดาราศาสตร์ โลก หิน ดิน และบรรยากาศ",
           "chapter_status": "completed",
           "quiz": {
             "id": "science-part07-quiz",
             "title": "แบบทดสอบท้ายบท · PART 07",
-            "file": null,
+            "file": "./data/exams/science-part07-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=pFg4Bvx7QNA"
         }
