@@ -441,11 +441,11 @@
         {
           "id": "science-part01",
           "title": "PART 01",
-          "file": null,
+          "file": "./data/content/science-part01.md",
           "type": "lesson",
           "source_duration_minutes": 104,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "สมบัติของสาร",
+          "chapter_status": "completed",
           "quiz": {
             "id": "science-part01-quiz",
             "title": "แบบทดสอบท้ายบท · PART 01",
@@ -458,11 +458,11 @@
         {
           "id": "science-part02",
           "title": "PART 02",
-          "file": null,
+          "file": "./data/content/science-part02.md",
           "type": "lesson",
           "source_duration_minutes": 139,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "สถานะของสาร",
+          "chapter_status": "completed",
           "quiz": {
             "id": "science-part02-quiz",
             "title": "แบบทดสอบท้ายบท · PART 02",
@@ -475,11 +475,11 @@
         {
           "id": "science-part03",
           "title": "PART 03",
-          "file": null,
+          "file": "./data/content/science-part03.md",
           "type": "lesson",
           "source_duration_minutes": 178,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "การแยกสาร",
+          "chapter_status": "completed",
           "quiz": {
             "id": "science-part03-quiz",
             "title": "แบบทดสอบท้ายบท · PART 03",
@@ -492,11 +492,11 @@
         {
           "id": "science-part04",
           "title": "PART 04",
-          "file": null,
+          "file": "./data/content/science-part04.md",
           "type": "lesson",
           "source_duration_minutes": 78,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ธาตุและสารประกอบ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "science-part04-quiz",
             "title": "แบบทดสอบท้ายบท · PART 04",
@@ -509,11 +509,11 @@
         {
           "id": "science-part05",
           "title": "PART 05",
-          "file": null,
+          "file": "./data/content/science-part05.md",
           "type": "lesson",
           "source_duration_minutes": 104,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ปฏิกิริยาเคมี",
+          "chapter_status": "completed",
           "quiz": {
             "id": "science-part05-quiz",
             "title": "แบบทดสอบท้ายบท · PART 05",
@@ -526,11 +526,11 @@
         {
           "id": "science-part06",
           "title": "PART 06",
-          "file": null,
+          "file": "./data/content/science-part06.md",
           "type": "lesson",
           "source_duration_minutes": 83,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "กรด เบส และเกลือ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "science-part06-quiz",
             "title": "แบบทดสอบท้ายบท · PART 06",
@@ -543,11 +543,11 @@
         {
           "id": "science-part07",
           "title": "PART 07",
-          "file": null,
+          "file": "./data/content/science-part07.md",
           "type": "lesson",
           "source_duration_minutes": 43,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "พลังงาน",
+          "chapter_status": "completed",
           "quiz": {
             "id": "science-part07-quiz",
             "title": "แบบทดสอบท้ายบท · PART 07",
