@@ -182,6 +182,7 @@ progress::-moz-progress-bar{background:var(--red)}
 .plan-item.done{background:var(--green-soft)}
 .plan-item.done::before{content:"✓ ";color:var(--green);font-weight:700}
 .plan-item.waiting{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.plan-item.review{background:#eef6f0;color:var(--green)}
 .plan-item.class{background:transparent;border-left:3px solid #6b7bb5;color:var(--muted);min-height:0}
 .period-note.ok{color:var(--green)}
 .plan-item.event{background:#eef0f7}

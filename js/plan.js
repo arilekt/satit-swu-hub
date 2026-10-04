@@ -78,7 +78,9 @@ function render(config,activities,tracker,groups){
       cell.append(a);
     }
     for(const e of StudyPlan.recurring(config.daily_plan||{},date))cell.append(node('span',(e.time?e.time+' ':'')+'🎧 '+e.title,'plan-item class'));
-    const rule=StudyPlan.rules(config.daily_plan||{},date);if(!items.length&&!keyDates[date]&&rule.rest.includes(new Date(Date.UTC(y,m-1,d)).getUTCDay()))cell.append(node('small','วันพัก ☁️','muted'));
+    const rule=StudyPlan.rules(config.daily_plan||{},date);
+    const period=(config.daily_plan.periods||[]).find(p=>p.from<=date&&date<=p.to);
+    if(!items.length&&period&&period.review_label&&!rule.rest.includes(new Date(Date.UTC(y,m-1,d)).getUTCDay()))cell.insertBefore(node('span',(rule.slots[0]&&rule.slots[0].time?rule.slots[0].time+' ':'')+'🔁 '+period.review_label,'plan-item review'),cell.children[1]||null);if(!items.length&&!keyDates[date]&&rule.rest.includes(new Date(Date.UTC(y,m-1,d)).getUTCDay()))cell.append(node('small','วันพัก ☁️','muted'));
     grid.append(cell);
   }
   box.append(grid);
