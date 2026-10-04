@@ -6,7 +6,7 @@ Copy everything below the line into a new session (a smaller model is fine).
 
 ทำเนื้อหาวิชาถัดไปของเว็บ satit-swu-hub (repo `arilekt/satit-swu-hub`, เครื่องนี้อยู่ที่ `D:\DEV_WORKSPACE\satit-mission-hub`) ให้เหมือนที่ทำ Math และ Science ไปแล้ว
 
-**ลำดับวิชา:** Math ✅ → Science ✅ (v0.9.0) → **Thai (ทำตอนนี้, 9 PART)** → Social (13 PART, มีบน main แล้ว ต้องตรวจ) → English (11 PART)
+**ลำดับวิชา:** Math ✅ → Science ✅ (v0.9.0) → Thai ✅ (v0.10.0) → **Social (ทำตอนนี้, 13 PART, มีบน main แล้ว ต้องตรวจ)** → English (11 PART)
 
 **อ่านก่อนเริ่ม:** `HANDOFF.md` (สถานะทุกวิชา + กฎเว็บ) และ commit `0a38d54` (ตัวอย่างงาน Science ที่ทำเสร็จ)
 
