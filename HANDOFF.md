@@ -14,3 +14,5 @@
 **Testing:** Playwright on localhost with Google GIS + Apps Script mocked by `page.route` (no bypass code in repo). YouTube/real Google login cannot load from cloud.
 
 **Next / open:** พี่ OK'd the design (2026-10-04); waiting for พอใจ's feedback and plan confirmation. chapter titles + quiz files come from the content job (do not invent). Adjust plan pace in config if พี่ wants.
+
+**Exam tickets (บัตรสอบ):** never put the PDF in this repo (GitHub Pages is public). Store it in Google Drive shared only with the allowed emails (not "anyone with the link"), then paste the share link into `data/config.json` → `admissions.programs[regular].pretest_ticket_url` / `exam_ticket_url`. Only `https://drive.google.com` / `docs.google.com` links are accepted; otherwise the card shows "ยังไม่ได้ใส่บัตรสอบ". Pre-Test ticket button hides once Pre-Test has passed.

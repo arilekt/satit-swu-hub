@@ -106,6 +106,14 @@ function journeyRow(config,subject,tracker){
   steps.append(now,side(index>=0?lessons[index+1]:null,'ต่อไป'));
   row.append(summary,steps);return row;
 }
+// Exam tickets hold personal data: only a link to a private Google Drive file is accepted, never a file in this repo.
+function ticketUrl(value){try{const u=new URL(value);return u.protocol==='https:'&&['drive.google.com','docs.google.com'].includes(u.hostname)?u.href:null;}catch(_){return null;}}
+function ticket(container,value,show){
+  container.replaceChildren();if(!show)return;
+  const url=ticketUrl(value);
+  if(!url){container.append(node('span','ยังไม่ได้ใส่บัตรสอบ','ticket-missing'));return;}
+  const a=node('a','🎫 เปิดบัตรสอบ','ticket-link');a.href=url;a.target='_blank';a.rel='noopener noreferrer';container.append(a);
+}
 function render(config,activities,tracker){
   const $=id=>document.getElementById(id);
   todayLabel($('today-date'));$('daily-boost').textContent=boost();
@@ -118,6 +126,8 @@ function render(config,activities,tracker){
   const exam=tracker.examDate()||regular.exam_date;
   $('real-exam-date').textContent=Countdown.label(exam);
   counters($('exam-counter'),exam);
+  ticket($('pretest-ticket'),regular.pretest_ticket_url,focus.phase==='pretest');
+  ticket($('exam-ticket'),regular.exam_ticket_url,true);
   $('result-notice').hidden=true;
   const groups=eventGroups(activities,Countdown.today()),list=$('activity-summary');list.replaceChildren();
   if(!groups.length)list.append(node('li','ยังไม่มีกิจกรรมอื่นตอนนี้','muted'));
@@ -129,5 +139,5 @@ function render(config,activities,tracker){
   $('schedule-source').textContent=config.admissions.source_note;
   if(window.PlanCalendar)PlanCalendar.render(config,activities,tracker,groups);
 }
-window.Dashboard={recommendation,subjectTarget,render,boost,eventGroups,BOOSTS};
+window.Dashboard={ticketUrl,recommendation,subjectTarget,render,boost,eventGroups,BOOSTS};
 })();

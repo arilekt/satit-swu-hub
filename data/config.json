@@ -945,7 +945,10 @@
         "name": "ภาคปกติ",
         "pretest_date": "2026-11-29",
         "exam_date": "2027-02-07",
-        "pretest_results_date": null
+        "pretest_results_date": null,
+        "pretest_ticket_url": null,
+        "exam_ticket_url": null,
+        "ticket_note": "ลิงก์ Google Drive ของบัตรสอบ (แชร์เฉพาะอีเมลที่อนุญาต) ห้ามใส่ไฟล์บัตรสอบใน repo"
       },
       {
         "id": "trilingual",

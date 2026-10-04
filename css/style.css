@@ -91,6 +91,10 @@ body.locked{overflow:hidden}
 .real-exam .exam-date,.real-exam .exam-message{color:var(--muted)}
 .other-events{background:var(--surface-2);border:1px solid var(--line)}
 .other-events h3{font-size:18px;color:var(--muted)}
+.ticket{margin-top:8px}
+.ticket-link{display:inline-flex;align-items:center;min-height:48px;padding:0 16px;border-radius:12px;font-weight:600;font-size:var(--fs-sm);background:var(--surface);color:var(--red);border:1px solid var(--red-line)}
+.pretest .ticket-link{background:#fff;color:var(--red);border-color:#fff}
+.ticket-missing{font-size:var(--fs-xs);opacity:.85}
 .counter{display:flex;gap:16px;align-items:baseline;margin:6px 0 2px}
 .counter-part{display:flex;gap:6px;align-items:baseline}
 .counter-part strong{font-size:40px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
