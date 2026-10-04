@@ -967,8 +967,19 @@
     "start_date": "2026-10-05",
     "rest_weekdays": [0],
     "items_per_day": 1,
-    "note": "แผนเริ่ม start_date วิชาผลัดกัน คณิต→วิทย์→ไทย→สังคม→อังกฤษ วันละ items_per_day รายการ rest_weekdays = วันพัก (0 = อาทิตย์)"
+    "periods": [
+      {
+        "name": "ปิดเทอม",
+        "from": "2026-10-05",
+        "to": "2026-10-31",
+        "slots": ["เช้า", "บ่าย", "เย็น"],
+        "session_minutes": 25,
+        "rest_weekdays": [0]
+      }
+    ],
+    "note": "ร่างแผนรอคุณพ่อยืนยัน · เริ่ม start_date วิชาผลัดกัน คณิต→วิทย์→ไทย→สังคม→อังกฤษ · periods ใช้แทนค่าปกติในช่วงวันที่นั้น (slots = ช่วงต่อวัน) · นอกช่วงเรียนวันละ items_per_day รายการ · rest_weekdays = วันพัก (0 = อาทิตย์)"
   },
+
   "sync": {
     "google_client_id": "31265253349-l240qupng3th9ob1obp66flb9ht4gmr3.apps.googleusercontent.com",
     "apps_script_url": "https://script.google.com/macros/s/AKfycbw3nF8y7GeEJoTWXHUsmW3_CuT5Bv-9r0aEt1N06RIlZHZU-ECDGZ1c8iznqFxG_hIy/exec",
