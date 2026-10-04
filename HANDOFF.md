@@ -23,8 +23,8 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - Checks: every one of the 240 questions re-solved from scratch, all keys correct; 6 wrong-option explanations fixed (P02 Q7, P05 Q11, P06 Q12, P11 Q8, P12 Q6, Q11). `validate_content.py --subject math` 0 errors. Video ids match the owner's list for all 12 PARTs.
 - Owner priority for the rest: Science → Thai → Social → English. PDF-based drafts for every subject already exist in `local/private/data/` (validation.json: 1,040 questions, 0 errors).
 
-### ⏳ Science (วิทย์) - DRAFT (Local Only)
-- **Status**: Not started (files in local/private if needed)
+### ⏳ Science (วิทย์) - NEXT (replace what is on main)
+- **Status**: main has a general-knowledge set from ed2aef0 (wrong titles, e.g. PART 01 "สมบัติของสาร" but the PDF PART 01 is "สิ่งมีชีวิตและการทำงานของพืช", no exams). Replace it with the PDF-based draft in local/private, the same way as math (lessons + exams, re-solve every answer).
 - **Content**: 7 PART chapters expected
 - **Action**: Create content + 15-20 ข้อ per PART, validate before push
 
