@@ -17,7 +17,11 @@
     <div class="login-content">
       <img class="login-logo" src="./images/swu-satit-logo.png" alt="โรงเรียนสาธิต มศว ประสานมิตร (ฝ่ายมัธยม)"><h1>เข้าสู่ระบบ</h1>
       <p>ใช้บัญชี Google ที่ได้รับอนุญาตเพื่อเข้าถึงระบบเตรียมสอบ</p>
-      <div id="google-button" class="google-button-wrapper"></div>
+      <div id="google-button" class="google-button-wrapper">
+        <button id="fallback-google-signin" class="fallback-signin-btn" type="button" style="display:none;">
+          ลงชื่อด้วย Google
+        </button>
+      </div>
       <p id="login-status" class="login-status notice" role="status" aria-live="polite"></p>
       <p class="login-note">โปรดเข้าสู่ระบบด้วยอีเมลที่คุณพ่อไว้วางใจให้เข้าได้</p>
     </div>

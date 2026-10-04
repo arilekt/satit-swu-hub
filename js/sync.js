@@ -63,7 +63,24 @@
       await loadGis();
       google.accounts.id.initialize({client_id: settings.google_client_id, callback: response => signedIn(response.credential), auto_select: true, cancel_on_tap_outside: true, use_fedcm_for_prompt: true});
       const box = $('google-button');
-      if (box) { box.replaceChildren(); google.accounts.id.renderButton(box, {theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', locale: 'th'}); }
+      if (box) {
+        box.replaceChildren();
+        google.accounts.id.renderButton(box, {theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', locale: 'th'});
+        // Check if button rendered successfully; if not, show fallback
+        setTimeout(() => {
+          const hasGoogleButton = box.querySelector('div[role="button"], iframe[title*="gsi"]') || box.children.length > 0;
+          if (!hasGoogleButton) {
+            const fallback = $('fallback-google-signin');
+            if (fallback) {
+              fallback.style.display = 'block';
+              fallback.onclick = () => google.accounts.id.prompt();
+            }
+          } else {
+            const fallback = $('fallback-google-signin');
+            if (fallback) fallback.style.display = 'none';
+          }
+        }, 100);
+      }
       if (!token) google.accounts.id.prompt();
     } catch (error) { lastError = error.message; render(); }
   }
