@@ -848,86 +848,86 @@
         {
           "id": "math-part08",
           "title": "PART 08",
-          "file": null,
+          "file": "./data/content/math-part08.md",
           "type": "lesson",
-          "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 20,
+          "chapter_title": "รูปสี่เหลี่ยม",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part08-quiz",
             "title": "แบบทดสอบท้ายบท · PART 08",
-            "file": null,
+            "file": "./data/content/math-part08.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           }
         },
         {
           "id": "math-part09",
           "title": "PART 09",
-          "file": null,
+          "file": "./data/content/math-part09.md",
           "type": "lesson",
-          "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 20,
+          "chapter_title": "รูปวงกลม",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part09-quiz",
             "title": "แบบทดสอบท้ายบท · PART 09",
-            "file": null,
+            "file": "./data/content/math-part09.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           }
         },
         {
           "id": "math-part10",
           "title": "PART 10",
-          "file": null,
+          "file": "./data/content/math-part10.md",
           "type": "lesson",
-          "source_duration_minutes": 62,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 20,
+          "chapter_title": "รูปสามมิติและปริมาตร",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part10-quiz",
             "title": "แบบทดสอบท้ายบท · PART 10",
-            "file": null,
+            "file": "./data/content/math-part10.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           }
         },
         {
           "id": "math-part11",
           "title": "PART 11",
-          "file": null,
+          "file": "./data/content/math-part11.md",
           "type": "lesson",
-          "source_duration_minutes": 63,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 15,
+          "chapter_title": "บัญญัติไตรยางค์",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part11-quiz",
             "title": "แบบทดสอบท้ายบท · PART 11",
-            "file": null,
+            "file": "./data/content/math-part11.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           }
         },
         {
           "id": "math-part12",
           "title": "PART 12",
-          "file": null,
+          "file": "./data/content/math-part12.md",
           "type": "lesson",
-          "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 20,
+          "chapter_title": "ร้อยละและอัตราส่วน",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part12-quiz",
             "title": "แบบทดสอบท้ายบท · PART 12",
-            "file": null,
+            "file": "./data/content/math-part12.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           }
         }
       ],
