@@ -1,10 +1,11 @@
 (() => {
 'use strict';
+const Catalog=window.Catalog;
 function recommendation(config,tracker,day=Countdown.today()){
   const session=Math.max(5,Math.min(30,Number(config.daily_plan?.session_minutes)||20));
   const candidates=config.subjects.map(subject=>{
-    const step=subject.steps.find(s=>s.file&&!tracker.has(s.id));
-    return {subject,step,ratio:subject.steps.filter(s=>tracker.has(s.id)).length/subject.steps.length};
+    const all=Catalog.items(subject),step=all.find(s=>s.file&&!tracker.has(s.id));
+    return {subject,step,ratio:all.filter(s=>tracker.has(s.id)).length/all.length};
   }).filter(x=>x.step);
   const rotation=Math.floor(new Date(day+'T00:00:00Z').getTime()/86400000)%config.subjects.length;
   candidates.sort((a,b)=>a.ratio-b.ratio||((config.subjects.indexOf(a.subject)-rotation+config.subjects.length)%config.subjects.length)-((config.subjects.indexOf(b.subject)-rotation+config.subjects.length)%config.subjects.length));
@@ -14,7 +15,7 @@ function recommendation(config,tracker,day=Countdown.today()){
   const step=subject.steps.find(s=>s.file&&s.type!=='exam');
   return {subject,step,review:true,minutes:Math.min(session,Number(step.study_minutes)||session)};
 }
-function subjectTarget(subject,tracker){return subject.steps.find(s=>s.file&&!tracker.has(s.id))||subject.steps.find(s=>s.file)||subject.steps[0];}
+function subjectTarget(subject,tracker){const all=Catalog.items(subject);return all.find(s=>s.file&&!tracker.has(s.id))||all.find(s=>s.file)||all[0];}
 function counters(container,date){
   container.replaceChildren();
   const node=(tag,text,cls)=>{const e=document.createElement(tag);e.textContent=text;if(cls)e.className=cls;return e;};
@@ -37,14 +38,14 @@ function render(config,activities,tracker){
   counters($('exam-counter'),exam);
   if($('result-notice').textContent!==focus.message)$('result-notice').textContent=focus.message;
   $('result-notice').hidden=!focus.message;
-  const stats=tracker.stats(config);$('overall-caption').textContent='จบแล้ว '+stats.done+' / '+stats.total+' บท';
+  const stats=tracker.stats(config);$('overall-caption').textContent='จบแล้ว '+stats.done+' / '+stats.total+' ภารกิจ';
   $('subject-progress').replaceChildren();
   config.subjects.forEach(subject=>{
-    const done=subject.steps.filter(s=>tracker.has(s.id)).length,percent=Math.round(done/subject.steps.length*100),ready=subject.steps.some(s=>s.file);
+    const all=Catalog.items(subject),done=all.filter(s=>tracker.has(s.id)).length,percent=Math.round(done/all.length*100),ready=all.some(s=>s.file);
     const card=node('a',undefined,'subject-card');card.href='#'+subject.id+'/'+subjectTarget(subject,tracker).id;
     card.append(node('span',subject.icon,'subject-icon'),node('h3',subject.name));
-    const meta=node('div',undefined,'subject-meta');meta.append(node('span',done+' / '+subject.steps.length+' บท'),node('strong',percent+'%'));card.append(meta);
-    const progress=node('progress');progress.max=subject.steps.length;progress.value=done;progress.setAttribute('aria-label','ความคืบหน้า'+subject.name);card.append(progress,node('span',ready?'เข้าห้องเรียน →':'กำลังเตรียมบทเรียน','subject-state'));$('subject-progress').append(card);
+    const meta=node('div',undefined,'subject-meta');meta.append(node('span',done+' / '+all.length+' ภารกิจ'),node('strong',percent+'%'));card.append(meta);
+    const progress=node('progress');progress.max=all.length;progress.value=done;progress.setAttribute('aria-label','ความคืบหน้า'+subject.name);card.append(progress,node('span',ready?'เข้าห้องเรียน →':'กำลังเตรียมบทเรียน','subject-state'));$('subject-progress').append(card);
   });
   const choice=recommendation(config,tracker),mission=$('daily-mission');mission.replaceChildren();
   if(choice){

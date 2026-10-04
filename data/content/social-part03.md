@@ -3,7 +3,11 @@ id: social-part03
 title: "PART 03 · สังคมศึกษา"
 duration: "เรียนครั้งละประมาณ 20 นาที"
 video_url: "https://www.youtube.com/watch?v=lwrMYO1pP40"
-content_status: "video-ready-summary-pending"
+video_match:
+  status: "partial"
+  evidence: "ชื่อคลิปจาก YouTube oEmbed (ตรวจ 3 ต.ค. 2569) คือ 'สรุปเนื้อหาสังคมศึกษา Part 03' ช่อง BBA (@bigbraintalk) เลข Part ตรงกับบทนี้"
+  unconfirmed: "หัวข้อในคลิปและหน้าที่ตรงกันใน PDF ยังไม่ได้เทียบ"
+analysis_status: "pending"
 ---
 
 ## ภารกิจวิดีโอ PART 03 📺

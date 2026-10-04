@@ -6,14 +6,15 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const read = name => fs.readFileSync(path.join(root,name),'utf8');
-for(const name of ['app','tracker','quiz-engine'])new vm.Script(read('js/'+name+'.js'));
+for(const name of ['app','tracker','quiz-engine','catalog'])new vm.Script(read('js/'+name+'.js'));
 const config=JSON.parse(read('data/config.json'));
 assert.deepEqual(config.subjects.map(s=>s.steps.length),[14,11,7,9,12]);
-for(const subject of config.subjects)for(const step of [...subject.steps,...subject.exams])if(step.file)assert.ok(fs.existsSync(path.join(root,step.file)));
+const catalogContext={window:{}};vm.createContext(catalogContext);vm.runInContext(read('js/catalog.js'),catalogContext);const Catalog=catalogContext.window.Catalog;
+for(const subject of config.subjects)for(const step of [...Catalog.items(subject),...subject.exams])if(step.file)assert.ok(fs.existsSync(path.join(root,step.file)));
 const stored=new Map();
 function tracker(){
   const c={localStorage:{getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)},window:{dispatchEvent(){}},CustomEvent:class{},Event:class{},setTimeout(){}};
-  vm.createContext(c);vm.runInContext(read('js/tracker.js'),c);return c.window.Tracker;
+  c.window.Catalog=Catalog;vm.createContext(c);vm.runInContext(read('js/tracker.js'),c);return c.window.Tracker;
 }
 let t=tracker();t.toggle('social-part01');t.addAttempt({id:'mock',title:'mock',score:1,total:2,answers:[{question:'Q',selected:0,correct:1}]});
 t=tracker();assert.equal(t.has('social-part01'),true);assert.equal(t.stats(config).done,1);assert.equal(t.attempts()[0].score,1);assert.equal(t.exportData().attempts[0].answers[0].selected,0);
@@ -97,7 +98,7 @@ assert.ok(escaped.includes('SUMMARY:A\\,B\\;C\\\\D\\nE'));
 console.log('PASS: 5 fair activities, sorted primary exam/result calendar, Bangkok-to-UTC times, exclusive all-day end, ICS escaping and UTF-8 folding');
 
 for(const name of ['dashboard','parent','calendar','countdown'])new vm.Script(read('js/'+name+'.js'));
-const dashboardContext={window:{},Countdown:countdown};
+const dashboardContext={window:{Catalog},Countdown:countdown};
 vm.createContext(dashboardContext);vm.runInContext(read('js/dashboard.js'),dashboardContext);
 const dashboard=dashboardContext.window.Dashboard;
 const fresh={has:()=>false};
@@ -155,10 +156,82 @@ assert.equal(config.subjects.reduce((n,s)=>n+s.steps.length,0),53);
 assert.ok(config.subjects.every(s=>s.steps.every(step=>!/-intro$|-pdf-guide$/.test(step.id))));
 assert.equal(dashboard.recommendation(config,{has:id=>id.startsWith('social-part')},'2026-10-03').step.id,'social-mock01');
 stored.set('satit-swu-hub:v1',JSON.stringify({version:1,completed:['social-intro','social-pdf-guide','social-part01'],attempts:[{id:'social-mock01',title:'Old mock',score:0,total:1,date:'2026-10-01T00:00:00Z'}],examDate:null,resultDate:null}));
-let migrated=tracker();assert.equal(migrated.stats(config).done,2);assert.equal(migrated.stats(config).total,53);
+let migrated=tracker();assert.equal(migrated.stats(config).done,2);assert.equal(migrated.stats(config).total,105);
 assert.equal(migrated.has('social-part01'),true);assert.equal(migrated.has('social-mock01'),true);
 migrated.addAttempt({id:'social-mock01',title:'Mock again',score:1,total:1});assert.equal(migrated.stats(config).done,2);
 migrated.addAttempt({id:'social-part02:mini',title:'Mini',score:1,total:1});assert.equal(migrated.has('social-part02'),false);
 for(let i=0;i<101;i++)migrated.addAttempt({id:'other-mock-'+i,title:'Other',score:1,total:1});
 assert.equal(tracker().has('social-mock01'),true);assert.equal(tracker().stats(config).done,2);
 console.log('PASS: no intro/PDF steps, 53 total units, old PART progress retained, historical exam migration, repeated exams counted once, mini-quiz excluded and exam completion retained after history rotation');
+
+const lessons=config.subjects.flatMap(s=>s.steps.filter(step=>step.type==='lesson'));
+assert.equal(lessons.length,52);
+for(const lesson of lessons){assert.match(lesson.title,/^PART \d{2}$/);assert.equal(lesson.quiz.id,lesson.id+'-quiz');assert.equal(lesson.quiz.type,'exam');assert.equal(lesson.quiz.questions,20);}
+const socialItems=Catalog.items(config.subjects[0]).map(x=>x.id);
+assert.deepEqual(socialItems.slice(0,4),['social-part01','social-part01-quiz','social-part02','social-part02-quiz']);
+assert.equal(socialItems.at(-1),'social-mock01');
+assert.equal(Catalog.parentOf(config.subjects[0],'social-part05-quiz').id,'social-part05');
+assert.equal(Catalog.parentOf(config.subjects[0],'social-mock01'),null);
+const withQuiz={...config,subjects:config.subjects.map((s,i)=>i?s:{...s,steps:s.steps.map(step=>step.id==='social-part01'?{...step,quiz:{...step.quiz,file:'./data/exams/x.md'}}:step)})};
+assert.equal(dashboard.recommendation(withQuiz,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part01-quiz');
+assert.equal(dashboard.subjectTarget(withQuiz.subjects[0],{has:id=>id==='social-part01'}).id,'social-part01-quiz');
+for(let i=1;i<=13;i++){const meta=read('data/content/social-part'+String(i).padStart(2,'0')+'.md');assert.match(meta,/\nvideo_match:\n  status: "(confirmed|partial|unconfirmed)"\n  evidence: "/);assert.match(meta,/\nanalysis_status: "(sample-unverified|pending|pdf-draft|pdf-verified)"/);}
+console.log('PASS: 52 PART lessons each followed by a 20-question end-of-chapter quiz, 105 progress units, quiz recommended after its lesson once ready, video-match evidence and analysis status on every Social PART');
+
+/* Google Sheet sync: Apps Script backend against an in-memory spreadsheet, plus tracker merge. */
+function fakeAppsScript(claimsFor){
+ const tabs=new Map(),props={GOOGLE_CLIENT_ID:'client-1.apps.googleusercontent.com',ALLOWED_EMAILS:'dad@example.com, Porjai@Example.com'};
+ const cell=v=>typeof v==='string'&&v.startsWith("'")?v.slice(1):v;
+ function tab(name){const rows=[];return {rows,appendRow:r=>rows.push(r.map(cell)),setFrozenRows(){},getLastRow:()=>rows.length,
+  getDataRange:()=>({getValues:()=>rows.map(r=>[...r])}),
+  getRange:(row,col,n,w)=>({getValues:()=>rows.slice(row-1,row-1+n).map(r=>r.slice(col-1,col-1+w)),setValues:vals=>vals.forEach((v,i)=>{rows[row-1+i]=v.map(cell);})})};}
+ const ctx={JSON,Date,Object,Array,String,Number,Math,isFinite,isNaN,encodeURIComponent,
+  SpreadsheetApp:{getActiveSpreadsheet:()=>({getSheetByName:n=>tabs.get(n)||null,insertSheet:n=>{const t=tab(n);tabs.set(n,t);return t;}})},
+  PropertiesService:{getScriptProperties:()=>({getProperty:k=>props[k]||null})},
+  CacheService:{getScriptCache:()=>({get:()=>null,put(){}})},
+  Utilities:{base64EncodeWebSafe:x=>String(x),computeDigest:(_,s)=>s,DigestAlgorithm:{SHA_256:1}},
+  UrlFetchApp:{fetch:url=>{const claims=claimsFor(decodeURIComponent(url.split('id_token=')[1]));return {getResponseCode:()=>claims?200:400,getContentText:()=>JSON.stringify(claims)};}},
+  LockService:{getScriptLock:()=>({waitLock(){},releaseLock(){}})},
+  ContentService:{MimeType:{JSON:'json'},createTextOutput:text=>({setMimeType(){return this;},text})}};
+ vm.createContext(ctx);vm.runInContext(read('backend/apps-script/Code.gs'),ctx);
+ ctx.post=body=>JSON.parse(ctx.doPost({postData:{contents:JSON.stringify(body)}}).text);ctx.tabs=tabs;return ctx;
+}
+const future=Math.floor(Date.UTC(2030,0,1)/1000);
+const claimsFor=t=>({dad:{aud:'client-1.apps.googleusercontent.com',iss:'https://accounts.google.com',email:'dad@example.com',email_verified:'true',exp:String(future)},
+ kid:{aud:'client-1.apps.googleusercontent.com',iss:'accounts.google.com',email:'porjai@example.com',email_verified:true,exp:future},
+ stranger:{aud:'client-1.apps.googleusercontent.com',iss:'accounts.google.com',email:'x@example.com',email_verified:'true',exp:String(future)},
+ otherapp:{aud:'other',iss:'accounts.google.com',email:'dad@example.com',email_verified:'true',exp:String(future)},
+ expired:{aud:'client-1.apps.googleusercontent.com',iss:'accounts.google.com',email:'dad@example.com',email_verified:'true',exp:'1000'}}[(t.match(/^tok-([a-z]+)/)||[])[1]]||null);
+const gs=fakeAppsScript(claimsFor);
+for(const [tok,msg] of [['tok-stranger-0000000000','ยังไม่ได้รับอนุญาต'],['tok-otherapp-0000000000','ไม่ได้ออกให้เว็บนี้'],['tok-expired-00000000000','หมดอายุ'],['tok-garbage-xxxxxxxxxx','token ไม่ถูกต้อง'],['', 'เข้าสู่ระบบ']]){const r=gs.post({action:'sync',id_token:tok,state:{}});assert.equal(r.ok,false);assert.ok(r.error.includes(msg),r.error);}
+assert.equal(gs.tabs.size,0);
+assert.equal(gs.post({action:'whoami',id_token:'tok-kid-0000000000000'}).email,'porjai@example.com');
+// iPad: completes PART 01 and does a quiz
+stored.clear();const ipad=tracker();ipad.toggle('social-part01');ipad.addAttempt({id:'social-mock01',title:'Mock',score:3,total:5,answers:[]});ipad.setExamDate('2027-02-08');
+let r1=gs.post({action:'sync',id_token:'tok-kid-0000000000000',state:ipad.syncPayload()});assert.equal(r1.ok,true);
+assert.equal(r1.state.attempts.length,1);assert.equal(r1.state.marks['social-part01'].done,true);assert.equal(r1.state.settings.examDate.value,'2027-02-08');
+// Same payload again does not duplicate rows
+gs.post({action:'sync',id_token:'tok-kid-0000000000000',state:ipad.syncPayload()});assert.equal(gs.tabs.get('attempts').rows.length,2);assert.equal(gs.tabs.get('marks').rows.length,3);
+// Dad's computer starts empty, pulls the iPad's work, then un-marks PART 01 later
+stored.clear();const pc=tracker();assert.equal(pc.has('social-part01'),false);
+let r2=gs.post({action:'sync',id_token:'tok-dad-00000000000000',state:pc.syncPayload()});pc.applyRemote(r2.state);
+assert.equal(pc.has('social-part01'),true);assert.equal(pc.has('social-mock01'),true);assert.equal(pc.examDate(),'2027-02-08');assert.equal(pc.attempts().length,1);
+{const t0=Date.now();while(Date.now()<=t0+1){}}pc.toggle('social-part01');assert.equal(pc.has('social-part01'),false);
+r2=gs.post({action:'sync',id_token:'tok-dad-00000000000000',state:pc.syncPayload()});assert.equal(r2.state.marks['social-part01'].done,false);
+// Older iPad mark loses to the newer un-mark; iPad picks up the change
+ipad.applyRemote(r2.state);assert.equal(ipad.has('social-part01'),false);
+assert.equal(gs.tabs.get('marks').rows.find(r=>r[0]==='social-part01')[3],'dad@example.com');
+assert.ok(gs.tabs.get('log').rows.length>=4);
+// Malformed payload pieces are dropped, not stored
+gs.post({action:'sync',id_token:'tok-dad-00000000000000',state:{marks:{'BAD ID':{done:true,at:'2026-01-01T00:00:00Z'},'x':{done:'yes',at:'2026'}},attempts:[{id:'a',title:'t',score:9,total:1,date:'2026-01-01T00:00:00Z'}],settings:{examDate:{value:'2027-02-30x',at:'2026-01-01T00:00:00Z'}}}});
+assert.equal(gs.tabs.get('attempts').rows.length,2);assert.ok(!gs.tabs.get('marks').rows.some(r=>r[0]==='BAD ID'));
+// Legacy progress without timestamps still uploads and stays done
+stored.set('satit-swu-hub:v1',JSON.stringify({version:1,completed:['social-part05'],attempts:[],examDate:null,resultDate:null}));
+const legacy=tracker();assert.equal(legacy.syncPayload().marks['social-part05'].done,true);
+legacy.applyRemote(gs.post({action:'sync',id_token:'tok-kid-0000000000000',state:legacy.syncPayload()}).state);assert.equal(legacy.has('social-part05'),true);assert.equal(legacy.has('social-mock01'),true);
+new vm.Script(read('js/sync.js'));
+const syncContext={window:{},document:{},atob:s=>Buffer.from(s,'base64').toString('binary')};vm.createContext(syncContext);vm.runInContext(read('js/sync.js'),syncContext);
+const fakeJwt='x.'+Buffer.from(JSON.stringify({email:'พอใจ@example.com',exp:1})).toString('base64url')+'.y';
+assert.equal(syncContext.window.MissionSync._decode(fakeJwt).email,'พอใจ@example.com');
+assert.deepEqual(config.sync&&Object.keys(config.sync).slice(0,2),['google_client_id','apps_script_url']);
+console.log('PASS: Google Sheet sync rejects unlisted/other-app/expired/invalid tokens, allows listed accounts, merges two devices (newest mark wins, attempts union without duplicates, dates), drops malformed data, uploads legacy progress');

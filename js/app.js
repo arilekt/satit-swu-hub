@@ -12,9 +12,21 @@ function renderMarkdown(body){const box=element('article',undefined,'prose');box
 function updateSidebar(){
   if(!current)return;
   $('subjects').replaceChildren();
-  config.subjects.forEach(subject=>{const link=element('a',undefined,'subject'+(subject.id===current.subject.id?' active':''));link.href='#'+subject.id+'/'+Dashboard.subjectTarget(subject,Tracker).id;link.append(element('span',subject.icon+' '+subject.name),element('small',subject.steps.filter(s=>Tracker.has(s.id)).length+'/'+subject.steps.length));if(subject.id===current.subject.id)link.setAttribute('aria-current','true');$('subjects').append(link);});
+  config.subjects.forEach(subject=>{const link=element('a',undefined,'subject'+(subject.id===current.subject.id?' active':''));link.href='#'+subject.id+'/'+Dashboard.subjectTarget(subject,Tracker).id;link.append(element('span',subject.icon+' '+subject.name),element('small',Catalog.items(subject).filter(s=>Tracker.has(s.id)).length+'/'+Catalog.items(subject).length));if(subject.id===current.subject.id)link.setAttribute('aria-current','true');$('subjects').append(link);});
   $('lessons').replaceChildren();
-  [...current.subject.steps,...(current.subject.exams||[])].forEach(step=>{const done=Tracker.has(step.id),link=element('a',undefined,'lesson'+(step.id===current.step.id?' active':''));link.href='#'+current.subject.id+'/'+step.id;const circle=element('span',done?'✓':'','circle'+(done?' done':''));circle.setAttribute('aria-hidden','true');link.append(circle,element('span',step.title+(done?' · จบแล้ว':'')));if(step.id===current.step.id)link.setAttribute('aria-current','page');$('lessons').append(link);});
+  const link=(step,label,cls)=>{const done=Tracker.has(step.id),a=element('a',undefined,cls+(step.id===current.step.id?' active':'')+(step.file?'':' pending'));a.href='#'+current.subject.id+'/'+step.id;const circle=element('span',done?'✓':'','circle'+(done?' done':''));circle.setAttribute('aria-hidden','true');a.append(circle,label);if(done)a.append(element('small','จบแล้ว','done-tag'));else if(!step.file)a.append(element('small','รอเนื้อหา','pending-tag'));if(step.id===current.step.id)a.setAttribute('aria-current','page');return a;};
+  const extras=[];
+  current.subject.steps.forEach(step=>{
+   if(step.type!=='lesson'){extras.push(step);return;}
+   const group=element('div',undefined,'part-group');
+   const label=element('span',undefined,'part-label');label.append(element('strong',step.title));
+   const chapter=element('span',step.chapter_title||'รอชื่อบทจาก PDF','part-chapter'+(step.chapter_title?'':' muted'));if(step.chapter_title&&step.chapter_status!=='confirmed')chapter.append(element('em',' · รอยืนยัน'));label.append(chapter);
+   group.append(link(step,label,'lesson part'));
+   if(step.quiz)group.append(link(step.quiz,element('span','📝 สอบท้ายบท','quiz-label'),'lesson quiz-link'));
+   $('lessons').append(group);
+  });
+  const more=[...extras,...(current.subject.exams||[])];
+  if(more.length){$('lessons').append(element('div','สนามซ้อมรวม','lesson-subheading'));more.forEach(step=>$('lessons').append(link(step,element('span',step.title),'lesson')));}
 }
 function update(){
  if(!config)return;
@@ -33,6 +45,17 @@ function video(url){
  else{const link=element('a','เปิดวิดีโอประกอบบทเรียน ↗');link.href=u.href;link.target='_blank';link.rel='noopener noreferrer';box.append(link);}
  return {box};
 }
+const MATCH_LABELS={confirmed:'ยืนยันแล้ว',partial:'ยืนยันบางส่วน',unconfirmed:'ยังไม่ยืนยัน'};
+const ANALYSIS_LABELS={'pdf-verified':'สรุปจาก PDF ตรวจแล้ว','pdf-draft':'สรุปจาก PDF รอผู้ใหญ่ตรวจ','sample-unverified':'ตัวอย่างเดิม ยังไม่ได้ตรวจกับ PDF/วิดีโอ',pending:'รอวิเคราะห์จาก PDF'};
+function analysisBadge(status){const key=ANALYSIS_LABELS[status]?status:'pending';return element('span',ANALYSIS_LABELS[key],'badge analysis-'+key);}
+function videoMatch(match){
+ if(!match||typeof match!=='object')return null;
+ const status=MATCH_LABELS[match.status]?match.status:'unconfirmed',box=element('details',undefined,'video-match match-'+status);
+ box.append(element('summary','การจับคู่วิดีโอกับบทเรียน: '+MATCH_LABELS[status]));
+ if(typeof match.evidence==='string'&&match.evidence)box.append(element('p','หลักฐาน: '+match.evidence));
+ if(typeof match.unconfirmed==='string'&&match.unconfirmed)box.append(element('p','ยังไม่ยืนยัน: '+match.unconfirmed));
+ return box;
+}
 function show(kind){
  page=kind;
  for(const id of ['dashboard','lesson','parent'])$(id+'-page').hidden=id!==kind;
@@ -47,21 +70,26 @@ async function route(){
  if(subjectId==='parent'){show('parent');update();return;}
  const subject=subjectId==='learn'?(current?.subject||config.subjects[0]):config.subjects.find(s=>s.id===subjectId);
  if(!subject){show('dashboard');update();notify('ไม่พบหน้านี้ กลับบ้านของพอใจก่อนนะ');return;}
- const step=[...subject.steps,...(subject.exams||[])].find(s=>s.id===stepId)||(subjectId==='learn'&&current?current.step:Dashboard.subjectTarget(subject,Tracker));
+ const step=[...Catalog.items(subject),...(subject.exams||[])].find(s=>s.id===stepId)||(subjectId==='learn'&&current?current.step:Dashboard.subjectTarget(subject,Tracker));
  current={subject,step};show('lesson');update();
  const main=$('lesson-content');main.replaceChildren(element('p','กำลังเปิดภารกิจ…'));
  try{
-  if(!step.file){main.replaceChildren(element('span',subject.name,'tag'),element('h2',step.title,'title'),element('p','บทนี้กำลังเตรียมเนื้อหา ลองเลือกบทที่พร้อมก่อนนะ','notice'));return;}
+  const parent=Catalog.parentOf(subject,step.id);
+  if(!step.file){main.replaceChildren(element('span',subject.name+(parent?' / แบบทดสอบท้ายบท':''),'tag'),element('h2',step.title,'title'),element('p',parent?'แบบทดสอบ '+(step.questions||20)+' ข้อของ '+parent.title+' กำลังเตรียมจาก PDF เมื่อพร้อมจะขึ้นที่นี่เลย ระหว่างนี้กลับไปทบทวนบทเรียนก่อนนะ':'บทนี้กำลังเตรียมเนื้อหา ลองเลือกบทที่พร้อมก่อนนะ','notice'));if(parent){const back=element('a','← กลับไป '+parent.title,'secondary-link');back.href='#'+subject.id+'/'+parent.id;main.append(back);}return;}
   await ensureMarkdown();if(token!==request)return;
   const data=parse(await get(step.file));if(token!==request)return;
   if(data.meta.id!==step.id)throw Error('id ในบทเรียนไม่ตรงกับ config');
   if(step.type==='exam')QuizEngine.validate(data.meta.questions);
   if(data.meta.quick_quiz)QuizEngine.validate(data.meta.quick_quiz);
-  main.replaceChildren(element('span',subject.name+' / '+(step.type==='exam'?'สนามซ้อม':'MISSION '+String(subject.steps.indexOf(step)+1).padStart(2,'0')),'tag'),element('h2',data.meta.title,'title'),element('p','⏱ '+(data.meta.duration||'เรียนตามจังหวะของเรา'),'meta'));
-  if(step.type!=='exam'){const media=video(data.meta.video_url);main.append(media.box);if(media.link)main.append(media.link);}
+  const head=element('header',undefined,'lesson-head');head.append(element('span',subject.name+' / '+(step.type==='exam'?(parent?'แบบทดสอบท้ายบท · '+parent.title:'สนามซ้อม'):step.title),'tag'),element('h2',data.meta.title,'title'),element('p','⏱ '+(data.meta.duration||'เรียนตามจังหวะของเรา'),'meta'));
+  if(step.type!=='exam'){
+   const media=video(data.meta.video_url),stage=element('section',undefined,'video-stage');stage.append(media.box);if(media.link)stage.append(media.link);
+   main.replaceChildren(stage,head);const match=videoMatch(data.meta.video_match);if(match)main.append(match);
+   const heading=element('div',undefined,'analysis-heading');heading.append(element('h3','📖 สรุปเนื้อหาจากการวิเคราะห์'),analysisBadge(data.meta.analysis_status));main.append(heading);
+  }else main.replaceChildren(head);
   main.append(renderMarkdown(data.body));
   if(step.type==='exam'||data.meta.quick_quiz){const panel=element('section',undefined,'quiz-panel');panel.append(element('h3',step.type==='exam'?'สนามซ้อมข้อสอบ':'เช็กความเข้าใจเล็ก ๆ'));main.append(panel);QuizEngine.mount(panel,{id:step.id+(step.type==='exam'?'':':mini'),title:data.meta.title,time_limit_minutes:data.meta.time_limit_minutes||5},step.type==='exam'?data.meta.questions:data.meta.quick_quiz);}
-  if(step.type!=='exam'){const complete=element('button',undefined,'primary complete');complete.id='complete-button';complete.onclick=()=>{Tracker.toggle(step.id);notify(Tracker.has(step.id)?'สำเร็จอีกหนึ่งก้าวแล้วพอใจ! 🌱':'ยกเลิกสถานะเรียนจบแล้ว');};main.append(complete);update();}
+  if(step.type!=='exam'){const complete=element('button',undefined,'primary complete');complete.id='complete-button';complete.onclick=()=>{Tracker.toggle(step.id);notify(Tracker.has(step.id)?'สำเร็จอีกหนึ่งก้าวแล้วพอใจ! 🌱':'ยกเลิกสถานะเรียนจบแล้ว');};main.append(complete);if(step.quiz){const next=element('a','ต่อด้วย 📝 แบบทดสอบท้ายบท '+(step.quiz.questions||20)+' ข้อ →','next-quiz');next.href='#'+subject.id+'/'+step.quiz.id;main.append(next);}update();}
  }catch(error){if(token!==request)return;main.replaceChildren(element('h2','ยังเปิดภารกิจไม่ได้'),element('p',error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;main.append(retry);}
 }
 function parentRefresh(){update();notify('บันทึกกิจกรรมบนเครื่องนี้แล้ว');}
@@ -107,7 +135,7 @@ async function init(){
  try{
  config=await get('./data/config.json',true);if(!Array.isArray(config.subjects)||!config.subjects.length)throw Error('config ไม่ถูกต้อง');
  let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
- ParentTools.init(activities);await route();setInterval(update,60000);
+ ParentTools.init(activities);if(window.MissionSync)MissionSync.init(config);await route();setInterval(update,60000);
  }catch(error){$('daily-mission').replaceChildren(element('p','เริ่มต้นเว็บไม่ได้: '+error.message,'notice'));notify(error.message);}
 }
 init();

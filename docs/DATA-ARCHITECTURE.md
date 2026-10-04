@@ -12,7 +12,7 @@ GitHub Pages is a [static hosting service](https://docs.github.com/en/pages/gett
 | Lessons and exams | Markdown files in data | After deployment |
 | Shared activities | data/activities.json | After deployment |
 | Parent's activity edits | LocalStorage, separate activities key | Export JSON, update shared file and deploy; or import on another browser |
-| Progress, attempts, personal dates | LocalStorage, original v1 key | Export backup, transfer file and explicitly restore |
+| Progress, attempts, personal dates | LocalStorage, original v1 key; Google Sheet via Apps Script when signed in | Automatically after sync on a signed-in device; otherwise export/restore |
 | Original PDF/images, AI drafts/reports | local/ on owner's computer (ignored) | Never published by the app |
 | API key | Local terminal environment | Never in browser or Git |
 | Version/build | Stamped HTML + data/build.json | After deployment |
@@ -25,7 +25,7 @@ One child, one primary iPad, 53 content and exam steps and small quiz histories 
 
 IndexedDB or SQLite in the browser would still store data on that browser. It would not by itself enable cross-device sync or write back to GitHub. Larger local data could justify IndexedDB later; the current workload does not require it.
 
-If automatic parent/iPad sync becomes required, add an external backend with authentication and access rules. Keep private progress in that backend rather than committing it to the public repository. No backend provider or account is configured in this release.
+Automatic parent/iPad sync uses Google Sign-In and an Apps Script web app bound to the parent's Google Sheet (v0.3.1). The backend verifies each ID token's audience, expiry and an email allowlist. Completion marks carry timestamps (newest wins) and attempts are a union, so two devices merge without overwriting each other. Setup: [GOOGLE-SHEET-SYNC.md](GOOGLE-SHEET-SYNC.md). Private progress stays in the Sheet, never in the public repository.
 
 ## Publishing parent changes
 

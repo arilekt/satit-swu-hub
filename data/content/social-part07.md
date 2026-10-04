@@ -3,7 +3,11 @@ id: social-part07
 title: "PART 07 · สังคมศึกษา"
 duration: "เรียนครั้งละประมาณ 20 นาที"
 video_url: "https://www.youtube.com/watch?v=jDN12vdh84w"
-content_status: "video-ready-summary-pending"
+video_match:
+  status: "unconfirmed"
+  evidence: "รหัสคลิปมาจากรายการที่คุณพ่อส่ง เรียงตามลำดับ PART"
+  unconfirmed: "ยังดึงชื่อคลิปมาตรวจแบบตรงตัวไม่ได้ และยังไม่ได้เทียบเนื้อหากับ PDF"
+analysis_status: "pending"
 ---
 
 ## ภารกิจวิดีโอ PART 07 📺

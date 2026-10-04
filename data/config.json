@@ -9,94 +9,224 @@
       "steps": [
         {
           "id": "social-part01",
-          "title": "PART 01 · พุทธศาสนา",
+          "title": "PART 01",
           "file": "./data/content/social-part01.md",
           "type": "lesson",
-          "study_minutes": 15
+          "study_minutes": 15,
+          "chapter_title": "พุทธศาสนา",
+          "chapter_status": "sample-unverified",
+          "quiz": {
+            "id": "social-part01-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 01",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part02",
-          "title": "PART 02 · หน้าที่พลเมือง",
+          "title": "PART 02",
           "file": "./data/content/social-part02.md",
           "type": "lesson",
-          "study_minutes": 12
+          "study_minutes": 12,
+          "chapter_title": "หน้าที่พลเมือง",
+          "chapter_status": "sample-unverified",
+          "quiz": {
+            "id": "social-part02-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 02",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part03",
           "title": "PART 03",
           "file": "./data/content/social-part03.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part03-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 03",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part04",
           "title": "PART 04",
           "file": "./data/content/social-part04.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part04-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 04",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part05",
           "title": "PART 05",
           "file": "./data/content/social-part05.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part05-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 05",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part06",
           "title": "PART 06",
           "file": "./data/content/social-part06.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part06-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 06",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part07",
           "title": "PART 07",
           "file": "./data/content/social-part07.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part07-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 07",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part08",
           "title": "PART 08",
           "file": "./data/content/social-part08.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part08-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 08",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part09",
           "title": "PART 09",
           "file": "./data/content/social-part09.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part09-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 09",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part10",
           "title": "PART 10",
           "file": "./data/content/social-part10.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part10-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 10",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part11",
           "title": "PART 11",
           "file": "./data/content/social-part11.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part11-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 11",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part12",
           "title": "PART 12",
           "file": "./data/content/social-part12.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part12-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 12",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-part13",
           "title": "PART 13",
           "file": "./data/content/social-part13.md",
           "type": "lesson",
-          "study_minutes": 20
+          "study_minutes": 20,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "social-part13-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 13",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "social-mock01",
@@ -118,77 +248,187 @@
           "title": "PART 01",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part01-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 01",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part02",
           "title": "PART 02",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 62
+          "source_duration_minutes": 62,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part02-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 02",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part03",
           "title": "PART 03",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part03-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 03",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part04",
           "title": "PART 04",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part04-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 04",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part05",
           "title": "PART 05",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part05-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 05",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part06",
           "title": "PART 06",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 64
+          "source_duration_minutes": 64,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part06-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 06",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part07",
           "title": "PART 07",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part07-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 07",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part08",
           "title": "PART 08",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part08-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 08",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part09",
           "title": "PART 09",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 63
+          "source_duration_minutes": 63,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part09-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 09",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part10",
           "title": "PART 10",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part10-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 10",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "english-part11",
           "title": "PART 11",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 63
+          "source_duration_minutes": 63,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "english-part11-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 11",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         }
       ],
       "exams": []
@@ -203,49 +443,119 @@
           "title": "PART 01",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 104
+          "source_duration_minutes": 104,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "science-part01-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 01",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "science-part02",
           "title": "PART 02",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 139
+          "source_duration_minutes": 139,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "science-part02-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 02",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "science-part03",
           "title": "PART 03",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 178
+          "source_duration_minutes": 178,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "science-part03-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 03",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "science-part04",
           "title": "PART 04",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 78
+          "source_duration_minutes": 78,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "science-part04-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 04",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "science-part05",
           "title": "PART 05",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 104
+          "source_duration_minutes": 104,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "science-part05-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 05",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "science-part06",
           "title": "PART 06",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 83
+          "source_duration_minutes": 83,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "science-part06-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 06",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "science-part07",
           "title": "PART 07",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 43
+          "source_duration_minutes": 43,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "science-part07-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 07",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         }
       ],
       "exams": []
@@ -260,63 +570,153 @@
           "title": "PART 01",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part01-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 01",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part02",
           "title": "PART 02",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part02-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 02",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part03",
           "title": "PART 03",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 62
+          "source_duration_minutes": 62,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part03-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 03",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part04",
           "title": "PART 04",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part04-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 04",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part05",
           "title": "PART 05",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part05-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 05",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part06",
           "title": "PART 06",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part06-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 06",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part07",
           "title": "PART 07",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part07-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 07",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part08",
           "title": "PART 08",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part08-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 08",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "thai-part09",
           "title": "PART 09",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 62
+          "source_duration_minutes": 62,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "thai-part09-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 09",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         }
       ],
       "exams": []
@@ -331,84 +731,204 @@
           "title": "PART 01",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 62
+          "source_duration_minutes": 62,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part01-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 01",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part02",
           "title": "PART 02",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part02-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 02",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part03",
           "title": "PART 03",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 63
+          "source_duration_minutes": 63,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part03-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 03",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part04",
           "title": "PART 04",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 63
+          "source_duration_minutes": 63,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part04-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 04",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part05",
           "title": "PART 05",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 63
+          "source_duration_minutes": 63,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part05-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 05",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part06",
           "title": "PART 06",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part06-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 06",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part07",
           "title": "PART 07",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 63
+          "source_duration_minutes": 63,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part07-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 07",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part08",
           "title": "PART 08",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part08-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 08",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part09",
           "title": "PART 09",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 60
+          "source_duration_minutes": 60,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part09-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 09",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part10",
           "title": "PART 10",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 62
+          "source_duration_minutes": 62,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part10-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 10",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part11",
           "title": "PART 11",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 63
+          "source_duration_minutes": 63,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part11-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 11",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         },
         {
           "id": "math-part12",
           "title": "PART 12",
           "file": null,
           "type": "lesson",
-          "source_duration_minutes": 61
+          "source_duration_minutes": 61,
+          "chapter_title": null,
+          "chapter_status": "pending",
+          "quiz": {
+            "id": "math-part12-quiz",
+            "title": "แบบทดสอบท้ายบท · PART 12",
+            "file": null,
+            "type": "exam",
+            "questions": 20,
+            "study_minutes": 20
+          }
         }
       ],
       "exams": []
@@ -444,5 +964,10 @@
   "daily_plan": {
     "session_minutes": 20,
     "break_minutes": 5
+  },
+  "sync": {
+    "google_client_id": "",
+    "apps_script_url": "",
+    "note": "ค่าสาธารณะ ไม่ใช่รหัสลับ ใส่หลังทำตาม docs/GOOGLE-SHEET-SYNC.md เว้นว่างไว้ = เก็บผลเรียนเฉพาะเครื่อง"
   }
 }
