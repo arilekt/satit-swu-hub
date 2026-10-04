@@ -586,162 +586,162 @@
         {
           "id": "thai-part01",
           "title": "PART 01",
-          "file": null,
+          "file": "./data/content/thai-part01.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "เสียงในภาษาไทย: พยัญชนะ สระ และวรรณยุกต์",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part01-quiz",
             "title": "แบบทดสอบท้ายบท · PART 01",
-            "file": null,
+            "file": "./data/exams/thai-part01-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=0TEABurBjnA"
         },
         {
           "id": "thai-part02",
           "title": "PART 02",
-          "file": null,
+          "file": "./data/content/thai-part02.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "พยางค์ ความหมายของคำ และการสร้างคำ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part02-quiz",
             "title": "แบบทดสอบท้ายบท · PART 02",
-            "file": null,
+            "file": "./data/exams/thai-part02-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=6gIQfmF1kcg"
         },
         {
           "id": "thai-part03",
           "title": "PART 03",
-          "file": null,
+          "file": "./data/content/thai-part03.md",
           "type": "lesson",
           "source_duration_minutes": 62,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "คำสมาส คำสนธิ และคำยืมภาษาต่างประเทศ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part03-quiz",
             "title": "แบบทดสอบท้ายบท · PART 03",
-            "file": null,
+            "file": "./data/exams/thai-part03-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=QkgaYSEzJUs"
         },
         {
           "id": "thai-part04",
           "title": "PART 04",
-          "file": null,
+          "file": "./data/content/thai-part04.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "คำราชาศัพท์ การใช้ภาษาและระดับภาษา",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part04-quiz",
             "title": "แบบทดสอบท้ายบท · PART 04",
-            "file": null,
+            "file": "./data/exams/thai-part04-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=L3hkD6FuuUI"
         },
         {
           "id": "thai-part05",
           "title": "PART 05",
-          "file": null,
+          "file": "./data/content/thai-part05.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "โวหาร ภาพพจน์ และการเขียน",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part05-quiz",
             "title": "แบบทดสอบท้ายบท · PART 05",
-            "file": null,
+            "file": "./data/exams/thai-part05-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=2K2XkLayjzA"
         },
         {
           "id": "thai-part06",
           "title": "PART 06",
-          "file": null,
+          "file": "./data/content/thai-part06.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "สำนวน พจนานุกรม เครื่องหมายวรรคตอน และการอ่านออกเสียง",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part06-quiz",
             "title": "แบบทดสอบท้ายบท · PART 06",
-            "file": null,
+            "file": "./data/exams/thai-part06-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=9y1hb_UyJRw"
         },
         {
           "id": "thai-part07",
           "title": "PART 07",
-          "file": null,
+          "file": "./data/content/thai-part07.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ทักษะการอ่าน วรรณศิลป์ และบทร้อยกรอง",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part07-quiz",
             "title": "แบบทดสอบท้ายบท · PART 07",
-            "file": null,
+            "file": "./data/exams/thai-part07-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=U_TnSHSypMc"
         },
         {
           "id": "thai-part08",
           "title": "PART 08",
-          "file": null,
+          "file": "./data/content/thai-part08.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ชนิดของคำในภาษาไทย",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part08-quiz",
             "title": "แบบทดสอบท้ายบท · PART 08",
-            "file": null,
+            "file": "./data/exams/thai-part08-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=bR5dQDd3yNE"
         },
         {
           "id": "thai-part09",
           "title": "PART 09",
-          "file": null,
+          "file": "./data/content/thai-part09.md",
           "type": "lesson",
           "source_duration_minutes": 62,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "กลุ่มคำ (วลี) และประโยคในภาษาไทย",
+          "chapter_status": "completed",
           "quiz": {
             "id": "thai-part09-quiz",
             "title": "แบบทดสอบท้ายบท · PART 09",
-            "file": null,
+            "file": "./data/exams/thai-part09-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=UsAyobUIoQE"
         }
