@@ -264,6 +264,9 @@ progress::-moz-progress-bar{background:var(--red)}
 .prose pre{background:var(--surface-2);padding:12px;overflow:auto;border-radius:10px}
 .prose img{height:auto}
 .prose hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.math-inline{display:inline;font-style:italic}
+.prose .math-inline{display:inline-flex;align-items:center;margin:0 2px}
+.prose .math-inline .katex{margin:0}
 .complete{width:100%;margin-top:16px;background:var(--green)}
 .complete:hover{background:#21603f}
 .next-quiz,.secondary-link{display:inline-flex;align-items:center;min-height:48px;margin-top:8px;font-weight:600;font-size:var(--fs-sm)}
