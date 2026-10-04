@@ -226,7 +226,7 @@ V2 มี 2 แบบ
 | is speak / is spoke | Passive ต้องเป็น be + V3 → is spoken |
 | The letters was written | be ต้องตรงกับประธานใหม่ → were written |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - Present Simple = นิสัย/ความจริง (V1 + s/es) / Present Continuous = กำลังทำ (be + V-ing)
 - Present Perfect = have/has + V3 ใช้กับ for, since, ever, never, already, yet

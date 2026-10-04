@@ -226,7 +226,7 @@ analysis_status: "pdf-verified"
 | a quarter past vs a quarter to | เลยมา 15 นาที vs อีก 15 นาทีจะถึง |
 | Do you know where is it? | ผิด! ต้องเป็น Do you know where it is? |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - ข้อสอบ 60 ข้อ: Conversation 1–14, Grammar 15–55, Reading 56–60
 - บทสนทนาต้อง "เข้าคู่": ขอบคุณ → You're welcome, ขอโทษ → That's all right / Never mind

@@ -145,7 +145,7 @@ purpose = aim = objective = target (เป้าหมาย / จุดปร�
 | คำอ้างอิง they | ดูนามพหูพจน์ที่อยู่ข้างหน้าใกล้ที่สุด |
 | purpose / aim / objective / target | ความหมายเดียวกัน = จุดประสงค์ |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - ข้อสอบอ่าน 2 แบบ: Document (ป้าย ประกาศ ตาราง) และ Long Passage (บทความ เรื่องเล่า)
 - purpose = aim = objective = target; summarize/conclude = สรุป, infer/assume = อนุมาน/สันนิษฐาน
