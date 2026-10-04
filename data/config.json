@@ -963,7 +963,11 @@
   },
   "daily_plan": {
     "session_minutes": 20,
-    "break_minutes": 5
+    "break_minutes": 5,
+    "start_date": "2026-10-05",
+    "rest_weekdays": [0],
+    "items_per_day": 1,
+    "note": "แผนเริ่ม start_date วิชาผลัดกัน คณิต→วิทย์→ไทย→สังคม→อังกฤษ วันละ items_per_day รายการ rest_weekdays = วันพัก (0 = อาทิตย์)"
   },
   "sync": {
     "google_client_id": "31265253349-l240qupng3th9ob1obp66flb9ht4gmr3.apps.googleusercontent.com",
