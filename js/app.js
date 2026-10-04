@@ -138,7 +138,21 @@ $('history-button').onclick=()=>{
  const attempts=Tracker.attempts().reverse();if(!attempts.length)list.append(element('p','ยังไม่มีประวัติข้อสอบ','muted'));
  for(const attempt of attempts){const row=element('div',undefined,'answer');row.append(element('strong',attempt.title+' · '+attempt.score+'/'+attempt.total),element('p',new Date(attempt.date).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})));list.append(row);}
 };
+// Study plan: data/config.json is the default; the plan tabs in Google Sheet override it after sync.
+const PLAN_KEY='satit-swu-hub:plan';let defaultPlan=null;
+function applyPlan(remote,save){
+ if(!remote||typeof remote!=='object'||Array.isArray(remote))return false;
+ const allowed=['start_date','items_per_day','session_minutes','rest_weekdays','periods','recurring_events'],next={...defaultPlan,source:'sheet'};
+ for(const key of allowed)if(remote[key]!==undefined)next[key]=remote[key];
+ if(next.periods&&!Array.isArray(next.periods))return false;
+ config.daily_plan=next;
+ if(save)try{localStorage.setItem(PLAN_KEY,JSON.stringify(remote));}catch(_){/* keep in memory */}
+ return true;
+}
+window.addEventListener('plan-remote',e=>{if(config&&applyPlan(e.detail,true))update();});
 async function start(){
+ defaultPlan={...config.daily_plan,source:'default'};config.daily_plan=defaultPlan;
+ try{const cached=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');if(cached)applyPlan(cached,false);}catch(_){/* use default */}
  let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
  ParentTools.init(activities);await route();setInterval(update,60000);
 }

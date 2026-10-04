@@ -88,7 +88,7 @@ function render(config,activities,tracker,groups){
   for(const p of config.daily_plan.periods||[])if(p.from.slice(0,7)<=month&&month<=p.to.slice(0,7))legend.append(node('span','ช่วง'+p.name+' '+Countdown.label(p.from)+' – '+Countdown.label(p.to)+' · วันละ '+(p.slots||[]).length+' ช่วง'+(p.weekday_slots?' (จ./พ./ศ. 1 ช่วง)':''),'period-note'));
   const planDays=Object.keys(plan).sort(),lastDay=planDays[planDays.length-1];
   if(config.daily_plan.finish_before==='pretest'&&lastDay)legend.append(node('span',lastDay<regular.pretest_date?'✅ เรียนครบทุกบทตามแผน '+Countdown.label(lastDay)+' ก่อน Pre-Test':'⚠️ แผนยังจบหลัง Pre-Test ('+Countdown.label(lastDay)+')',lastDay<regular.pretest_date?'period-note ok':'period-note'));
-  legend.append(node('span','ร่างแผนรอคุณพ่อยืนยัน'));legend.append(node('span','✓ = ทำภารกิจแล้ว'),node('span','กรอบเส้นประ = บทที่ยังรอเนื้อหา'),node('span','แผนคงที่ ไม่เลื่อนตามการติ๊กเรียนจบ'));box.append(legend);
+  legend.append(node('span',config.daily_plan.source==='sheet'?'📄 แผนจาก Google Sheet (แท็บ plan_*)':'แผนตั้งต้นจากเว็บ · แก้ได้ที่ Google Sheet แท็บ plan_*'));legend.append(node('span','✓ = ทำภารกิจแล้ว'),node('span','กรอบเส้นประ = บทที่ยังรอเนื้อหา'),node('span','แผนคงที่ ไม่เลื่อนตามการติ๊กเรียนจบ'));box.append(legend);
 }
 function shift(n){if(!month)return;const [y,m]=month.split('-').map(Number),d=new Date(Date.UTC(y,m-1+n,1));month=d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1);if(last)render(...last);}
 document.getElementById('plan-prev')?.addEventListener('click',()=>shift(-1));

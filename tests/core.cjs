@@ -238,3 +238,25 @@ const fakeJwt='x.'+Buffer.from(JSON.stringify({email:'พอใจ@example.com',
 assert.equal(syncContext.window.MissionSync._decode(fakeJwt).email,'พอใจ@example.com');
 assert.deepEqual(config.sync&&Object.keys(config.sync).slice(0,2),['google_client_id','apps_script_url']);
 console.log('PASS: Google Sheet sync rejects unlisted/other-app/expired/invalid tokens, allows listed accounts, merges two devices (newest mark wins, attempts union without duplicates, dates), drops malformed data, uploads legacy progress');
+
+/* Study plan: fixed schedule from config, Sheet plan tabs seeded to match it, parser rejects bad rows. */
+{
+ const planContext={window:{Catalog},document:{getElementById:()=>null},Countdown:countdown};vm.createContext(planContext);vm.runInContext(read('js/plan.js'),planContext);
+ const plan=planContext.window.StudyPlan,days=plan.schedule(config),dates=Object.keys(days).sort();
+ const total=config.subjects.reduce((n,s)=>n+Catalog.items(s).length,0);
+ assert.equal(dates.reduce((n,d)=>n+days[d].length,0),total);
+ assert.ok(dates[dates.length-1]<config.admissions.programs.find(p=>p.id==='regular').pretest_date,'plan must end before Pre-Test');
+ for(const d of dates){const day=new Date(d+'T00:00:00Z').getUTCDay();assert.notEqual(day,0,'no study on Sunday');
+  if(d>='2026-11-01'&&[1,3,5].includes(day))assert.ok(days[d].length<=1&&days[d].every(x=>x.slot.time<'19:00'),'one slot before the English class');}
+ const sheetBackend=fakeAppsScript(claimsFor);sheetBackend.post({action:'login',id_token:'tok-dad-0000000000000'});
+ for(const name of ['plan_settings','plan_periods','plan_classes'])assert.ok(sheetBackend.tabs.get(name).rows.length>1,name+' seeded');
+ const remote=sheetBackend.post({action:'sync',id_token:'tok-dad-0000000000000',state:{marks:{},attempts:[],settings:{}}}).plan;
+ assert.equal(remote.start_date,config.daily_plan.start_date);
+ assert.deepEqual(JSON.parse(JSON.stringify(remote.recurring_events)),config.daily_plan.recurring_events);
+ const fromSheet=plan.schedule({...config,daily_plan:{...config.daily_plan,...remote}});
+ assert.deepEqual(Object.keys(fromSheet).map(d=>d+':'+fromSheet[d].map(x=>x.step.id+'@'+x.slot.time).join(',')),dates.map(d=>d+':'+days[d].map(x=>x.step.id+'@'+x.slot.time).join(',')));
+ assert.equal(sheetBackend.parsePlan([['start_date','2026-13-40'],['items_per_day','99']],[['x','2026-11-02','2026-11-01','09:00 a']],[['c','zz','19:00']]),null);
+ // ticking lessons done never moves the plan
+ assert.deepEqual(Object.keys(plan.schedule(config)),dates);
+ console.log('PASS: study plan covers all '+total+' items before Pre-Test, no Sunday study, Mon/Wed/Fri slot before English class, Sheet plan tabs seeded and parsed to the same schedule, bad rows ignored');
+}

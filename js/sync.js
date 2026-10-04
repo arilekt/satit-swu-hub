@@ -111,6 +111,7 @@
     try {
       const data = await call('sync', {state: Tracker.syncPayload()});
       Tracker.applyRemote(data.state);
+      if (data.plan && typeof data.plan === 'object') window.dispatchEvent(new CustomEvent('plan-remote', {detail: data.plan}));
       email = data.email || email; lastSync = new Date(); lastError = '';
     } catch (error) { lastError = error.message; }
     finally { busy = false; render(); }

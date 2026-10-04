@@ -1,5 +1,5 @@
 /**
- * Satit SWU Mission Hub sync backend (Google Apps Script bound to one Google Sheet).
+ * SPSM เส้นทางสู่ ม.1 sync backend (Google Apps Script bound to one Google Sheet).
  *
  * Every request carries a Google ID token from the website's Sign-In button. The token is
  * verified with Google, its audience must equal GOOGLE_CLIENT_ID and its email must be in
@@ -14,8 +14,31 @@ var SHEETS = {
   marks: ['step_id', 'done', 'updated_at', 'email'],
   attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json', 'email'],
   settings: ['key', 'value', 'updated_at', 'email'],
-  log: ['time', 'email', 'action', 'detail']
+  log: ['time', 'email', 'action', 'detail'],
+  plan_settings: ['key', 'value', 'คำอธิบาย'],
+  plan_periods: ['name', 'from', 'to', 'slots', 'weekday_slots', 'session_minutes', 'rest_days', 'review_label'],
+  plan_classes: ['title', 'days', 'time']
 };
+/* Study plan tabs are edited by hand in the Sheet. They start with these rows; the website's
+   data/config.json daily_plan stays the fallback when a tab is empty or a row is invalid. */
+var PLAN_SEED = {
+  plan_settings: [
+    ['start_date', "'2026-10-05", 'วันเริ่มแผน (ปี ค.ศ. yyyy-mm-dd)'],
+    ['items_per_day', 1, 'จำนวนรายการต่อวัน นอกช่วงใน plan_periods'],
+    ['session_minutes', 20, 'นาทีต่อช่วง นอกช่วงใน plan_periods'],
+    ['rest_days', 'อา', 'วันพัก เช่น อา หรือ ส,อา']
+  ],
+  plan_periods: [
+    ['ปิดเทอม', "'2026-10-05", "'2026-10-31", "'09:00 เช้า, 10:30 สาย, 13:30 บ่าย, 16:00 เย็น", '', 25, 'อา', ''],
+    ['เปิดเทอม ก่อน Pre-Test', "'2026-11-01", "'2026-11-28", "'17:00 หลังเลิกเรียน, 17:45 รอบ 2", "'จ,พ,ศ = 17:00 หลังเลิกเรียน", 25, 'อา', 'ทบทวนบทที่ยังไม่มั่นใจ / ทำข้อสอบท้ายบทซ้ำ']
+  ],
+  plan_classes: [
+    ['เรียนอังกฤษออนไลน์', 'จ', "'19:30"],
+    ['เรียนอังกฤษออนไลน์', 'พ', "'19:00"],
+    ['เรียนอังกฤษออนไลน์', 'ศ', "'19:30"]
+  ]
+};
+var DAY_CODES = {'อา': 0, 'จ': 1, 'อ': 2, 'พ': 3, 'พฤ': 4, 'ศ': 5, 'ส': 6};
 var SETTING_KEYS = ['examDate', 'resultDate'];
 var MAX_ATTEMPTS_RETURNED = 100;
 
@@ -23,7 +46,11 @@ var MAX_ATTEMPTS_RETURNED = 100;
 
 function attemptKey(a) { return a.id + '|' + a.date; }
 
-function validDate(value) { return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value); }
+function validDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  var d = new Date(value + 'T00:00:00Z');
+  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
 
 function validTime(value) { return typeof value === 'string' && !isNaN(new Date(value).getTime()); }
 
@@ -79,6 +106,60 @@ function responseState(merged) {
   return {marks: merged.marks, attempts: merged.attempts.slice(-MAX_ATTEMPTS_RETURNED), settings: merged.settings, synced_at: new Date().toISOString()};
 }
 
+function parseDays(value) {
+  var out = [];
+  String(value || '').split(/[,\s]+/).forEach(function (code) {
+    code = code.replace(/\./g, '');
+    if (DAY_CODES.hasOwnProperty(code) && out.indexOf(DAY_CODES[code]) < 0) out.push(DAY_CODES[code]);
+  });
+  return out;
+}
+
+/** "09:00 เช้า, 10:30 สาย" → [{time, name}] */
+function parseSlots(value) {
+  var out = [];
+  String(value || '').split(',').forEach(function (part) {
+    var m = part.trim().match(/^(\d{1,2})[:.](\d{2})\s*(.*)$/);
+    if (m && Number(m[1]) < 24 && Number(m[2]) < 60) out.push({time: ('0' + m[1]).slice(-2) + ':' + m[2], name: m[3].trim().slice(0, 40)});
+  });
+  return out.slice(0, 6);
+}
+
+/** Turn the three plan tabs (rows already as text) into a daily_plan object, or null if nothing usable. */
+function parsePlan(settingRows, periodRows, classRows) {
+  var plan = {}, any = false;
+  settingRows.forEach(function (r) {
+    var key = String(r[0] || '').trim(), value = String(r[1] === undefined ? '' : r[1]).trim();
+    if (key === 'start_date' && validDate(value)) { plan.start_date = value; any = true; }
+    if (key === 'items_per_day' && Number(value) >= 1 && Number(value) <= 6) { plan.items_per_day = Math.floor(Number(value)); any = true; }
+    if (key === 'session_minutes' && Number(value) >= 5 && Number(value) <= 60) { plan.session_minutes = Math.floor(Number(value)); any = true; }
+    if (key === 'rest_days') { plan.rest_weekdays = parseDays(value); any = true; }
+  });
+  var periods = [];
+  periodRows.forEach(function (r) {
+    var from = String(r[1] || '').trim(), to = String(r[2] || '').trim(), slots = parseSlots(r[3]);
+    if (!validDate(from) || !validDate(to) || from > to || !slots.length) return;
+    var period = {name: String(r[0] || '').trim().slice(0, 60), from: from, to: to, slots: slots, rest_weekdays: parseDays(r[6])};
+    var special = {};
+    String(r[4] || '').split(';').forEach(function (group) {
+      var bits = group.split('='), days = parseDays(bits[0]), daySlots = parseSlots(bits[1]);
+      if (days.length && daySlots.length) days.forEach(function (d) { special[String(d)] = daySlots; });
+    });
+    if (Object.keys(special).length) period.weekday_slots = special;
+    if (Number(r[5]) >= 5 && Number(r[5]) <= 60) period.session_minutes = Math.floor(Number(r[5]));
+    if (String(r[7] || '').trim()) period.review_label = String(r[7]).trim().slice(0, 120);
+    periods.push(period);
+  });
+  if (periods.length) { plan.periods = periods; any = true; }
+  var classes = [];
+  classRows.forEach(function (r) {
+    var days = parseDays(r[1]), slot = parseSlots(String(r[2] || '') + ' x');
+    if (String(r[0] || '').trim() && days.length) classes.push({title: String(r[0]).trim().slice(0, 80), weekdays: days, time: slot.length ? slot[0].time : ''});
+  });
+  if (classes.length) { plan.recurring_events = classes; any = true; }
+  return any ? plan : null;
+}
+
 function checkClaims(claims, clientId, allowed, nowSeconds) {
   if (!claims || claims.aud !== clientId) throw new Error('token ไม่ได้ออกให้เว็บนี้');
   if (['accounts.google.com', 'https://accounts.google.com'].indexOf(claims.iss) < 0) throw new Error('ผู้ออก token ไม่ถูกต้อง');
@@ -107,7 +188,7 @@ function doPost(e) {
       var result = mergeState(readState(), incoming);
       writeChanges(result.changed, incoming, email);
       appendLog(email, 'sync', result.changed.marks.length + ' marks, ' + result.changed.attempts.length + ' attempts, ' + result.changed.settings.length + ' settings');
-      return json({ok: true, email: email, state: responseState(result.merged)});
+      return json({ok: true, email: email, state: responseState(result.merged), plan: readPlan()});
     } finally { lock.releaseLock(); }
   } catch (error) {
     return json({ok: false, error: String(error && error.message || error)});
@@ -147,7 +228,10 @@ function verify(idToken) {
 function sheet(name) {
   var book = SpreadsheetApp.getActiveSpreadsheet();
   var tab = book.getSheetByName(name);
-  if (!tab) { tab = book.insertSheet(name); tab.appendRow(SHEETS[name]); tab.setFrozenRows(1); }
+  if (!tab) {
+    tab = book.insertSheet(name); tab.appendRow(SHEETS[name]); tab.setFrozenRows(1);
+    (PLAN_SEED[name] || []).forEach(function (row) { tab.appendRow(row); });
+  }
   return tab;
 }
 
@@ -192,6 +276,19 @@ function writeChanges(changed, incoming, email) {
     tab.getRange(tab.getLastRow() + 1, 1, values.length, values[0].length).setValues(values);
   }
   changed.settings.forEach(function (key) { upsert('settings', key, [key, incoming.settings[key].value ? text(incoming.settings[key].value) : '', text(incoming.settings[key].at), email]); });
+}
+
+/** Sheets may turn typed dates/times into Date objects; read them back as the text the parent typed. */
+function cellText(value, pattern) {
+  if (value instanceof Date) return Utilities.formatDate(value, Session.getScriptTimeZone(), pattern);
+  return String(value === null || value === undefined ? '' : value);
+}
+
+function readPlan() {
+  try {
+    var asText = function (name, patterns) { return rows(name).map(function (r) { return r.map(function (v, i) { return cellText(v, patterns[i] || 'yyyy-MM-dd'); }); }); };
+    return parsePlan(asText('plan_settings', []), asText('plan_periods', ['', 'yyyy-MM-dd', 'yyyy-MM-dd', 'HH:mm', 'HH:mm']), asText('plan_classes', ['', '', 'HH:mm']));
+  } catch (error) { return null; }
 }
 
 function appendLog(email, action, detail) { sheet('log').appendRow([text(new Date().toISOString()), email, action, detail]); }
