@@ -166,6 +166,12 @@ progress::-moz-progress-bar{background:var(--red)}
 .plan-head h2{flex:1;font-size:22px}
 .plan-nav{display:flex;gap:6px}
 .plan-nav button{min-width:48px}
+.plan-sync{min-height:48px;padding:0 16px;font-weight:600}
+.plan-sync:disabled{opacity:.7;cursor:progress}
+.plan-sync-status{flex-basis:100%;margin:0;font-size:16px;color:var(--muted,#555)}
+.plan-sync-status:empty{display:none}
+.plan-sync-status.ok{color:#1f7a3a}
+.plan-sync-status.error{color:var(--red)}
 .month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:8px}
 .month-grid .dow{font-size:var(--fs-xs);color:var(--muted);text-align:center;font-weight:600;padding:2px 0}
 .day{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:96px;padding:4px 5px;display:flex;flex-direction:column;gap:3px;min-width:0}

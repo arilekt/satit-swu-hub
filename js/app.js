@@ -149,7 +149,18 @@ function applyPlan(remote,save){
  if(save)try{localStorage.setItem(PLAN_KEY,JSON.stringify(remote));}catch(_){/* keep in memory */}
  return true;
 }
-window.addEventListener('plan-remote',e=>{if(config&&applyPlan(e.detail,true))update();});
+window.addEventListener('plan-remote',e=>{if(!config||!defaultPlan)return;
+ if(e.detail===null){try{localStorage.removeItem(PLAN_KEY);}catch(_){/* ignore */}if(config.daily_plan.source!=='default'){config.daily_plan=defaultPlan;update();}return;}
+ if(applyPlan(e.detail,true))update();});
+// Sync button on the plan calendar: pull the latest plan and progress from Google Sheet without reloading.
+document.getElementById('plan-sync')?.addEventListener('click',async e=>{
+ const button=e.currentTarget,status=document.getElementById('plan-sync-status');
+ button.disabled=true;button.textContent='⏳ กำลังซิงก์…';status.className='plan-sync-status busy';status.textContent='';
+ let result;try{result=await window.MissionSync.sync();}catch(error){result={ok:false,error:error.message};}
+ button.disabled=false;button.textContent='🔄 ซิงก์';
+ const time=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
+ status.className='plan-sync-status '+(result&&result.ok?'ok':'error');
+ status.textContent=result&&result.ok?'✅ อัปเดตแล้ว '+time+' น. · '+(config.daily_plan.source==='sheet'?'แผนจาก Sheet':'แผนตั้งต้น'):'⚠️ ซิงก์ไม่สำเร็จ'+(result&&result.error?' ('+result.error+')':'')+' · ใช้แผนเดิมในเครื่อง';});
 async function start(){
  defaultPlan={...config.daily_plan,source:'default'};config.daily_plan=defaultPlan;
  try{const cached=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');if(cached)applyPlan(cached,false);}catch(_){/* use default */}

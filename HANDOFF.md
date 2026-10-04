@@ -13,7 +13,7 @@
 
 **Testing:** Playwright on localhost with Google GIS + Apps Script mocked by `page.route` (no bypass code in repo). YouTube/real Google login cannot load from cloud.
 
-- Dynamic plan (v0.4.9, พี่ 2026-10-04): Google Sheet tabs `plan_settings` (key/value), `plan_periods` (name, from, to, slots "09:00 เช้า, 10:30 สาย", weekday_slots "จ,พ,ศ = 17:00 หลังเลิกเรียน", session_minutes, rest_days "อา", review_label) and `plan_classes` (title, days "จ,ศ", time) override `config.daily_plan` after login (sync response `plan`, cached in localStorage `satit-swu-hub:plan`). Tabs are created and seeded with the config plan by Code.gs on first sync. Empty/broken tabs or offline = config default. Needs Code.gs redeployed (new version, same URL).
+- Dynamic plan (v0.4.9, พี่ 2026-10-04): Google Sheet tabs `plan_settings` (key/value), `plan_periods` (name, from, to, slots "09:00 เช้า, 10:30 สาย", weekday_slots "จ,พ,ศ = 17:00 หลังเลิกเรียน", session_minutes, rest_days "อา", review_label) and `plan_classes` (title, days "จ,ศ", time) override `config.daily_plan` after login (sync response `plan`, cached in localStorage `satit-swu-hub:plan`). Tabs are created and seeded with the config plan by Code.gs on first sync. Empty/broken tabs or offline = config default. Needs Code.gs redeployed (new version, same URL). The "🔄 ซิงก์" button on the plan calendar (v0.4.10) calls MissionSync.sync() and re-renders; a sync with no plan resets to the config default and clears the cache.
 
 **Next / open:** พี่ OK'd the design (2026-10-04); waiting for พอใจ's feedback and plan confirmation. chapter titles + quiz files come from the content job (do not invent). Adjust plan pace in config if พี่ wants.
 

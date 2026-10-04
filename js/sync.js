@@ -105,16 +105,18 @@
   }
 
   async function sync() {
-    if (!configured() || !token || busy) return;
-    if (!valid(token)) { signOut(); lastError = 'หมดเวลาเข้าสู่ระบบ กรุณาเข้าสู่ระบบอีกครั้ง'; render(); if (window.google?.accounts?.id) google.accounts.id.prompt(); return; }
+    if (!configured() || !token) return {ok: false, error: 'ยังไม่ได้เข้าสู่ระบบ'};
+    if (busy) return {ok: false, error: 'กำลังซิงก์อยู่ ลองอีกครั้ง'};
+    if (!valid(token)) { signOut(); lastError = 'หมดเวลาเข้าสู่ระบบ กรุณาเข้าสู่ระบบอีกครั้ง'; render(); if (window.google?.accounts?.id) google.accounts.id.prompt(); return {ok: false, error: lastError}; }
     busy = true; render();
     try {
       const data = await call('sync', {state: Tracker.syncPayload()});
       Tracker.applyRemote(data.state);
-      if (data.plan && typeof data.plan === 'object') window.dispatchEvent(new CustomEvent('plan-remote', {detail: data.plan}));
+      window.dispatchEvent(new CustomEvent('plan-remote', {detail: data.plan && typeof data.plan === 'object' ? data.plan : null}));
       email = data.email || email; lastSync = new Date(); lastError = '';
     } catch (error) { lastError = error.message; }
     finally { busy = false; render(); }
+    return lastError ? {ok: false, error: lastError} : {ok: true};
   }
 
   function schedule() { clearTimeout(timer); timer = setTimeout(sync, 2000); }
