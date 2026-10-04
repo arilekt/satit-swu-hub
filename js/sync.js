@@ -36,7 +36,12 @@
     if (status) status.textContent = (email ? email + ' · ' : '') + text;
     if (now) now.hidden = !token || !accessGranted;
     if (out) out.hidden = !token;
-    if (gating && content) { gating.hidden = token && accessGranted; content.hidden = !(token && accessGranted && loginValidated); }
+    if (gating && content) {
+      const isAuthenticated = token && accessGranted && loginValidated;
+      gating.hidden = isAuthenticated;
+      content.hidden = !isAuthenticated;
+      document.body.style.overflow = isAuthenticated ? '' : 'hidden';
+    }
   }
 
   function loadGis() {
