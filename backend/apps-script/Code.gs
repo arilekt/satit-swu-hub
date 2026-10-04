@@ -97,6 +97,7 @@ function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
     var email = verify(body.id_token);
+    if (body.action === 'login') return doLogin(email);
     if (body.action === 'whoami') return json({ok: true, email: email});
     if (body.action !== 'sync') throw new Error('ไม่รู้จักคำสั่ง');
     var lock = LockService.getScriptLock();
@@ -108,6 +109,20 @@ function doPost(e) {
       appendLog(email, 'sync', result.changed.marks.length + ' marks, ' + result.changed.attempts.length + ' attempts, ' + result.changed.settings.length + ' settings');
       return json({ok: true, email: email, state: responseState(result.merged)});
     } finally { lock.releaseLock(); }
+  } catch (error) {
+    return json({ok: false, error: String(error && error.message || error)});
+  }
+}
+
+function doLogin(email) {
+  try {
+    var book = SpreadsheetApp.getActiveSpreadsheet();
+    var requiredTabs = Object.keys(SHEETS);
+    var existingTabs = book.getSheets().map(function (s) { return s.getName(); });
+    var missingTabs = requiredTabs.filter(function (t) { return existingTabs.indexOf(t) < 0; });
+    if (missingTabs.length > 0) throw new Error('Sheet ยังไม่ได้ตั้งค่า (หายแท็บ: ' + missingTabs.join(', ') + ')');
+    appendLog(email, 'login', 'successful');
+    return json({ok: true, email: email});
   } catch (error) {
     return json({ok: false, error: String(error && error.message || error)});
   }

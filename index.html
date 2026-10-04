@@ -12,7 +12,18 @@
 <a class="skip" href="#main">ข้ามไปเนื้อหา</a>
 <header class="top"><a class="brand" href="#dashboard"><span class="logo">S<span>W</span></span><span>Satit SWU<small>PORJAI'S MISSION HUB</small></span></a><nav class="top-nav" aria-label="เมนูหลัก"><a href="#dashboard" id="nav-dashboard">บ้านของพอใจ</a><a href="#learn" id="nav-learn">ห้องเรียน</a><a href="#parent" id="nav-parent" class="parent-link">สำหรับคุณพ่อ</a></nav><a id="sync-chip" class="sync-chip" href="#parent" hidden>☁️ เข้าสู่ระบบ</a><span class="avatar" aria-label="พอใจ">พ</span></header>
 <main id="main" tabindex="-1">
-<section id="dashboard-page" class="page">
+<section id="login-gating" class="page login-gating" hidden>
+  <div class="login-dialog">
+    <div class="login-content">
+      <h1>🔐 เข้าสู่ระบบ</h1>
+      <p>ใช้บัญชี Google ที่ได้รับอนุญาตเพื่อเข้าถึงระบบเตรียมสอบ</p>
+      <div id="google-button" class="google-button-wrapper"></div>
+      <p id="login-status" class="login-status notice" role="status" aria-live="polite"></p>
+      <p class="login-note">โปรดเข้าสู่ระบบด้วยอีเมลที่คุณพ่อไว้วางใจให้เข้าได้</p>
+    </div>
+  </div>
+</section>
+<section id="dashboard-page" class="page" hidden>
   <div class="welcome"><div><span class="eyebrow">MY MISSION / ภารกิจสู่ ม.1</span><h1>เฮ้ พอใจ! <span>วันนี้ไปต่ออีกนิดกัน</span> ✨</h1><p>ไม่ต้องเก่งทุกอย่างวันนี้ แค่เริ่มทีละก้าวก็พอ</p><div id="today-date" class="today-date">กำลังโหลดวันที่…</div></div><div class="welcome-art" aria-hidden="true"><span class="orbit">★</span><span class="pencil">✎</span><span class="art-caption">YOU GOT THIS!</span></div></div>
   <div class="section-heading"><div><span class="eyebrow">NEXT BIG MOMENT</span><h2>นัดสำคัญของเรา 🎯</h2></div><span class="school-chip">ประสานมิตร · ภาคปกติ</span></div>
   <div class="exam-grid"><article class="exam-card pretest"><div class="exam-label"><span>ภารกิจใกล้ที่สุด</span><span aria-hidden="true">⚑</span></div><h3 id="pretest-title">Pre-Test · สนามซ้อม</h3><p id="pretest-date"></p><div id="pretest-counter" class="counter"></div><p id="pretest-message" class="exam-message"></p></article><article class="exam-card real-exam"><div class="exam-label"><span>เป้าหมายต่อไป</span><span aria-hidden="true">↗</span></div><h3>สอบจริง · สู่ ม.1</h3><p id="real-exam-date"></p><div id="exam-counter" class="counter"></div><p class="exam-message">ค่อย ๆ เติมความพร้อมไปด้วยกัน</p></article></div>

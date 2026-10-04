@@ -3,7 +3,8 @@
 (() => {
   'use strict';
   const TOKEN_KEY = 'satit-swu-hub:google-id-token';
-  let settings = null, token = null, email = null, timer = null, busy = false, lastSync = null, lastError = '', gisReady = null;
+  const ACCESS_KEY = 'satit-swu-hub:access-granted';
+  let settings = null, token = null, email = null, timer = null, busy = false, lastSync = null, lastError = '', gisReady = null, accessGranted = false, loginValidated = false;
   const $ = id => document.getElementById(id);
 
   function decode(jwt) {
@@ -17,21 +18,25 @@
 
   function render() {
     const chip = $('sync-chip'), status = $('sync-status'), now = $('sync-now'), out = $('sign-out');
+    const gating = $('login-gating'), content = $('dashboard-page');
     if (!chip) return;
     let text, state;
     if (!configured()) { text = 'ยังไม่ได้ตั้งค่า Google Sheet'; state = 'off'; }
     else if (!token) { text = (lastError ? lastError + ' · ' : '') + 'ยังไม่ได้เข้าสู่ระบบ ผลเรียนเก็บเฉพาะเครื่องนี้'; state = 'signed-out'; }
+    else if (!loginValidated) { text = 'กำลังตรวจสอบการเข้าถึง…'; state = 'busy'; }
+    else if (!accessGranted) { text = 'ไม่มีสิทธิ์เข้าดู'; state = 'denied'; }
     else if (busy) { text = 'กำลังซิงก์…'; state = 'busy'; }
     else if (lastError) { text = 'ซิงก์ไม่สำเร็จ: ' + lastError; state = 'error'; }
     else if (lastSync) { text = 'ซิงก์กับ Google Sheet แล้ว ' + lastSync.toLocaleTimeString('th-TH', {timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit'}) + ' น.'; state = 'ok'; }
     else { text = 'เข้าสู่ระบบแล้ว'; state = 'ok'; }
     chip.hidden = !configured();
-    chip.textContent = state === 'ok' ? '☁️ ซิงก์แล้ว' : state === 'busy' ? '☁️ กำลังซิงก์' : state === 'error' ? '⚠️ ซิงก์ไม่สำเร็จ' : '☁️ เข้าสู่ระบบ';
+    chip.textContent = state === 'ok' ? '☁️ ซิงก์แล้ว' : state === 'busy' ? '☁️ กำลังซิงก์' : state === 'error' ? '⚠️ ซิงก์ไม่สำเร็จ' : state === 'denied' ? '🚫 ไม่มีสิทธิ์' : '☁️ เข้าสู่ระบบ';
     chip.className = 'sync-chip sync-' + state;
     chip.title = text;
     if (status) status.textContent = (email ? email + ' · ' : '') + text;
-    if (now) now.hidden = !token;
+    if (now) now.hidden = !token || !accessGranted;
     if (out) out.hidden = !token;
+    if (gating && content) { gating.hidden = token && accessGranted; content.hidden = !(token && accessGranted && loginValidated); }
   }
 
   function loadGis() {
@@ -58,16 +63,30 @@
     } catch (error) { lastError = error.message; render(); }
   }
 
+  async function validateLogin(credential) {
+    if (!configured() || loginValidated) return;
+    busy = true; render();
+    try {
+      const response = await fetch(settings.apps_script_url, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({action: 'login', id_token: credential})});
+      if (!response.ok) throw Error('เชื่อมต่อ Google Sheet ไม่ได้ (' + response.status + ')');
+      const data = await response.json();
+      if (!data.ok) throw Error(data.error || 'Google Sheet ตอบกลับผิดพลาด');
+      accessGranted = true; lastError = '';
+      try { sessionStorage.setItem(ACCESS_KEY, 'true'); } catch (_) { /* keep in memory only */ }
+    } catch (error) { accessGranted = false; lastError = error.message; }
+    finally { loginValidated = true; busy = false; render(); }
+  }
+
   function signedIn(credential) {
     if (!valid(credential)) { lastError = 'token จาก Google ไม่ถูกต้อง'; render(); return; }
-    token = credential; email = decode(credential).email || null; lastError = '';
+    token = credential; email = decode(credential).email || null; lastError = ''; loginValidated = false; accessGranted = false;
     try { sessionStorage.setItem(TOKEN_KEY, credential); } catch (_) { /* keep in memory only */ }
-    render(); sync();
+    render(); validateLogin(credential).then(() => { if (accessGranted) sync(); });
   }
 
   function signOut() {
-    token = null; email = null; lastSync = null; lastError = '';
-    try { sessionStorage.removeItem(TOKEN_KEY); } catch (_) { /* ignore */ }
+    token = null; email = null; lastSync = null; lastError = ''; accessGranted = false; loginValidated = false;
+    try { sessionStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(ACCESS_KEY); } catch (_) { /* ignore */ }
     if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
     render();
   }
@@ -98,14 +117,18 @@
     settings = config.sync || null;
     render();
     if (!configured()) return;
-    try { const saved = sessionStorage.getItem(TOKEN_KEY); if (valid(saved)) { token = saved; email = decode(saved).email || null; } } catch (_) { /* storage blocked */ }
-    window.addEventListener('progress-changed', e => { if (token && e.detail?.source !== 'remote') schedule(); });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && token && (!lastSync || Date.now() - lastSync > 60000)) sync(); });
+    try {
+      const saved = sessionStorage.getItem(TOKEN_KEY);
+      if (valid(saved)) { token = saved; email = decode(saved).email || null; accessGranted = sessionStorage.getItem(ACCESS_KEY) === 'true'; loginValidated = !!accessGranted; }
+    } catch (_) { /* storage blocked */ }
+    window.addEventListener('progress-changed', e => { if (token && accessGranted && e.detail?.source !== 'remote') schedule(); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && token && accessGranted && (!lastSync || Date.now() - lastSync > 60000)) sync(); });
     $('sync-now')?.addEventListener('click', sync);
     $('sign-out')?.addEventListener('click', signOut);
     setupButton();
-    if (token) sync();
+    if (token && !loginValidated) validateLogin(token);
+    else if (token && accessGranted) sync();
   }
 
-  window.MissionSync = {init, sync, signOut, configured: () => configured(), _decode: decode};
+  window.MissionSync = {init, sync, signOut, validateLogin, configured: () => configured(), _decode: decode};
 })();
