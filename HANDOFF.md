@@ -12,8 +12,8 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Complete & Validated**: Math PART 01-12 (240 ข้อ, PDF-based) ✅
 - **Complete & Validated**: Science PART 01-07 (140 ข้อ, PDF-based) ✅
 - **Complete & Validated**: Thai PART 01-09 (180 ข้อ, PDF-based) ✅
+- **Complete & Validated**: Social PART 01-13 (260 ข้อ, PDF-based) ✅
 - **Pending**: English (11 PART)
-- **Exists**: Social Studies (13 PART + 1 mock exam) - needs validation
 
 ---
 
@@ -40,9 +40,10 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Content**: 11 PART chapters expected
 - **Action**: Create content + 15-20 ข้อ per PART, validate before push
 
-### ✅ Social Studies (สังคม) - EXISTS, NEEDS VALIDATION
-- **Status**: 13 PART + 1 mock exam files exist on main
-- **Action**: Validate questions & add missing chapter titles before full deployment
+### ✅ Social Studies (สังคม) - PART 01-13 COMPLETE (lessons + exams)
+- Source: PDF-based drafts in `local/private/data/` copied into `data/content/social-partNN.md` and `data/exams/social-partNN-exam.md`, replacing the old sample lessons (quick_quiz).
+- Exams use the config quiz ids (`social-partNN-quiz`), 20 questions each, 30 minutes. Lessons carry `analysis_status: "pdf-verified"`, `chapter_title`, and keep the `video_match` block.
+- Checks: all 260 answer keys re-checked, all correct; explanations matched against the keyed option. `social-mock01` unchanged.
 
 ---
 

@@ -112,8 +112,8 @@ const dashboard=dashboardContext.window.Dashboard;
 const fresh={has:()=>false};
 const socialOnly={...config,subjects:config.subjects.filter(s=>s.id==='social')}; // other subjects gain ready content over time
 assert.equal(dashboard.recommendation(socialOnly,fresh,'2026-10-03').step.id,'social-part01');
-assert.equal(dashboard.recommendation(socialOnly,fresh,'2026-10-03').minutes,15);
-assert.equal(dashboard.recommendation(socialOnly,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part02');
+assert.equal(dashboard.recommendation(socialOnly,fresh,'2026-10-03').minutes,20); // PDF lessons carry the clip length, not study_minutes, so the 20-minute session applies
+assert.equal(dashboard.recommendation(socialOnly,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part01-quiz'); // its end-of-chapter quiz is ready now
 assert.ok(dashboard.recommendation(config,fresh,'2026-10-03').step.file,'recommends only ready content');
 assert.ok(dashboard.recommendation(config,{has:()=>true},'2026-10-03').review);
 assert.equal(dashboard.recommendation({...config,subjects:config.subjects.map(s=>({...s,steps:s.steps.map(step=>({...step,file:null,quiz:step.quiz&&{...step.quiz,file:null}}))}))},fresh,'2026-10-03'),null); // no lesson and no exam ready

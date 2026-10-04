@@ -12,221 +12,234 @@
           "title": "PART 01",
           "file": "./data/content/social-part01.md",
           "type": "lesson",
-          "study_minutes": 15,
-          "chapter_title": "พุทธศาสนา",
-          "chapter_status": "sample-unverified",
+          "source_duration_minutes": 66,
+          "chapter_title": "ประเภทศาสนาและพุทธประวัติ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part01-quiz",
             "title": "แบบทดสอบท้ายบท · PART 01",
-            "file": null,
+            "file": "./data/exams/social-part01-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=O1nzUrNctik"
         },
         {
           "id": "social-part02",
           "title": "PART 02",
           "file": "./data/content/social-part02.md",
           "type": "lesson",
-          "study_minutes": 12,
-          "chapter_title": "หน้าที่พลเมือง",
-          "chapter_status": "sample-unverified",
+          "source_duration_minutes": 65,
+          "chapter_title": "หลักธรรม ชาวพุทธตัวอย่าง และวันสำคัญ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part02-quiz",
             "title": "แบบทดสอบท้ายบท · PART 02",
-            "file": null,
+            "file": "./data/exams/social-part02-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=Oh7BB9fiWxk"
         },
         {
           "id": "social-part03",
           "title": "PART 03",
           "file": "./data/content/social-part03.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 67,
+          "chapter_title": "มารยาทชาวพุทธ ศาสนพิธี และศาสนาอื่นในไทย",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part03-quiz",
             "title": "แบบทดสอบท้ายบท · PART 03",
-            "file": null,
+            "file": "./data/exams/social-part03-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=lwrMYO1pP40"
         },
         {
           "id": "social-part04",
           "title": "PART 04",
           "file": "./data/content/social-part04.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 65,
+          "chapter_title": "สถานภาพ สิทธิ หน้าที่ และระบบการปกครอง",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part04-quiz",
             "title": "แบบทดสอบท้ายบท · PART 04",
-            "file": null,
+            "file": "./data/exams/social-part04-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=ljLU4tBXzZw"
         },
         {
           "id": "social-part05",
           "title": "PART 05",
           "file": "./data/content/social-part05.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 70,
+          "chapter_title": "กฎหมายใกล้ตัวและวัฒนธรรมไทย",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part05-quiz",
             "title": "แบบทดสอบท้ายบท · PART 05",
-            "file": null,
+            "file": "./data/exams/social-part05-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=YB9_6Y31dq0"
         },
         {
           "id": "social-part06",
           "title": "PART 06",
           "file": "./data/content/social-part06.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 75,
+          "chapter_title": "เศรษฐศาสตร์ ระบบเศรษฐกิจ การผลิต และตลาด",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part06-quiz",
             "title": "แบบทดสอบท้ายบท · PART 06",
-            "file": null,
+            "file": "./data/exams/social-part06-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=9MLokAEhwmc"
         },
         {
           "id": "social-part07",
           "title": "PART 07",
           "file": "./data/content/social-part07.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 66,
+          "chapter_title": "สหกรณ์ สถาบันการเงิน ภาษี และความร่วมมือทางเศรษฐกิจ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part07-quiz",
             "title": "แบบทดสอบท้ายบท · PART 07",
-            "file": null,
+            "file": "./data/exams/social-part07-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=jDN12vdh84w"
         },
         {
           "id": "social-part08",
           "title": "PART 08",
           "file": "./data/content/social-part08.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 72,
+          "chapter_title": "การแบ่งยุค การนับเวลา วิธีการทางประวัติศาสตร์ และรัฐโบราณ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part08-quiz",
             "title": "แบบทดสอบท้ายบท · PART 08",
-            "file": null,
+            "file": "./data/exams/social-part08-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=mKc5TNy4034"
         },
         {
           "id": "social-part09",
           "title": "PART 09",
           "file": "./data/content/social-part09.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 67,
+          "chapter_title": "รัฐไทย สุโขทัย อยุธยา ธนบุรี และพระมหากษัตริย์รัตนโกสินทร์",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part09-quiz",
             "title": "แบบทดสอบท้ายบท · PART 09",
-            "file": null,
+            "file": "./data/exams/social-part09-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=Gk7naGQTzD0"
         },
         {
           "id": "social-part10",
           "title": "PART 10",
           "file": "./data/content/social-part10.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 75,
+          "chapter_title": "บุคคลสำคัญ สงครามของสยาม และแหล่งมรดกโลกทางวัฒนธรรม",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part10-quiz",
             "title": "แบบทดสอบท้ายบท · PART 10",
-            "file": null,
+            "file": "./data/exams/social-part10-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=vHeBan42X7E"
         },
         {
           "id": "social-part11",
           "title": "PART 11",
           "file": "./data/content/social-part11.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 78,
+          "chapter_title": "เครื่องมือภูมิศาสตร์ เขตอากาศ และภูมิศาสตร์ประเทศไทย",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part11-quiz",
             "title": "แบบทดสอบท้ายบท · PART 11",
-            "file": null,
+            "file": "./data/exams/social-part11-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=H1eALn71IBU"
         },
         {
           "id": "social-part12",
           "title": "PART 12",
           "file": "./data/content/social-part12.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 70,
+          "chapter_title": "มรดกโลกทางธรรมชาติ สัตว์ป่าสงวน ภัยธรรมชาติ และความร่วมมือด้านสิ่งแวดล้อม",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part12-quiz",
             "title": "แบบทดสอบท้ายบท · PART 12",
-            "file": null,
+            "file": "./data/exams/social-part12-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=jTc5Cyj4jiY"
         },
         {
           "id": "social-part13",
           "title": "PART 13",
           "file": "./data/content/social-part13.md",
           "type": "lesson",
-          "study_minutes": 20,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "source_duration_minutes": 70,
+          "chapter_title": "อาเซียน ทวีปของโลก โอลิมปิก และสัญลักษณ์ควรรู้",
+          "chapter_status": "completed",
           "quiz": {
             "id": "social-part13-quiz",
             "title": "แบบทดสอบท้ายบท · PART 13",
-            "file": null,
+            "file": "./data/exams/social-part13-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
-          }
+            "study_minutes": 30
+          },
+          "video_url": "https://www.youtube.com/watch?v=4mxEfGB8IPw"
         },
         {
           "id": "social-mock01",
