@@ -16,7 +16,8 @@ function rules(plan,date){
   const period=(Array.isArray(plan.periods)?plan.periods:[]).find(p=>p&&p.from<=date&&date<=p.to)||{};
   const pick=(key,fallback)=>period[key]!==undefined?period[key]:plan[key]!==undefined?plan[key]:fallback;
   const perDay=Math.max(1,Math.min(6,Number(plan.items_per_day)||1));
-  const slots=Array.isArray(period.slots)&&period.slots.length?period.slots.slice(0,6):Array.from({length:perDay},()=>null);
+  const weekday=String(new Date(date+'T00:00:00Z').getUTCDay()),special=period.weekday_slots&&period.weekday_slots[weekday];
+  const slots=Array.isArray(special)?special.slice(0,6):Array.isArray(period.slots)&&period.slots.length?period.slots.slice(0,6):Array.from({length:perDay},()=>null);
   return {period:period.name||null,slots,rest:pick('rest_weekdays',[0]),session:Math.max(5,Math.min(60,Number(pick('session_minutes',20))||20))};
 }
 // Returns {date:[{subject,step,minutes,slot,period}]} for every planned day, or null when no start date is set.
@@ -32,7 +33,10 @@ function schedule(config){
   }
   return days;
 }
-window.StudyPlan={ORDER,ordered,queue,schedule,rules};
+const slotLabel=slot=>!slot?'':typeof slot==='string'?slot:[slot.time,slot.name].filter(Boolean).join(' ');
+// Weekly fixed commitments (e.g. online English class) shown on the calendar from start_date on.
+function recurring(plan,date){if(!plan.start_date||date<plan.start_date)return [];const day=new Date(date+'T00:00:00Z').getUTCDay();return (Array.isArray(plan.recurring_events)?plan.recurring_events:[]).filter(e=>Array.isArray(e.weekdays)&&e.weekdays.includes(day));}
+window.StudyPlan={ORDER,ordered,queue,schedule,rules,slotLabel,recurring};
 })();
 
 /* Month view of the plan on the dashboard. */
@@ -67,18 +71,21 @@ function render(config,activities,tracker,groups){
     for(const {subject,step,minutes,slot} of items){
       const parent=Catalog.parentOf(subject,step.id),lesson=parent||step;
       const a=node('a',undefined,'plan-item'+(tracker.has(step.id)?' done':step.file?'':' waiting'));a.href='#'+subject.id+'/'+step.id;
-      const top=node('span',undefined,'plan-line');if(slot)top.append(node('b',slot+' ','slot'));top.append(document.createTextNode(subject.icon+' '+subject.name));
+      const top=node('span',undefined,'plan-line');if(slot)top.append(node('b',StudyPlan.slotLabel(slot)+' ','slot'));top.append(document.createTextNode(subject.icon+' '+subject.name));
       a.append(top,node('span',parent?lesson.title+' · ข้อสอบ':step.type==='exam'?step.title:step.title,'plan-line'));
       const info=[step.type==='lesson'&&step.chapter_title?step.chapter_title:null,step.file?'~'+minutes+' นาที':'รอเนื้อหา'].filter(Boolean).join(' · ');
       a.append(node('small',info));
       cell.append(a);
     }
+    for(const e of StudyPlan.recurring(config.daily_plan||{},date))cell.append(node('span',(e.time?e.time+' ':'')+'🎧 '+e.title,'plan-item class'));
     const rule=StudyPlan.rules(config.daily_plan||{},date);if(!items.length&&!keyDates[date]&&rule.rest.includes(new Date(Date.UTC(y,m-1,d)).getUTCDay()))cell.append(node('small','วันพัก ☁️','muted'));
     grid.append(cell);
   }
   box.append(grid);
   const legend=node('div',undefined,'plan-legend');
-  for(const p of config.daily_plan.periods||[])if(p.from.slice(0,7)<=month&&month<=p.to.slice(0,7))legend.append(node('span','ช่วง'+p.name+' '+Countdown.label(p.from)+' – '+Countdown.label(p.to)+' · วันละ '+(p.slots||[]).length+' ช่วง','period-note'));
+  for(const p of config.daily_plan.periods||[])if(p.from.slice(0,7)<=month&&month<=p.to.slice(0,7))legend.append(node('span','ช่วง'+p.name+' '+Countdown.label(p.from)+' – '+Countdown.label(p.to)+' · วันละ '+(p.slots||[]).length+' ช่วง'+(p.weekday_slots?' (จ./พ./ศ. 1 ช่วง)':''),'period-note'));
+  const planDays=Object.keys(plan).sort(),lastDay=planDays[planDays.length-1];
+  if(config.daily_plan.finish_before==='pretest'&&lastDay)legend.append(node('span',lastDay<regular.pretest_date?'✅ เรียนครบทุกบทตามแผน '+Countdown.label(lastDay)+' ก่อน Pre-Test':'⚠️ แผนยังจบหลัง Pre-Test ('+Countdown.label(lastDay)+')',lastDay<regular.pretest_date?'period-note ok':'period-note'));
   legend.append(node('span','ร่างแผนรอคุณพ่อยืนยัน'));legend.append(node('span','✓ = ทำภารกิจแล้ว'),node('span','กรอบเส้นประ = บทที่ยังรอเนื้อหา'),node('span','แผนคงที่ ไม่เลื่อนตามการติ๊กเรียนจบ'));box.append(legend);
 }
 function shift(n){if(!month)return;const [y,m]=month.split('-').map(Number),d=new Date(Date.UTC(y,m-1+n,1));month=d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1);if(last)render(...last);}
