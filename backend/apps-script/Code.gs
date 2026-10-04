@@ -116,11 +116,7 @@ function doPost(e) {
 
 function doLogin(email) {
   try {
-    var book = SpreadsheetApp.getActiveSpreadsheet();
-    var requiredTabs = Object.keys(SHEETS);
-    var existingTabs = book.getSheets().map(function (s) { return s.getName(); });
-    var missingTabs = requiredTabs.filter(function (t) { return existingTabs.indexOf(t) < 0; });
-    if (missingTabs.length > 0) throw new Error('Sheet ยังไม่ได้ตั้งค่า (หายแท็บ: ' + missingTabs.join(', ') + ')');
+    Object.keys(SHEETS).forEach(function (name) { sheet(name); });
     appendLog(email, 'login', 'successful');
     return json({ok: true, email: email});
   } catch (error) {
