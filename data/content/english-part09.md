@@ -133,7 +133,7 @@ very ใช้นำหน้า few/little ได้ (very little time) แต�
 | I don't have nothing | ปฏิเสธซ้อน → I don't have anything |
 | interesting something | something interesting |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - นามนับไม่ได้ (water, money, time, information, homework) ไม่เติม s และใช้ much / a little
 - some = บอกเล่าและคำเสนอ, any = ปฏิเสธ คำถาม หรือ "อันไหนก็ได้"

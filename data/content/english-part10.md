@@ -164,7 +164,7 @@ EX:
 | both ... or / either ... nor | คู่ที่ถูก: both-and, either-or, neither-nor, not only-but also |
 | neither ... nor + not | ห้ามปฏิเสธซ้อน |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - Simple = 1 อนุประโยคอิสระ / Compound = อิสระ + อิสระ (FANBOYS) / Complex = อิสระ + ไม่อิสระ
 - FANBOYS: for, and, nor, but, or, yet, so ใส่ comma หน้าคำเมื่อเชื่อม 2 ประโยค

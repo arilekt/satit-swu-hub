@@ -177,7 +177,7 @@ The dog wagged **its** tail. / **It's** raining.
 | between you and I | หลังคำบุพบทต้องใช้กรรม → between you and me |
 | themself / theirselves | รูปที่ถูกคือ themselves |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - a/an ดู "เสียง" แรก: an hour, an honest, a uniform, a university
 - the ใช้กับสิ่งที่เจาะจง: หนึ่งเดียวในโลก ขั้นสูงสุด ลำดับที่ กล่าวซ้ำ รู้กันระหว่างผู้พูด-ผู้ฟัง

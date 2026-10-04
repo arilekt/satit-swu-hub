@@ -216,7 +216,7 @@ I have = I've / she has = she's / I had = I'd / have not = haven't / has not = h
 | He don't ... | ประธานเอกพจน์ใช้ doesn't |
 | this books / those car | this/that + เอกพจน์, these/those + พหูพจน์ |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - กริยาช่วย 3 กลุ่ม: be (Continuous/Passive), do (ปฏิเสธ/คำถาม Simple), have (Perfect)
 - I am / he-she-it is / you-we-they are; อดีต was / were

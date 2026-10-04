@@ -177,7 +177,7 @@ EX: a **beautiful small black leather** bag / a **nice new red Japanese** car / 
 | He always is late | หลัง be → He is always late. |
 | interesting something | adjective ตามหลัง something → something interesting |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - Adjective อยู่หน้านาม หรือหลัง be / linking verb (look, taste, smell ...)
 - ขั้นกว่า: -er / more + than; ขั้นสุด: the -est / the most + in/of

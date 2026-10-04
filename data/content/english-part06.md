@@ -146,7 +146,7 @@ analysis_status: "pdf-verified"
 | How many vs How much | นับได้ vs นับไม่ได้ (หรือราคา) |
 | What time the train leaves? | ต้องมี does → What time does the train leave? |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - Modal + Vinf เสมอ ไม่เติม s ไม่ใช้ do ช่วย
 - can = สามารถ/ขออนุญาต, could = อดีตของ can/สุภาพกว่า, cannot เขียนติดกัน

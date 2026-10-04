@@ -173,7 +173,7 @@ mind แปลว่า "รังเกียจ/ขัดข้อง" คำ�
 | ตอบคำชม | ฝรั่งตอบ Thank you ไม่ใช่ You're welcome |
 | Can I ...? vs Can you ...? | ขออนุญาตทำเอง vs ขอให้อีกฝ่ายทำ |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - ขอร้องสุภาพ: Could you please + V1? / Would you mind + V-ing?
 - ตอบ Do you mind ...? ว่า No, not at all เมื่อยินดีทำ

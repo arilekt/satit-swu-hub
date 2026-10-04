@@ -176,7 +176,7 @@ EX: The book is **on** the table. / I was born **in** May.
 | because vs because of | + ประโยค vs + นาม |
 | in vs into | อยู่ข้างใน (นิ่ง) vs เคลื่อนเข้าไป |
 
-## ⭐ Key Takeaways
+## ⭐ ประเด็นสำคัญที่ได้จากบทเรียนนี้
 
 - Type 0: V1, V1 (ความจริง) / Type 1: V1, will + Vinf (เป็นไปได้)
 - Type 2: V2/were, would + Vinf (สมมติปัจจุบัน) / Type 3: had + V3, would have + V3 (สมมติอดีต)
