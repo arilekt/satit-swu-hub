@@ -189,6 +189,7 @@ progress::-moz-progress-bar{background:var(--red)}
 .day.today .day-num{color:var(--red)}
 .plan-item{display:block;font-size:13px;line-height:1.3;padding:4px 5px;border-radius:7px;background:var(--surface-2);color:var(--ink);min-height:40px;overflow:hidden;overflow-wrap:anywhere}
 .plan-line{display:block}
+.plan-line.subject-line{font-weight:600;color:var(--red)}
 .plan-item .slot{color:var(--red);font-weight:600}
 .period-note{color:var(--red);font-weight:600}
 .plan-item small{display:block;color:var(--muted);font-size:12px}

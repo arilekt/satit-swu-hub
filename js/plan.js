@@ -110,10 +110,10 @@ function render(config,activities,tracker,groups){
     const allDone=items.length&&items.every(x=>tracker.has(x.step.id));if(allDone)num.append(node('span','✓','done-mark'));
     cell.append(num);
     for(const label of keyDates[date]||[])cell.append(node('span',label,'plan-item event'));
-    for(const {subject,step,minutes,slot} of items){
+    for(const {subject,step,minutes} of items){
       const parent=Catalog.parentOf(subject,step.id),lesson=parent||step;
       const a=node('a',undefined,'plan-item'+(tracker.has(step.id)?' done':step.file?'':' waiting'));a.href='#'+subject.id+'/'+step.id;
-      const top=node('span',undefined,'plan-line');if(slot)top.append(node('b',StudyPlan.slotLabel(slot)+' ','slot'));top.append(document.createTextNode(subject.icon+' '+subject.name));
+      const top=node('span',subject.icon+' '+subject.name,'plan-line subject-line');
       a.append(top,node('span',parent?lesson.title+' · ข้อสอบ':step.title,'plan-line'));
       const info=[step.type==='lesson'&&step.chapter_title?step.chapter_title:null,'~'+minutes+' นาที'+(step.file?'':' · รอเนื้อหา')].filter(Boolean).join(' · ');
       a.append(node('small',info));
@@ -122,7 +122,7 @@ function render(config,activities,tracker,groups){
     for(const e of StudyPlan.recurring(config.daily_plan||{},date))cell.append(node('span',(e.time?e.time+' ':'')+'🎧 '+e.title,'plan-item class'));
     const rule=StudyPlan.rules(config.daily_plan||{},date);
     if(rule.note)cell.insertBefore(node('span','📝 '+rule.note,'plan-item note'),cell.children[1]||null);
-    if(!items.length&&rule.review_label&&!rule.off)cell.insertBefore(node('span',rule.start+' 🔁 '+rule.review_label,'plan-item review'),cell.children[1]||null);
+    if(!items.length&&rule.review_label&&!rule.off)cell.insertBefore(node('span','🔁 '+rule.review_label,'plan-item review'),cell.children[1]||null);
     if(!items.length&&!keyDates[date]&&rule.off)cell.append(node('small',rule.special?'งดเรียนวันนี้ ☁️':'วันพัก ☁️','muted'));
     grid.append(cell);
   }
@@ -130,7 +130,7 @@ function render(config,activities,tracker,groups){
   const legend=node('div',undefined,'plan-legend'),hours=m=>m%60?(m/60).toFixed(1).replace('.0','')+' ชม.':m/60+' ชม.';
   for(const p of config.daily_plan.periods||[])if(p.from.slice(0,7)<=month&&month<=p.to.slice(0,7)){
     const extra=p.weekday_minutes?Object.keys(p.weekday_minutes).map(k=>['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'][k]+' '+hours(Number(p.weekday_minutes[k]))).join(' '):'';
-    legend.append(node('span','ช่วง'+p.name+' '+Countdown.label(p.from)+' – '+Countdown.label(p.to)+' · เริ่ม '+(p.start_time||config.daily_plan.start_time||'17:00')+' น. เรียนวันละ ~'+hours(Number(p.day_minutes||config.daily_plan.day_minutes||90))+(extra?' ('+extra+')':''),'period-note'));}
+    legend.append(node('span','ช่วง'+p.name+' '+Countdown.label(p.from)+' – '+Countdown.label(p.to)+' · เรียนวันละ ~'+hours(Number(p.day_minutes||config.daily_plan.day_minutes||90))+(extra?' ('+extra+')':''),'period-note'));}
   const finish=StudyPlan.finishDates(plan),set=StudyPlan.settings(config),pre=regular.pretest_date;
   const before=StudyPlan.ordered(config).filter(s=>finish[s.id]&&!(set[s.id]?.from>pre)),later=StudyPlan.ordered(config).filter(s=>finish[s.id]&&set[s.id]?.from>pre);
   if(config.daily_plan.finish_before==='pretest'&&before.length){const end=before.map(s=>finish[s.id]).sort().pop(),ok=end<pre;

@@ -92,9 +92,9 @@ function eventGroups(activities,from){
 const shortDay=date=>new Intl.DateTimeFormat('th-TH',{timeZone:'UTC',weekday:'short',day:'numeric',month:'short'}).format(new Date(date+'T00:00:00Z'));
 // Plan line for the next lesson: when it is scheduled, or that it is overdue.
 function planWhen(at,today){
-  if(!at)return null;const slot=at.slot&&window.StudyPlan?StudyPlan.slotLabel(at.slot):'';
+  if(!at)return null;
   if(at.date<today)return node('span','⚠️ เลยกำหนดตามแผน ('+shortDay(at.date)+')','plan-when late');
-  return node('span','📅 ตามแผน: '+(at.date===today?'วันนี้':shortDay(at.date))+(slot?' · '+slot:''),'plan-when');
+  return node('span','📅 ตามแผน: '+(at.date===today?'วันนี้':shortDay(at.date)),'plan-when');
 }
 function journeyRow(config,subject,tracker,plan){
   const lessons=subject.steps.filter(s=>s.type==='lesson'),done=lessons.filter(s=>tracker.has(s.id)).length;

@@ -49,7 +49,7 @@ function video(url){
  return {box};
 }
 const MATCH_LABELS={confirmed:'ยืนยันแล้ว',partial:'ยืนยันบางส่วน',unconfirmed:'ยังไม่ยืนยัน'};
-const ANALYSIS_LABELS={'pdf-verified':'สรุปจาก PDF ตรวจแล้ว','pdf-draft':'สรุปจาก PDF รอผู้ใหญ่ตรวจ','sample-unverified':'ตัวอย่างเดิม ยังไม่ได้ตรวจกับ PDF/วิดีโอ',pending:'รอวิเคราะห์จาก PDF'};
+const ANALYSIS_LABELS={'pdf-verified':'สรุปจาก PDF ตรวจแล้ว',completed:'สรุปจาก PDF แล้ว','pdf-draft':'สรุปจาก PDF รอผู้ใหญ่ตรวจ','sample-unverified':'ตัวอย่างเดิม ยังไม่ได้ตรวจกับ PDF/วิดีโอ',pending:'รอวิเคราะห์จาก PDF'};
 function analysisBadge(status){const key=ANALYSIS_LABELS[status]?status:'pending';return element('span',ANALYSIS_LABELS[key],'badge analysis-'+key);}
 function videoMatch(match){
  if(!match||typeof match!=='object')return null;
@@ -111,7 +111,8 @@ async function route(){
   if(data.meta.id!==step.id)throw Error('id ในบทเรียนไม่ตรงกับ config');
   if(data.meta.quick_quiz)QuizEngine.validate(data.meta.quick_quiz);
   const head=element('header',undefined,'lesson-head'),clip=step.source_duration_minutes?'คลิป '+step.source_duration_minutes+' นาที':null;
-  head.append(element('span',subject.icon+' '+subject.name+' · '+step.title,'tag'),element('h2',data.meta.title,'title'),element('span',[clip,data.meta.duration?'เรียนประมาณ '+data.meta.duration:null].filter(Boolean).join(' · '),'meta'));
+  const total=window.StudyPlan?StudyPlan.minutes(step,config.daily_plan||{}):null;
+  head.append(element('span',subject.icon+' '+subject.name+' · '+step.title,'tag'),element('h2',data.meta.title,'title'),element('span',[total?'ใช้เวลาประมาณ '+total+' นาที':null,clip].filter(Boolean).join(' · '),'meta'));
   const media=video(data.meta.video_url),stage=element('section',undefined,'video-stage');stage.append(media.box);if(media.link)stage.append(media.link);
   main.replaceChildren(head,stage);
   const heading=element('div',undefined,'analysis-heading');heading.append(element('h3','📖 สรุปเนื้อหา'),analysisBadge(data.meta.analysis_status));main.append(heading);
@@ -169,6 +170,8 @@ function applyPlan(remote,save){
  const allowed=['start_date','start_time','day_minutes','break_minutes','reading_minutes','rest_weekdays','periods','recurring_events','subjects','days'],next={...defaultPlan,source:'sheet'};
  for(const key of allowed)if(remote[key]!==undefined)next[key]=remote[key];
  if(next.periods&&!Array.isArray(next.periods))return false;
+ // periods from older Sheet tabs (slot lists, no minutes per day) would squeeze the plan: keep the default ones
+ if(Array.isArray(remote.periods)&&!remote.periods.every(p=>p&&Number.isFinite(Number(p.day_minutes))))next.periods=defaultPlan.periods;
  if(next.subjects&&!Array.isArray(next.subjects))return false;
  if(next.days&&(typeof next.days!=='object'||Array.isArray(next.days)))return false;
  config.daily_plan=next;

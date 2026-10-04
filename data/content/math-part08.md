@@ -4,7 +4,6 @@ title: "PART 08 · คณิตศาสตร์"
 subject: math
 chapter_title: "รูปสี่เหลี่ยม"
 duration: "เรียนครั้งละประมาณ 20 นาที"
-video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 video_match:
   status: "pending"
   evidence: "จากสรุปเนื้อหา ม.1 สาธิต"

@@ -110,9 +110,11 @@ const dashboardContext={window:{Catalog},Countdown:countdown};
 vm.createContext(dashboardContext);vm.runInContext(read('js/dashboard.js'),dashboardContext);
 const dashboard=dashboardContext.window.Dashboard;
 const fresh={has:()=>false};
-assert.equal(dashboard.recommendation(config,fresh,'2026-10-03').step.id,'social-part01');
-assert.equal(dashboard.recommendation(config,fresh,'2026-10-03').minutes,15);
-assert.equal(dashboard.recommendation(config,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part02');
+const socialOnly={...config,subjects:config.subjects.filter(s=>s.id==='social')}; // other subjects gain ready content over time
+assert.equal(dashboard.recommendation(socialOnly,fresh,'2026-10-03').step.id,'social-part01');
+assert.equal(dashboard.recommendation(socialOnly,fresh,'2026-10-03').minutes,15);
+assert.equal(dashboard.recommendation(socialOnly,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part02');
+assert.ok(dashboard.recommendation(config,fresh,'2026-10-03').step.file,'recommends only ready content');
 assert.ok(dashboard.recommendation(config,{has:()=>true},'2026-10-03').review);
 assert.equal(dashboard.recommendation({...config,subjects:config.subjects.map(s=>({...s,steps:s.steps.map(step=>({...step,file:null}))}))},fresh,'2026-10-03'),null);
 assert.equal(dashboard.subjectTarget(config.subjects[1],fresh).id,'english-part01');
@@ -162,7 +164,7 @@ console.log('PASS: all 13 Social Markdown/config video mappings, iframe controls
 
 assert.equal(config.subjects.reduce((n,s)=>n+s.steps.length,0),53);
 assert.ok(config.subjects.every(s=>s.steps.every(step=>!/-intro$|-pdf-guide$/.test(step.id))));
-assert.equal(dashboard.recommendation(config,{has:id=>id.startsWith('social-part')},'2026-10-03').step.id,'social-mock01');
+assert.equal(dashboard.recommendation(socialOnly,{has:id=>id.startsWith('social-part')},'2026-10-03').step.id,'social-mock01');
 stored.set('satit-swu-hub:v1',JSON.stringify({version:1,completed:['social-intro','social-pdf-guide','social-part01'],attempts:[{id:'social-mock01',title:'Old mock',score:0,total:1,date:'2026-10-01T00:00:00Z'}],examDate:null,resultDate:null}));
 let migrated=tracker();assert.equal(migrated.stats(config).done,2);assert.equal(migrated.stats(config).total,105);
 assert.equal(migrated.has('social-part01'),true);assert.equal(migrated.has('social-mock01'),true);
@@ -180,10 +182,12 @@ assert.deepEqual(socialItems.slice(0,4),['social-part01','social-part01-quiz','s
 assert.equal(socialItems.at(-1),'social-mock01');
 assert.equal(Catalog.parentOf(config.subjects[0],'social-part05-quiz').id,'social-part05');
 assert.equal(Catalog.parentOf(config.subjects[0],'social-mock01'),null);
-const withQuiz={...config,subjects:config.subjects.map((s,i)=>i?s:{...s,steps:s.steps.map(step=>step.id==='social-part01'?{...step,quiz:{...step.quiz,file:'./data/exams/x.md'}}:step)})};
+const withQuiz={...socialOnly,subjects:socialOnly.subjects.map(s=>({...s,steps:s.steps.map(step=>step.id==='social-part01'?{...step,quiz:{...step.quiz,file:'./data/exams/x.md'}}:step)}))};
 assert.equal(dashboard.recommendation(withQuiz,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part01-quiz');
 assert.equal(dashboard.subjectTarget(withQuiz.subjects[0],{has:id=>id==='social-part01'}).id,'social-part01-quiz');
 for(let i=1;i<=13;i++){const meta=read('data/content/social-part'+String(i).padStart(2,'0')+'.md');assert.match(meta,/\nvideo_match:\n  status: "(confirmed|partial|unconfirmed)"\n  evidence: "/);assert.match(meta,/\nanalysis_status: "(sample-unverified|pending|pdf-draft|pdf-verified)"/);}
+for(const s of config.subjects)for(const step of s.steps)if(step.quiz&&step.quiz.file)assert.notEqual(step.quiz.file,step.file,step.quiz.id+' must point to an exam file, not the lesson');
+for(const s of config.subjects)for(const step of s.steps)if(step.file&&fs.existsSync(step.file.replace('./','')))assert.ok(!read(step.file.replace('./','')).includes('dQw4w9WgXcQ'),step.id+' has a placeholder video');
 console.log('PASS: 52 PART lessons each followed by a 20-question end-of-chapter quiz, 105 progress units, quiz recommended after its lesson once ready, video-match evidence and analysis status on every Social PART');
 
 /* Google Sheet sync: Apps Script backend against an in-memory spreadsheet, plus tracker merge. */
