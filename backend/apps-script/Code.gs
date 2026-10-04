@@ -15,29 +15,59 @@ var SHEETS = {
   attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json', 'email'],
   settings: ['key', 'value', 'updated_at', 'email'],
   log: ['time', 'email', 'action', 'detail'],
-  plan_settings: ['key', 'value', 'คำอธิบาย'],
-  plan_periods: ['name', 'from', 'to', 'slots', 'weekday_slots', 'session_minutes', 'rest_days', 'review_label'],
-  plan_classes: ['title', 'days', 'time']
+  'แผน-วิธีใช้': ['วิธีปรับแผนการเรียนของพอใจ (แท็บนี้อ่านอย่างเดียว ไม่มีผลกับแผน)'],
+  'แผน-ตั้งค่า': ['หัวข้อ', 'ค่า', 'คำอธิบาย'],
+  'แผน-ช่วงเวลา': ['ชื่อช่วง', 'ตั้งแต่วันที่', 'ถึงวันที่', 'รอบเรียน', 'รอบเฉพาะบางวัน', 'นาทีต่อรอบ', 'วันพัก', 'ข้อความวันทบทวน'],
+  'แผน-วิชา': ['วิชา', 'ลำดับ', 'บทต่อรอบ', 'ข้อความจากพ่อถึงพอใจ'],
+  'แผน-วันพิเศษ': ['วันที่', 'รอบเรียนวันนั้น', 'ข้อความบนปฏิทิน'],
+  'แผน-คลาส': ['ชื่อคลาส', 'วัน', 'เวลา']
+};
+/* Hover notes on each header cell of the plan tabs. */
+var HEADER_NOTES = {
+  'แผน-ช่วงเวลา': ['ชื่อที่จะโชว์ใต้ปฏิทิน', 'เช่น 2026-10-05 หรือ 5/10/2569', 'เช่น 2026-10-31 หรือ 31/10/2569', 'เวลาและชื่อรอบ คั่นด้วย , เช่น 09:00 เช้า, 13:30 บ่าย (สูงสุด 6 รอบ)', 'ถ้าบางวันเรียนไม่เท่าวันอื่น เช่น จ,พ,ศ = 17:00 หลังเลิกเรียน (หลายกลุ่มคั่นด้วย ;)', 'นาทีต่อรอบ 5–60', 'เช่น อา หรือ ส,อา', 'ข้อความในวันที่เรียนครบทุกบทแล้ว'],
+  'แผน-วิชา': ['คณิต วิทย์ ไทย สังคม อังกฤษ', 'ลำดับที่หมุนเรียน 1 = เรียนก่อน', '1 = ปกติ, 2 = เรียนถี่ขึ้น 2 เท่า (สูงสุด 3)', 'จะโชว์ในการ์ดวิชานี้ หน้าเส้นทางการเรียน'],
+  'แผน-วันพิเศษ': ['วันที่ เช่น 2026-10-12 หรือ 12/10/2569', 'เว้นว่างหรือพิมพ์ หยุด = งดเรียนทั้งวัน, หรือใส่รอบเฉพาะวันนั้น เช่น 09:00 เช้า', 'โชว์ในช่องวันนั้นบนปฏิทิน เช่น ไปเที่ยว'],
+  'แผน-คลาส': ['ชื่อที่โชว์บนปฏิทิน', 'เช่น จ หรือ จ,พ,ศ', 'เช่น 19:30']
 };
 /* Study plan tabs are edited by hand in the Sheet. They start with these rows; the website's
    data/config.json daily_plan stays the fallback when a tab is empty or a row is invalid. */
 var PLAN_SEED = {
-  plan_settings: [
-    ['start_date', "'2026-10-05", 'วันเริ่มแผน (ปี ค.ศ. yyyy-mm-dd)'],
-    ['items_per_day', 1, 'จำนวนรายการต่อวัน นอกช่วงใน plan_periods'],
-    ['session_minutes', 20, 'นาทีต่อช่วง นอกช่วงใน plan_periods'],
-    ['rest_days', 'อา', 'วันพัก เช่น อา หรือ ส,อา']
+  'แผน-วิธีใช้': [
+    ['1. แก้ค่าในแท็บ แผน-… แล้วกดปุ่ม 🔄 ซิงก์ ที่ปฏิทินบนเว็บ แผนจะเปลี่ยนทันที ไม่ต้อง deploy'],
+    ['2. แผน-ตั้งค่า: วันเริ่มแผน นาทีต่อรอบ และวันพักประจำ'],
+    ['3. แผน-ช่วงเวลา: ช่วงปิดเทอม/เปิดเทอม แต่ละช่วงกำหนดรอบเรียนต่อวันเองได้'],
+    ['4. แผน-วิชา: สลับลำดับวิชา ให้วิชาไหนเรียนถี่ขึ้น และฝากข้อความถึงพอใจ (โชว์ในการ์ดวิชา)'],
+    ['5. แผน-วันพิเศษ: วันไปเที่ยว/ป่วย ให้หยุด หรือเรียนน้อยลงเฉพาะวัน บทที่เหลือจะเลื่อนไปวันถัดไปเอง'],
+    ['6. แผน-คลาส: คลาสประจำสัปดาห์ เช่น เรียนอังกฤษออนไลน์'],
+    ['วันที่พิมพ์ได้ทั้ง 2026-10-12 และ 12/10/2569 · วันใช้ อา จ อ พ พฤ ศ ส · ชี้ที่หัวคอลัมน์เพื่อดูคำอธิบาย'],
+    ['ถ้าลบแถวจนแท็บว่าง หรือพิมพ์ผิดรูปแบบ เว็บจะใช้แผนตั้งต้นในส่วนนั้นแทน · ติ๊กเรียนจบแล้วแผนไม่เลื่อน']
   ],
-  plan_periods: [
+  'แผน-ตั้งค่า': [
+    ['วันเริ่มแผน', "'2026-10-05", 'วันแรกของแผน'],
+    ['นาทีต่อรอบ', 20, 'ใช้เมื่อช่วงเวลาไม่ได้กำหนดเอง'],
+    ['รอบต่อวัน', 1, 'จำนวนรอบต่อวันนอกช่วงในแท็บ แผน-ช่วงเวลา'],
+    ['วันพักประจำ', 'อา', 'เช่น อา หรือ ส,อา']
+  ],
+  'แผน-ช่วงเวลา': [
     ['ปิดเทอม', "'2026-10-05", "'2026-10-31", "'09:00 เช้า, 10:30 สาย, 13:30 บ่าย, 16:00 เย็น", '', 25, 'อา', ''],
     ['เปิดเทอม ก่อน Pre-Test', "'2026-11-01", "'2026-11-28", "'17:00 หลังเลิกเรียน, 17:45 รอบ 2", "'จ,พ,ศ = 17:00 หลังเลิกเรียน", 25, 'อา', 'ทบทวนบทที่ยังไม่มั่นใจ / ทำข้อสอบท้ายบทซ้ำ']
   ],
-  plan_classes: [
+  'แผน-วิชา': [['คณิต', 1, 1, ''], ['วิทย์', 2, 1, ''], ['ไทย', 3, 1, ''], ['สังคม', 4, 1, ''], ['อังกฤษ', 5, 1, '']],
+  'แผน-วันพิเศษ': [
+    ['ตัวอย่าง 12/10/2569', 'หยุด', 'ไปเที่ยวกับครอบครัว (แถวตัวอย่าง ไม่มีผล ลบได้)'],
+    ['ตัวอย่าง 13/10/2569', "'09:00 เช้า", 'วันนี้เรียนรอบเดียว (แถวตัวอย่าง ไม่มีผล ลบได้)']
+  ],
+  'แผน-คลาส': [
     ['เรียนอังกฤษออนไลน์', 'จ', "'19:30"],
     ['เรียนอังกฤษออนไลน์', 'พ', "'19:00"],
     ['เรียนอังกฤษออนไลน์', 'ศ', "'19:30"]
   ]
 };
+var SETTING_ALIASES = {'วันเริ่มแผน': 'start_date', 'start_date': 'start_date', 'นาทีต่อรอบ': 'session_minutes', 'session_minutes': 'session_minutes',
+  'รอบต่อวัน': 'items_per_day', 'items_per_day': 'items_per_day', 'วันพักประจำ': 'rest_days', 'rest_days': 'rest_days'};
+var SUBJECT_ALIASES = {'คณิต': 'math', 'คณิตศาสตร์': 'math', 'math': 'math', 'วิทย์': 'science', 'วิทยาศาสตร์': 'science', 'science': 'science',
+  'ไทย': 'thai', 'ภาษาไทย': 'thai', 'thai': 'thai', 'สังคม': 'social', 'สังคมศึกษา': 'social', 'social': 'social',
+  'อังกฤษ': 'english', 'ภาษาอังกฤษ': 'english', 'english': 'english'};
 var DAY_CODES = {'อา': 0, 'จ': 1, 'อ': 2, 'พ': 3, 'พฤ': 4, 'ศ': 5, 'ส': 6};
 var SETTING_KEYS = ['examDate', 'resultDate'];
 var MAX_ATTEMPTS_RETURNED = 100;
@@ -50,6 +80,15 @@ function validDate(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   var d = new Date(value + 'T00:00:00Z');
   return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+/** "2026-10-12", "12/10/2026" or "12/10/2569" (พ.ศ.) → "2026-10-12", else "" */
+function parseDate(value) {
+  var v = String(value || '').trim(), m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) v = m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2);
+  var y = Number(v.slice(0, 4));
+  if (y > 2400) v = (y - 543) + v.slice(4); // พ.ศ.
+  return validDate(v) ? v : '';
 }
 
 function validTime(value) { return typeof value === 'string' && !isNaN(new Date(value).getTime()); }
@@ -125,21 +164,21 @@ function parseSlots(value) {
   return out.slice(0, 6);
 }
 
-/** Turn the three plan tabs (rows already as text) into a daily_plan object, or null if nothing usable. */
-function parsePlan(settingRows, periodRows, classRows) {
-  var plan = {}, any = false;
-  settingRows.forEach(function (r) {
-    var key = String(r[0] || '').trim(), value = String(r[1] === undefined ? '' : r[1]).trim();
-    if (key === 'start_date' && validDate(value)) { plan.start_date = value; any = true; }
+/** Turn the plan tabs (rows already as text) into a daily_plan object, or null if nothing usable. */
+function parsePlan(settingRows, periodRows, classRows, subjectRows, dayRows) {
+  var plan = {}, any = false, clean = function (v, n) { return String(v === undefined || v === null ? '' : v).trim().slice(0, n); };
+  (settingRows || []).forEach(function (r) {
+    var key = SETTING_ALIASES[clean(r[0], 40)], value = clean(r[1], 40);
+    if (key === 'start_date' && parseDate(value)) { plan.start_date = parseDate(value); any = true; }
     if (key === 'items_per_day' && Number(value) >= 1 && Number(value) <= 6) { plan.items_per_day = Math.floor(Number(value)); any = true; }
     if (key === 'session_minutes' && Number(value) >= 5 && Number(value) <= 60) { plan.session_minutes = Math.floor(Number(value)); any = true; }
     if (key === 'rest_days') { plan.rest_weekdays = parseDays(value); any = true; }
   });
   var periods = [];
-  periodRows.forEach(function (r) {
-    var from = String(r[1] || '').trim(), to = String(r[2] || '').trim(), slots = parseSlots(r[3]);
-    if (!validDate(from) || !validDate(to) || from > to || !slots.length) return;
-    var period = {name: String(r[0] || '').trim().slice(0, 60), from: from, to: to, slots: slots, rest_weekdays: parseDays(r[6])};
+  (periodRows || []).forEach(function (r) {
+    var from = parseDate(r[1]), to = parseDate(r[2]), slots = parseSlots(r[3]);
+    if (!from || !to || from > to || !slots.length) return;
+    var period = {name: clean(r[0], 60), from: from, to: to, slots: slots, rest_weekdays: parseDays(r[6])};
     var special = {};
     String(r[4] || '').split(';').forEach(function (group) {
       var bits = group.split('='), days = parseDays(bits[0]), daySlots = parseSlots(bits[1]);
@@ -147,16 +186,31 @@ function parsePlan(settingRows, periodRows, classRows) {
     });
     if (Object.keys(special).length) period.weekday_slots = special;
     if (Number(r[5]) >= 5 && Number(r[5]) <= 60) period.session_minutes = Math.floor(Number(r[5]));
-    if (String(r[7] || '').trim()) period.review_label = String(r[7]).trim().slice(0, 120);
+    if (clean(r[7], 120)) period.review_label = clean(r[7], 120);
     periods.push(period);
   });
   if (periods.length) { plan.periods = periods; any = true; }
   var classes = [];
-  classRows.forEach(function (r) {
+  (classRows || []).forEach(function (r) {
     var days = parseDays(r[1]), slot = parseSlots(String(r[2] || '') + ' x');
-    if (String(r[0] || '').trim() && days.length) classes.push({title: String(r[0]).trim().slice(0, 80), weekdays: days, time: slot.length ? slot[0].time : ''});
+    if (clean(r[0], 80) && days.length) classes.push({title: clean(r[0], 80), weekdays: days, time: slot.length ? slot[0].time : ''});
   });
   if (classes.length) { plan.recurring_events = classes; any = true; }
+  var subjects = [], seen = {};
+  (subjectRows || []).forEach(function (r, i) {
+    var id = SUBJECT_ALIASES[clean(r[0], 40).toLowerCase()] || SUBJECT_ALIASES[clean(r[0], 40)];
+    if (!id || seen[id]) return; seen[id] = true;
+    var order = Number(r[1]), weight = Math.floor(Number(r[2]));
+    subjects.push({id: id, order: isFinite(order) && clean(r[1], 10) !== '' ? order : 100 + i, weight: weight >= 1 && weight <= 3 ? weight : 1, note: clean(r[3], 300)});
+  });
+  if (subjects.length) { plan.subjects = subjects; any = true; }
+  var days = {};
+  (dayRows || []).forEach(function (r) {
+    var date = parseDate(r[0]), slotText = clean(r[1], 200), note = clean(r[2], 120);
+    if (!date) return;
+    days[date] = {slots: /^หยุด|^งด/.test(slotText) ? [] : parseSlots(slotText), note: note};
+  });
+  if (Object.keys(days).length) { plan.days = days; any = true; }
   return any ? plan : null;
 }
 
@@ -231,6 +285,14 @@ function sheet(name) {
   if (!tab) {
     tab = book.insertSheet(name); tab.appendRow(SHEETS[name]); tab.setFrozenRows(1);
     (PLAN_SEED[name] || []).forEach(function (row) { tab.appendRow(row); });
+    if (PLAN_SEED[name]) {
+      try { // cosmetic only: bold header, hover notes, wider columns
+        var header = tab.getRange(1, 1, 1, SHEETS[name].length);
+        header.setFontWeight('bold').setBackground('#f3d6da');
+        if (HEADER_NOTES[name]) header.setNotes([HEADER_NOTES[name]]);
+        for (var c = 1; c <= SHEETS[name].length; c++) tab.setColumnWidth(c, name === 'แผน-วิธีใช้' ? 760 : 170);
+      } catch (_) { /* formatting is optional */ }
+    }
   }
   return tab;
 }
@@ -287,7 +349,9 @@ function cellText(value, pattern) {
 function readPlan() {
   try {
     var asText = function (name, patterns) { return rows(name).map(function (r) { return r.map(function (v, i) { return cellText(v, patterns[i] || 'yyyy-MM-dd'); }); }); };
-    return parsePlan(asText('plan_settings', []), asText('plan_periods', ['', 'yyyy-MM-dd', 'yyyy-MM-dd', 'HH:mm', 'HH:mm']), asText('plan_classes', ['', '', 'HH:mm']));
+    sheet('แผน-วิธีใช้');
+    return parsePlan(asText('แผน-ตั้งค่า', []), asText('แผน-ช่วงเวลา', ['', 'yyyy-MM-dd', 'yyyy-MM-dd', 'HH:mm', 'HH:mm']), asText('แผน-คลาส', ['', '', 'HH:mm']),
+      asText('แผน-วิชา', ['', '', '']), asText('แผน-วันพิเศษ', ['yyyy-MM-dd', 'HH:mm']));
   } catch (error) { return null; }
 }
 

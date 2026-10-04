@@ -185,7 +185,7 @@ console.log('PASS: 52 PART lessons each followed by a 20-question end-of-chapter
 function fakeAppsScript(claimsFor){
  const tabs=new Map(),props={GOOGLE_CLIENT_ID:'client-1.apps.googleusercontent.com',ALLOWED_EMAILS:'dad@example.com, Porjai@Example.com'};
  const cell=v=>typeof v==='string'&&v.startsWith("'")?v.slice(1):v;
- function tab(name){const rows=[];return {rows,appendRow:r=>rows.push(r.map(cell)),setFrozenRows(){},getLastRow:()=>rows.length,
+ function tab(name){const rows=[];return {rows,appendRow:r=>rows.push(r.map(cell)),setFrozenRows(){},setColumnWidth(){},getLastRow:()=>rows.length,
   getDataRange:()=>({getValues:()=>rows.map(r=>[...r])}),
   getRange:(row,col,n,w)=>({getValues:()=>rows.slice(row-1,row-1+n).map(r=>r.slice(col-1,col-1+w)),setValues:vals=>vals.forEach((v,i)=>{rows[row-1+i]=v.map(cell);})})};}
  const ctx={JSON,Date,Object,Array,String,Number,Math,isFinite,isNaN,encodeURIComponent,
@@ -249,13 +249,24 @@ console.log('PASS: Google Sheet sync rejects unlisted/other-app/expired/invalid 
  for(const d of dates){const day=new Date(d+'T00:00:00Z').getUTCDay();assert.notEqual(day,0,'no study on Sunday');
   if(d>='2026-11-01'&&[1,3,5].includes(day))assert.ok(days[d].length<=1&&days[d].every(x=>x.slot.time<'19:00'),'one slot before the English class');}
  const sheetBackend=fakeAppsScript(claimsFor);sheetBackend.post({action:'login',id_token:'tok-dad-0000000000000'});
- for(const name of ['plan_settings','plan_periods','plan_classes'])assert.ok(sheetBackend.tabs.get(name).rows.length>1,name+' seeded');
+ for(const name of ['แผน-วิธีใช้','แผน-ตั้งค่า','แผน-ช่วงเวลา','แผน-วิชา','แผน-วันพิเศษ','แผน-คลาส'])assert.ok(sheetBackend.tabs.get(name).rows.length>1,name+' seeded');
  const remote=sheetBackend.post({action:'sync',id_token:'tok-dad-0000000000000',state:{marks:{},attempts:[],settings:{}}}).plan;
  assert.equal(remote.start_date,config.daily_plan.start_date);
  assert.deepEqual(JSON.parse(JSON.stringify(remote.recurring_events)),config.daily_plan.recurring_events);
  const fromSheet=plan.schedule({...config,daily_plan:{...config.daily_plan,...remote}});
  assert.deepEqual(Object.keys(fromSheet).map(d=>d+':'+fromSheet[d].map(x=>x.step.id+'@'+x.slot.time).join(',')),dates.map(d=>d+':'+days[d].map(x=>x.step.id+'@'+x.slot.time).join(',')));
  assert.equal(sheetBackend.parsePlan([['start_date','2026-13-40'],['items_per_day','99']],[['x','2026-11-02','2026-11-01','09:00 a']],[['c','zz','19:00']]),null);
+ // Thai dates (พ.ศ.), subject order/weight/note and special days from the Sheet
+ assert.equal(sheetBackend.parseDate('12/10/2569'),'2026-10-12');assert.equal(sheetBackend.parseDate('2569-10-12'),'2026-10-12');assert.equal(sheetBackend.parseDate('31/02/2026'),'');
+ const custom=sheetBackend.parsePlan([['วันเริ่มแผน','5/10/2569']],[],[],[['อังกฤษ','1','2','อ่านออกเสียงด้วยนะ'],['คณิต','2','1',''],['ภาษาไทย','3','',''],['xx','4','1','']],
+  [['12/10/2569','หยุด','ไปเที่ยว'],['13/10/2569','09:00 เช้า',''],['ตัวอย่าง 14/10/2569','หยุด','']]);
+ assert.equal(custom.start_date,'2026-10-05');assert.deepEqual(JSON.parse(JSON.stringify(custom.subjects.map(x=>[x.id,x.weight]))),[['english',2],['math',1],['thai',1]]);
+ assert.deepEqual(Object.keys(custom.days),['2026-10-12','2026-10-13']);
+ const customPlan={...config,daily_plan:{...config.daily_plan,...custom}},cd=plan.schedule(customPlan);
+ assert.equal(cd['2026-10-05'].map(x=>x.subject.id).join(),'english,english,math,thai');
+ assert.ok(!cd['2026-10-12'],'day off');assert.equal(cd['2026-10-13'].length,1);assert.equal(plan.note(customPlan,'english'),'อ่านออกเสียงด้วยนะ');
+ assert.equal(Object.values(cd).reduce((n,d)=>n+d.length,0),total,'nothing dropped when days are off');
+ const st=plan.standing(days,config.subjects.find(x=>x.id==='math'),{has:()=>false},'2026-10-08');assert.ok(st.behind>0&&st.ahead===0);
  // ticking lessons done never moves the plan
  assert.deepEqual(Object.keys(plan.schedule(config)),dates);
  console.log('PASS: study plan covers all '+total+' items before Pre-Test, no Sunday study, Mon/Wed/Fri slot before English class, Sheet plan tabs seeded and parsed to the same schedule, bad rows ignored');

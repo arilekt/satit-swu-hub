@@ -82,7 +82,14 @@ function eventGroups(activities,from){
   }
   return out.sort((a,b)=>a.first.localeCompare(b.first));
 }
-function journeyRow(config,subject,tracker){
+const shortDay=date=>new Intl.DateTimeFormat('th-TH',{timeZone:'UTC',weekday:'short',day:'numeric',month:'short'}).format(new Date(date+'T00:00:00Z'));
+// Plan line for the next lesson: when it is scheduled, or that it is overdue.
+function planWhen(at,today){
+  if(!at)return null;const slot=at.slot&&window.StudyPlan?StudyPlan.slotLabel(at.slot):'';
+  if(at.date<today)return node('span','⚠️ เลยกำหนดตามแผน ('+shortDay(at.date)+')','plan-when late');
+  return node('span','📅 ตามแผน: '+(at.date===today?'วันนี้':shortDay(at.date))+(slot?' · '+slot:''),'plan-when');
+}
+function journeyRow(config,subject,tracker,plan){
   const lessons=subject.steps.filter(s=>s.type==='lesson'),done=lessons.filter(s=>tracker.has(s.id)).length;
   const percent=lessons.length?Math.round(done/lessons.length*100):0;
   const row=node('article',undefined,'subject-row'),summary=node('div',undefined,'subject-summary');
@@ -90,6 +97,8 @@ function journeyRow(config,subject,tracker){
   const meta=node('div',undefined,'subject-meta');meta.append(node('span','จบ '+done+'/'+lessons.length+' บท'),node('strong',percent+'%'));
   const bar=node('progress');bar.max=lessons.length||1;bar.value=done;bar.setAttribute('aria-label','ความคืบหน้า'+subject.name);
   summary.append(meta,bar);
+  if(plan&&plan.days){const {behind,ahead}=StudyPlan.standing(plan.days,subject,tracker,plan.today);
+    summary.append(node('span',behind?'⏳ ช้ากว่าแผน '+behind+' ภารกิจ':ahead?'🚀 เร็วกว่าแผน '+ahead+' ภารกิจ':'✅ ตามแผน','plan-status '+(behind?'late':ahead?'ahead':'ok')));}
   const index=lessons.findIndex(s=>!tracker.has(s.id)),current=index<0?null:lessons[index];
   const steps=node('div',undefined,'subject-steps');
   const side=(step,label)=>{if(!step)return node('div','','step-side empty');const a=node('a',undefined,'step-side');a.href='#'+subject.id+'/'+step.id;a.append(document.createTextNode(label),node('strong',partName(step)));return a;};
@@ -100,11 +109,16 @@ function journeyRow(config,subject,tracker){
     text.append(node('span',current.file?'บทที่ควรเรียนต่อ':'บทถัดไป · รอเนื้อหา','label'),node('h4',partName(current)));
     const session=Math.max(5,Math.min(60,Number(config.daily_plan?.session_minutes)||20));
     const time=[current.source_duration_minutes?'คลิป '+current.source_duration_minutes+' นาที':null,'เรียนครั้งละประมาณ '+Math.min(session,Number(current.study_minutes)||session)+' นาที'].filter(Boolean).join(' · ');
-    text.append(node('span',time,'time'));now.append(text);
+    text.append(node('span',time,'time'));
+    const when=plan&&plan.index?planWhen(plan.index[current.id],plan.today):null;if(when)text.append(when);
+    now.append(text);
     if(current.file){const go=node('a','เข้าเรียน →','primary');go.href='#'+subject.id+'/'+current.id;now.append(go);}
   }else{text.append(node('span','จบครบทุกบทแล้ว 🎉','label'),node('h4','ทบทวนหรือทำข้อสอบท้ายบทได้เลย'));now.append(text);}
   steps.append(now,side(index>=0?lessons[index+1]:null,'ต่อไป'));
-  row.append(summary,steps);return row;
+  row.append(summary,steps);
+  const message=window.StudyPlan?StudyPlan.note(config,subject.id):'';
+  if(message){const box=node('p',undefined,'subject-note');box.append(node('b','💌 พ่อฝาก: '),document.createTextNode(message));row.append(box);}
+  return row;
 }
 // Exam tickets hold personal data: only a link to a private Google Drive file is accepted, never a file in this repo.
 function ticketUrl(value){try{const u=new URL(value);return u.protocol==='https:'&&['drive.google.com','docs.google.com'].includes(u.hostname)?u.href:null;}catch(_){return null;}}
@@ -172,7 +186,8 @@ function render(config,activities,tracker){
   if(!groups.length)list.append(node('li','ยังไม่มีกิจกรรมอื่นตอนนี้','muted'));
   for(const g of groups.slice(0,3)){const li=node('li');li.append(node('span',g.title),node('span',g.range,'when'));list.append(li);}
   const stats=tracker.stats(config);$('overall-caption').textContent='รวมทุกวิชา จบแล้ว '+stats.done+'/'+stats.total+' ภารกิจ';
-  $('subject-progress').replaceChildren(...ORDER()(config).map(subject=>journeyRow(config,subject,tracker)));
+  const planDays=window.StudyPlan?StudyPlan.schedule(config):null,plan=planDays?{days:planDays,index:StudyPlan.index(planDays),today:Countdown.today()}:null;
+  $('subject-progress').replaceChildren(...ORDER()(config).map(subject=>journeyRow(config,subject,tracker,plan)));
   MissionCalendar.render($('calendar-events'),activities.events.map(e=>({...e,source_note:e.source_note||activities.source_note})).sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))));
   $('other-schedules').replaceChildren();config.admissions.programs.filter(p=>p.id!==regular.id).forEach(program=>{const row=node('div',undefined,'other-program');row.append(node('h3',program.name),node('p','Pre-Test · '+Countdown.label(program.pretest_date)+' · สอบจริง · '+Countdown.label(program.exam_date)));$('other-schedules').append(row);});
   $('schedule-source').textContent=config.admissions.source_note;

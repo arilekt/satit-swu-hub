@@ -142,9 +142,11 @@ $('history-button').onclick=()=>{
 const PLAN_KEY='satit-swu-hub:plan';let defaultPlan=null;
 function applyPlan(remote,save){
  if(!remote||typeof remote!=='object'||Array.isArray(remote))return false;
- const allowed=['start_date','items_per_day','session_minutes','rest_weekdays','periods','recurring_events'],next={...defaultPlan,source:'sheet'};
+ const allowed=['start_date','items_per_day','session_minutes','rest_weekdays','periods','recurring_events','subjects','days'],next={...defaultPlan,source:'sheet'};
  for(const key of allowed)if(remote[key]!==undefined)next[key]=remote[key];
  if(next.periods&&!Array.isArray(next.periods))return false;
+ if(next.subjects&&!Array.isArray(next.subjects))return false;
+ if(next.days&&(typeof next.days!=='object'||Array.isArray(next.days)))return false;
  config.daily_plan=next;
  if(save)try{localStorage.setItem(PLAN_KEY,JSON.stringify(remote));}catch(_){/* keep in memory */}
  return true;
