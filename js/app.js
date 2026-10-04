@@ -105,7 +105,11 @@ async function route(){
  const main=$('lesson-content');main.replaceChildren(element('p','กำลังเปิดภารกิจ…'));
  try{
   // Lessons only: every exam step goes to quizPage() above, which shares QuizEngine with the mini check below.
-  if(!step.file){main.replaceChildren(element('span',subject.name,'tag'),element('h2',partName(step),'title'),element('p','บทนี้ยังรอเนื้อหา ลองเลือกบทที่พร้อมก่อนนะ','notice'));return;}
+  if(!step.file){ // no summary yet: the clip (from config) can still be watched
+   main.replaceChildren(element('span',subject.icon+' '+subject.name+' · '+step.title,'tag'),element('h2',partName(step),'title'));
+   if(step.video_url){const media=video(step.video_url),stage=element('section',undefined,'video-stage');stage.append(media.box);if(media.link)stage.append(media.link);main.append(stage,element('p','สรุปเนื้อหาบทนี้กำลังตามมา ดูคลิปไปก่อนได้เลย','notice'));}
+   else main.append(element('p','บทนี้ยังรอเนื้อหา ลองเลือกบทที่พร้อมก่อนนะ','notice'));
+   return;}
   await ensureMarkdown();if(token!==request)return;
   const data=parse(await get(step.file));if(token!==request)return;
   if(data.meta.id!==step.id)throw Error('id ในบทเรียนไม่ตรงกับ config');
@@ -113,7 +117,7 @@ async function route(){
   const head=element('header',undefined,'lesson-head'),clip=step.source_duration_minutes?'คลิป '+step.source_duration_minutes+' นาที':null;
   const total=window.StudyPlan?StudyPlan.minutes(step,config.daily_plan||{}):null;
   head.append(element('span',subject.icon+' '+subject.name+' · '+step.title,'tag'),element('h2',data.meta.title,'title'),element('span',[total?'ใช้เวลาประมาณ '+total+' นาที':null,clip].filter(Boolean).join(' · '),'meta'));
-  const media=video(data.meta.video_url),stage=element('section',undefined,'video-stage');stage.append(media.box);if(media.link)stage.append(media.link);
+  const media=video(data.meta.video_url||step.video_url),stage=element('section',undefined,'video-stage');stage.append(media.box);if(media.link)stage.append(media.link);
   main.replaceChildren(head,stage);
   const heading=element('div',undefined,'analysis-heading');heading.append(element('h3','📖 สรุปเนื้อหา'),analysisBadge(data.meta.analysis_status));main.append(heading);
   main.append(data.body.trim()?renderMarkdown(data.body):element('p','รอสรุปเนื้อหาจาก PDF','notice'));

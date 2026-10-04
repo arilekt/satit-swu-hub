@@ -188,6 +188,7 @@ assert.equal(dashboard.subjectTarget(withQuiz.subjects[0],{has:id=>id==='social-
 for(let i=1;i<=13;i++){const meta=read('data/content/social-part'+String(i).padStart(2,'0')+'.md');assert.match(meta,/\nvideo_match:\n  status: "(confirmed|partial|unconfirmed)"\n  evidence: "/);assert.match(meta,/\nanalysis_status: "(sample-unverified|pending|pdf-draft|pdf-verified)"/);}
 for(const s of config.subjects)for(const step of s.steps)if(step.quiz&&step.quiz.file)assert.notEqual(step.quiz.file,step.file,step.quiz.id+' must point to an exam file, not the lesson');
 for(const s of config.subjects)for(const step of s.steps)if(step.file&&fs.existsSync(step.file.replace('./','')))assert.ok(!read(step.file.replace('./','')).includes('dQw4w9WgXcQ'),step.id+' has a placeholder video');
+for(const s of config.subjects.filter(s=>s.id!=='social'))for(const step of s.steps.filter(x=>x.type==='lesson'))assert.match(step.video_url||'',/^https:\/\/www\.youtube\.com\/watch\?v=[\w-]{11}$/,step.id+' video');
 console.log('PASS: 52 PART lessons each followed by a 20-question end-of-chapter quiz, 105 progress units, quiz recommended after its lesson once ready, video-match evidence and analysis status on every Social PART');
 
 /* Google Sheet sync: Apps Script backend against an in-memory spreadsheet, plus tracker merge. */

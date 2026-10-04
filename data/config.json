@@ -258,7 +258,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=BtyXdnAUlGM"
         },
         {
           "id": "english-part02",
@@ -275,7 +276,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=Ao170WV8e3c"
         },
         {
           "id": "english-part03",
@@ -292,7 +294,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=t8vkNCGLbIk"
         },
         {
           "id": "english-part04",
@@ -309,7 +312,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=J4AEcMAICvY"
         },
         {
           "id": "english-part05",
@@ -326,7 +330,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=0hqOYTZl_C8"
         },
         {
           "id": "english-part06",
@@ -343,7 +348,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=kfpo5S6nbkM"
         },
         {
           "id": "english-part07",
@@ -360,7 +366,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=YDUBknnVTFI"
         },
         {
           "id": "english-part08",
@@ -377,7 +384,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=1i5lN9NRQXo"
         },
         {
           "id": "english-part09",
@@ -394,7 +402,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=daW2a3aIuSs"
         },
         {
           "id": "english-part10",
@@ -411,7 +420,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=zUXz49htFjg"
         },
         {
           "id": "english-part11",
@@ -428,7 +438,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=ukzn6cCik4s"
         }
       ],
       "exams": []
@@ -453,7 +464,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=q-KOoEI3r7U"
         },
         {
           "id": "science-part02",
@@ -470,7 +482,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=9O7PeEyrSN4"
         },
         {
           "id": "science-part03",
@@ -487,7 +500,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=N_LpYW5XNLg"
         },
         {
           "id": "science-part04",
@@ -504,7 +518,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=Jr1HBDFXTmc"
         },
         {
           "id": "science-part05",
@@ -521,7 +536,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=Mc2aYSJNMdY"
         },
         {
           "id": "science-part06",
@@ -538,7 +554,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=AzD0VnGGQM8"
         },
         {
           "id": "science-part07",
@@ -555,7 +572,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=pFg4Bvx7QNA"
         }
       ],
       "exams": []
@@ -580,7 +598,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=0TEABurBjnA"
         },
         {
           "id": "thai-part02",
@@ -597,7 +616,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=6gIQfmF1kcg"
         },
         {
           "id": "thai-part03",
@@ -614,7 +634,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=QkgaYSEzJUs"
         },
         {
           "id": "thai-part04",
@@ -631,7 +652,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=L3hkD6FuuUI"
         },
         {
           "id": "thai-part05",
@@ -648,7 +670,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=2K2XkLayjzA"
         },
         {
           "id": "thai-part06",
@@ -665,7 +688,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=9y1hb_UyJRw"
         },
         {
           "id": "thai-part07",
@@ -682,7 +706,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=U_TnSHSypMc"
         },
         {
           "id": "thai-part08",
@@ -699,7 +724,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=bR5dQDd3yNE"
         },
         {
           "id": "thai-part09",
@@ -716,7 +742,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=UsAyobUIoQE"
         }
       ],
       "exams": []
@@ -741,7 +768,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=kGZnJkfESw0"
         },
         {
           "id": "math-part02",
@@ -758,7 +786,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=tssa9bqx92s"
         },
         {
           "id": "math-part03",
@@ -775,7 +804,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=HSbalkPOvu0"
         },
         {
           "id": "math-part04",
@@ -792,7 +822,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=ZI1PxnKQv2M"
         },
         {
           "id": "math-part05",
@@ -809,7 +840,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=RPZMnsAmx-0"
         },
         {
           "id": "math-part06",
@@ -826,7 +858,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=UG2oo8M3CKk"
         },
         {
           "id": "math-part07",
@@ -843,7 +876,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 20
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=27DFKg9rvxU"
         },
         {
           "id": "math-part08",
@@ -860,7 +894,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=bayMtpS_2os"
         },
         {
           "id": "math-part09",
@@ -877,7 +912,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=QVPvOb662Rg"
         },
         {
           "id": "math-part10",
@@ -894,7 +930,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=EWB3mPZulU8"
         },
         {
           "id": "math-part11",
@@ -911,7 +948,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=sJr4XtjXUNA"
         },
         {
           "id": "math-part12",
@@ -928,7 +966,8 @@
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
-          }
+          },
+          "video_url": "https://www.youtube.com/watch?v=r1ed6LuJHZ0"
         }
       ],
       "exams": []
