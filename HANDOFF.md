@@ -102,52 +102,107 @@
 
 ---
 
-## 4. How to Resume
+## 4. For Next Thread: Phase ข-ง Completion
 
-### To Start UX/UI Redesign (New Thread)
-1. Clone this repo (if fresh session)
-2. Run local server: `python3 -m http.server 8000`
-3. Follow spec above, commit ทีละชุด (phase ก → ข → ค → ง)
-4. Test: `node scratchpad/test-final.mjs` (Playwright)
-5. Update HANDOFF.md after each phase
+### To Fix Phase ข & Complete Phases ค-ง (New Thread)
+1. **Start by fixing Phase ข blocker:**
+   - Debug ensureMarkdown() timing in route() line 79-80
+   - Check browser console for CDN library load timing
+   - Consider pre-loading libraries at app startup instead of deferring
+   - Or inline markdown parsing logic instead of CDN
+   - Verify fix by running Playwright test script
 
-### To Resume Daily Content Summary (Restart Job 88ce5cde at 01:00)
+2. **After Phase ข fix:**
+   - Commit Phase ข with video-first layout verified
+   - Then proceed to Phase ค (dashboard redesign per spec)
+   - Then Phase ง (monthly calendar)
+
+3. **CRITICAL - Logo Replacement:**
+   - Current logo is SVG placeholder at images/logo.svg
+   - Must replace with actual SWU_Prasanmit_Demonstration_Sec_TH_Color.png
+   - File location: user's machine D:\DEV_WORKSPACE\satit-mission-hub\images\
+   - Use Remote Control to copy file into images/ folder
+   - This is blocking Phase ก from being considered "fully complete"
+
+4. **Testing & Cleanup:**
+   - Keep test-phase-a.mjs (Phase ก verification)
+   - Delete or .gitignore other test-*.mjs files before merging
+   - Test each phase with Playwright before commit
+   - Update HANDOFF.md after each phase completion
+
+5. **Push & Merge:**
+   - Push to branch `claude/project-thread-y5n6ez`
+   - When all 4 phases complete: create PR to main with full spec verification
+
+### For Daily Content Summary Job (Resume at 01:00)
 1. Job ID: `88ce5cde` (stored in `.claude/trigger/`)
 2. Currently paused (do not delete)
-3. To unpause: Check `mcp__claude-code-remote__get_trigger` for current state
-4. Re-run: Schedule for next 01:00 Asia/Bangkok via cron
-5. Script: Validates PART count vs PDF, posts summary
+3. Ready to resume: Schedule for next 01:00 Asia/Bangkok
+4. Script: Validates PART count vs PDF, posts summary to project
 
 ---
 
-## 5. Phase ก Status (Updated 2026-10-04 current session)
+## 5. Current Session Status (2026-10-04 06:19 Bangkok)
 
-### ✅ Phase ก Complete: Typography + Logo + Layout
+### 🔄 Commits on Branch claude/project-thread-y5n6ez (NOT merged to main)
+| Commit | Message | Status |
+|--------|---------|--------|
+| 7784759 | Phase ก: theme + typography + logo + layout | Verified with Playwright |
+| d3b1861 | WIP: Phase ข investigation - lesson page content loading issue | Debug blocker ค้าง |
+| 88b0c9b | Update HANDOFF.md: Phase ก complete, Phase ข blocker identified | Latest |
+
+**Branch:** `claude/project-thread-y5n6ez` (ahead of main by 3 commits)
+
+### ✅ Phase ก Completed: Typography + Logo + Layout
 - body: 16px → **18px** ✓
 - h2: 23px → **26px**, h3: 20px → **22px** ✓
-- Logo: replaced text "SW" with SVG image ✓
+- Logo: **replaced text "SW" with SVG placeholder** (NOT final)
 - Logo clickable → dashboard ✓
 - Tested on iPad (768×1024) and desktop (1920×1080) ✓
-- **Commit:** d3b1861 Phase ก typography + logo + layout
+- Verified in commit 7784759
 
-### ⚠️ Phase ข Investigation: Lesson Page Content Loading
-**Current issue:** route() executes but markdown content not rendering
-- route() correctly loads markdown file via fetch ✓
-- render() correctly calls renderMarkdown() ✓
-- BUT: main.replaceChildren() still shows "กำลังเปิดภารกิจ…" after 5+ seconds ✗
+**⚠️ Logo Status:** Currently using `images/logo.svg` (red #BD2637 background + white "S" text)
+- **TEMPORARY PLACEHOLDER** — must be replaced with actual `SWU_Prasanmit_Demonstration_Sec_TH_Color.png` from user's machine (D:\DEV_WORKSPACE\satit-mission-hub\images\) via Remote Control
+- Phase ก is NOT fully complete until logo file is in place
 
-**Root cause identified:**
-- window.config was trapped in IIFE closure (FIXED in commit d3b1861)
-- CDN libraries (marked, jsyaml, DOMPurify) were async (changed to defer)
-- Suspect: ensureMarkdown() times out or libraries still not available
+### ❌ Phase ข BLOCKED: Lesson Page Content Loading
+**Issue:** route() executes but markdown content not rendering after 5+ seconds
 
-**Needed fixes:**
-1. Debug ensureMarkdown() timing in route() line 79-80
-2. Verify marked.parse(), jsyaml.load(), DOMPurify available
-3. May need inline load or pre-load at app startup instead of defer
-4. Check browser console for parse errors in renderMarkdown()
+**Root Cause Identified:**
+- window.config was trapped in IIFE closure → **FIXED** by adding `window.config=config;` at app.js:137
+- CDN libraries (marked, jsyaml, DOMPurify) script loading order → changed from async to defer
+- **PRIMARY BLOCKER:** ensureMarkdown() at route():79 times out waiting for libraries to load
+  - Symptoms: page stuck on "กำลังเปิดภารกิจ…" indefinitely
+  - Libraries may not be available when renderMarkdown() called at line 90
+  - Attempted fix: defer instead of async — did not resolve
 
-**Test files created:** scratchpad/test-*.mjs (7 files for debugging)
+**Attempted Fixes (commit d3b1861):**
+1. Exposed window.config from IIFE closure
+2. Modified sync.js to trust pre-set access-granted flag in sessionStorage
+3. Changed CDN scripts from async to defer in index.html
+4. Created 7 debug test scripts to isolate each component
+
+**Still Needed:**
+- Debug ensureMarkdown() timing with browser devtools
+- Option 1: Pre-load libraries at app startup instead of deferring
+- Option 2: Inline markdown parsing instead of relying on CDN
+- Option 3: Increase ensureMarkdown() timeout or add retry logic
+- Verify marked.parse(), jsyaml.load(), DOMPurify are available when renderMarkdown() executes
+
+### 🧪 Debug Test Files (scratchpad/test-*.mjs)
+**Created 8 test files for Phase ข investigation** (commit d3b1861):
+1. test-phase-a.mjs — Phase ก verification (✓ passed, safe to keep)
+2. test-lesson-debug.mjs — Initial lesson load (debug only)
+3. test-lesson-with-auth.mjs — With fake auth (debug only)
+4. test-check-script-load.mjs — Script availability (debug only)
+5. test-init-called.mjs — Init flow (debug only)
+6. test-init-error.mjs — Error detection (debug only)
+7. test-init-flow.mjs — Auth flow (debug only)
+8. test-route-flow.mjs — Route execution (debug only)
+
+**Recommendation:** Delete test-lesson-*.mjs, test-check-*.mjs, test-init-*.mjs, test-route-*.mjs before merging
+- Keep only test-phase-a.mjs (verified Phase ก typography + logo changes)
+- Or add `scratchpad/test-*.mjs` to .gitignore if keeping temporary test scripts
 
 ## 5. Important Notes
 
@@ -170,9 +225,10 @@
 
 ---
 
-**Status as of 2026-10-04 06:08:**
-- Login: ✅ Secure
-- Config: ✅ Loads
-- Content: ⏳ Route() not rendering (investigate next)
-- UI Redesign: ❌ Not started (START HERE in new thread)
-- Quiz Summary: ⏸️ Job 88ce5cde paused (resume at 01:00)
+**Status as of 2026-10-04 06:19 Bangkok:**
+- Login: ✅ Secure (gating + auth flow working)
+- Config: ✅ Loads (exposed via window.config)
+- Content: ❌ Route() loads but markdown NOT rendering (ensureMarkdown() timeout)
+- **Phase ก UI:** ✅ Typography + Logo theme complete (✘ logo still SVG placeholder)
+- **Phase ข-ง:** ❌ BLOCKED by Phase ข content rendering issue
+- **Quiz Summary Job (88ce5cde):** ⏸️ Paused (resume at 01:00)
