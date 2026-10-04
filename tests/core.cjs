@@ -62,7 +62,8 @@ console.log('PASS: calendar months/days, month-end clamping, leap year, exam day
 const regular=config.admissions.programs.find(p=>p.id==='regular');
 assert.equal(countdown.milestone(regular,null,'2026-10-03').phase,'pretest');
 assert.equal(countdown.milestone(regular,null,'2026-11-29').phase,'pretest');
-assert.equal(countdown.milestone(regular,null,'2026-11-30').phase,'results-unknown');
+assert.equal(countdown.milestone({...regular,pretest_results_date:null},null,'2026-11-30').phase,'results-unknown');
+assert.equal(countdown.milestone(regular,null,'2026-12-08').phase,'results-today');
 assert.equal(countdown.milestone(regular,'2026-12-05','2026-11-30').phase,'results-future');
 assert.equal(countdown.milestone(regular,'2026-12-05','2026-12-05').phase,'results-today');
 assert.equal(countdown.milestone(regular,'2026-12-05','2026-12-06').phase,'results-past');
@@ -81,10 +82,12 @@ vm.createContext(calendarContext);vm.runInContext(read('js/calendar.js'),calenda
 const calendar=calendarContext.window.MissionCalendar;
 const activities=JSON.parse(read('data/activities.json'));
 assert.equal(activities.events.length,5);
-const calendarEvents=calendar.list(config,activities,{resultDate:()=>null,examDate:()=>null});
+const noResultConfig={...config,admissions:{...config.admissions,programs:config.admissions.programs.map(p=>p.id==='regular'?{...p,pretest_results_date:null}:p)}};
+const calendarEvents=calendar.list(noResultConfig,activities,{resultDate:()=>null,examDate:()=>null});
 assert.equal(calendarEvents.length,7);
+assert.equal(calendar.list(config,activities,{resultDate:()=>null,examDate:()=>null}).length,8);
 assert.equal(calendarEvents[0].id,'regular-pretest');
-const resultEvents=calendar.list(config,activities,{resultDate:()=>'2026-12-05',examDate:()=>null});
+const resultEvents=calendar.list(noResultConfig,activities,{resultDate:()=>'2026-12-05',examDate:()=>null});
 assert.equal(resultEvents.length,8);
 const exported=calendar.ics(calendarEvents,new Date('2026-10-03T00:00:00Z'));
 assert.equal((exported.match(/BEGIN:VEVENT/g)||[]).length,7);
