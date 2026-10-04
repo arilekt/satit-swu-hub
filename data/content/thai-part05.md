@@ -4,6 +4,8 @@ title: "PART 05 · โวหาร ภาพพจน์ และการเ�
 duration: "60 นาที"
 source_duration_minutes: 60
 video_url: "https://www.youtube.com/watch?v=2K2XkLayjzA"
+chapter_title: "โวหาร ภาพพจน์ และการเขียน"
+analysis_status: "pdf-verified"
 ---
 
 > แหล่งที่มา: เอกสาร "สรุปเนื้อหาภาษาไทย" (PDF หน้า 22–24) · การแบ่ง PART เป็นการจับคู่ที่เสนอ (proposed) ความมั่นใจปานกลาง โดยอาศัยลำดับหัวข้อในเอกสาร (หัวข้อ 8 โวหาร, 9 ภาพพจน์, 10 การเขียน) · คลิปวิดีโอยังไม่ได้ตรวจสอบเนื้อหา (unverified) จึงไม่ยืนยันว่าตรงกับบทเรียนนี้

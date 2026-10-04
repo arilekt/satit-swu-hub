@@ -4,6 +4,8 @@ title: "PART 01 · เสียงในภาษาไทย: พยัญช�
 duration: "61 นาที"
 source_duration_minutes: 61
 video_url: "https://www.youtube.com/watch?v=0TEABurBjnA"
+chapter_title: "เสียงในภาษาไทย: พยัญชนะ สระ และวรรณยุกต์"
+analysis_status: "pdf-verified"
 ---
 
 > แหล่งที่มา: เอกสาร "สรุปเนื้อหาภาษาไทย" (PDF หน้า 2–7) · การแบ่ง PART เป็นการจับคู่ที่เสนอ (proposed) ความมั่นใจปานกลาง โดยอาศัยลำดับหัวข้อในเอกสาร · คลิปวิดีโอยังไม่ได้ตรวจสอบเนื้อหา (unverified) จึงไม่ยืนยันว่าตรงกับบทเรียนนี้
