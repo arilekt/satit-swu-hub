@@ -138,5 +138,5 @@ async function init(){
  ParentTools.init(activities);if(window.MissionSync)MissionSync.init(config);await route();setInterval(update,60000);
  }catch(error){$('daily-mission').replaceChildren(element('p','เริ่มต้นเว็บไม่ได้: '+error.message,'notice'));notify(error.message);}
 }
-init();
+if(document.getElementById('login-gating')?.hidden !== false) init(); else window.AppInit=init;
 })();
