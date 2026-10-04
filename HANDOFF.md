@@ -120,6 +120,35 @@
 
 ---
 
+## 5. Phase ก Status (Updated 2026-10-04 current session)
+
+### ✅ Phase ก Complete: Typography + Logo + Layout
+- body: 16px → **18px** ✓
+- h2: 23px → **26px**, h3: 20px → **22px** ✓
+- Logo: replaced text "SW" with SVG image ✓
+- Logo clickable → dashboard ✓
+- Tested on iPad (768×1024) and desktop (1920×1080) ✓
+- **Commit:** d3b1861 Phase ก typography + logo + layout
+
+### ⚠️ Phase ข Investigation: Lesson Page Content Loading
+**Current issue:** route() executes but markdown content not rendering
+- route() correctly loads markdown file via fetch ✓
+- render() correctly calls renderMarkdown() ✓
+- BUT: main.replaceChildren() still shows "กำลังเปิดภารกิจ…" after 5+ seconds ✗
+
+**Root cause identified:**
+- window.config was trapped in IIFE closure (FIXED in commit d3b1861)
+- CDN libraries (marked, jsyaml, DOMPurify) were async (changed to defer)
+- Suspect: ensureMarkdown() times out or libraries still not available
+
+**Needed fixes:**
+1. Debug ensureMarkdown() timing in route() line 79-80
+2. Verify marked.parse(), jsyaml.load(), DOMPurify available
+3. May need inline load or pre-load at app startup instead of defer
+4. Check browser console for parse errors in renderMarkdown()
+
+**Test files created:** scratchpad/test-*.mjs (7 files for debugging)
+
 ## 5. Important Notes
 
 - **Nightly routine paused:** Until UX/UI redesign (phase ก-ข) completes
