@@ -4,7 +4,7 @@
   'use strict';
   const TOKEN_KEY = 'satit-swu-hub:google-id-token';
   const ACCESS_KEY = 'satit-swu-hub:access-granted';
-  let settings = null, token = null, email = null, timer = null, busy = false, lastSync = null, lastError = '', gisReady = null, accessGranted = false, loginValidated = false;
+  let onAuthorized = null, settings = null, token = null, email = null, timer = null, busy = false, lastSync = null, lastError = '', gisReady = null, accessGranted = false, loginValidated = false;
   const $ = id => document.getElementById(id);
 
   function decode(jwt) {
@@ -18,7 +18,7 @@
 
   function render() {
     const chip = $('sync-chip'), status = $('sync-status'), now = $('sync-now'), out = $('sign-out');
-    const gating = $('login-gating'), content = $('dashboard-page');
+    const gating = $('login-gating');
     if (!chip) return;
     let text, state;
     if (!configured()) { text = 'ยังไม่ได้ตั้งค่า Google Sheet'; state = 'off'; }
@@ -36,12 +36,12 @@
     if (status) status.textContent = (email ? email + ' · ' : '') + text;
     if (now) now.hidden = !token || !accessGranted;
     if (out) out.hidden = !token;
-    if (gating && content) {
-      const isAuthenticated = token && accessGranted && loginValidated;
-      gating.hidden = isAuthenticated;
-      content.hidden = !isAuthenticated;
-      document.body.style.overflow = isAuthenticated ? '' : 'hidden';
-    }
+    const authenticated = configured() && !!token && accessGranted && loginValidated;
+    if (gating) gating.hidden = authenticated;
+    document.body.classList.toggle('locked', !authenticated);
+    const login = $('login-status');
+    if (login) login.textContent = authenticated ? '' : !configured() ? 'ยังไม่ได้ตั้งค่าการเข้าสู่ระบบ' : (token && !loginValidated) ? 'กำลังตรวจสอบสิทธิ์…' : (token && !accessGranted) ? 'บัญชีนี้ยังไม่มีสิทธิ์เข้าใช้ ' + (lastError ? '(' + lastError + ')' : '') : lastError;
+    if (authenticated && onAuthorized) { const start = onAuthorized; onAuthorized = null; start(); }
   }
 
   function loadGis() {
@@ -78,7 +78,6 @@
       if (!data.ok) throw Error(data.error || 'Google Sheet ตอบกลับผิดพลาด');
       accessGranted = true; lastError = '';
       try { sessionStorage.setItem(ACCESS_KEY, 'true'); } catch (_) { /* keep in memory only */ }
-      if (window.AppInit) { window.AppInit(); window.AppInit = null; }
     } catch (error) { accessGranted = false; lastError = error.message; }
     finally { loginValidated = true; busy = false; render(); }
   }
@@ -119,8 +118,8 @@
 
   function schedule() { clearTimeout(timer); timer = setTimeout(sync, 2000); }
 
-  function init(config) {
-    settings = config.sync || null;
+  function init(config, authorized) {
+    settings = config.sync || null; onAuthorized = authorized || null;
     render();
     if (!configured()) return;
     try {

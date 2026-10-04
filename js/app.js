@@ -131,12 +131,16 @@ $('history-button').onclick=()=>{
  const attempts=Tracker.attempts().reverse();if(!attempts.length)list.append(element('p','ยังไม่มีประวัติข้อสอบ','muted'));
  for(const attempt of attempts){const row=element('div',undefined,'answer');row.append(element('strong',attempt.title+' · '+attempt.score+'/'+attempt.total),element('p',new Date(attempt.date).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})));list.append(row);}
 };
-async function init(){
+async function start(){
+ let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
+ ParentTools.init(activities);await route();setInterval(update,60000);
+}
+// The app renders nothing until MissionSync confirms the signed-in account is allowed.
+async function boot(){
  try{
  config=await get('./data/config.json',true);if(!Array.isArray(config.subjects)||!config.subjects.length)throw Error('config ไม่ถูกต้อง');
- let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
- ParentTools.init(activities);if(window.MissionSync)MissionSync.init(config);await route();setInterval(update,60000);
- }catch(error){$('daily-mission').replaceChildren(element('p','เริ่มต้นเว็บไม่ได้: '+error.message,'notice'));notify(error.message);}
+ MissionSync.init(config,()=>start().catch(error=>notify(error.message)));
+ }catch(error){$('login-status').textContent='เริ่มต้นเว็บไม่ได้: '+error.message;}
 }
-const gating=document.getElementById('login-gating');if(gating?.hidden) window.AppInit=init; else if(gating) init();
+boot();
 })();
