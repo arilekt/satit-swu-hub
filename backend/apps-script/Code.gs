@@ -1,5 +1,6 @@
 /**
  * SPSM เส้นทางสู่ ม.1 sync backend (Google Apps Script bound to one Google Sheet).
+ * Generated: 2026-10-05 01:52 Bangkok
  *
  * Every request carries a Google ID token from the website's Sign-In button. The token is
  * verified with Google, its audience must equal GOOGLE_CLIENT_ID and its email must be in
