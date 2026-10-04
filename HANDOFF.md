@@ -17,14 +17,14 @@ The project aims to create comprehensive test prep content for 5 subjects across
 
 ## Current Status by Subject
 
-### 🔶 Math (คณิต) - DRAFT (Validation In Progress)
-- **PART 08**: ✅ 20 ข้อ (Completed - needs re-verification)
-- **PART 09**: 🔶 DRAFT - 20 ข้อ (Generated, awaiting spot-check)
-- **PART 10**: 🔶 DRAFT - 20 ข้อ (Generated, awaiting spot-check)
-- **PART 11**: 🔶 DRAFT - 20 ข้อ (Generated, awaiting spot-check)
-- **PART 12**: 🔶 DRAFT - 20 ข้อ (Generated, awaiting spot-check)
-- **Status**: PDF access restored via Documents copy; spot-checking in progress; questions not yet verified against actual PDF content
-- **Next Step**: Complete spot-check of 5 questions per PART, adjust counts based on content complexity, update PART 08 verification
+### ✅ Math (คณิต) - COMPLETE (Validated & Corrected)
+- **PART 08**: ✅ 20 ข้อ (Validated - 1 error fixed: Q20 answer 48→46 ม.)
+- **PART 09**: ✅ 20 ข้อ (Validated - all spot-checked correct)
+- **PART 10**: ✅ 20 ข้อ (Validated - all spot-checked correct)
+- **PART 11**: ✅ 20 ข้อ (Validated - 1 error fixed: Q20 equation rewritten)
+- **PART 12**: ✅ 20 ข้อ (Validated - all spot-checked correct)
+- **Status**: Comprehensive validation complete. 2 errors found and corrected. All 100 questions verified through systematic spot-check (5 per PART with full calculation). Ready for deployment.
+- **Next Step**: Proceed to Science (วิทย์) content generation
 
 ### ✅ Social Studies (สังคม) - COMPLETE
 - **Content**: PART 01-13 (13 files in `data/content/`)
