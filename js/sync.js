@@ -78,6 +78,7 @@
       if (!data.ok) throw Error(data.error || 'Google Sheet ตอบกลับผิดพลาด');
       accessGranted = true; lastError = '';
       try { sessionStorage.setItem(ACCESS_KEY, 'true'); } catch (_) { /* keep in memory only */ }
+      if (window.AppInit) { window.AppInit(); window.AppInit = null; }
     } catch (error) { accessGranted = false; lastError = error.message; }
     finally { loginValidated = true; busy = false; render(); }
   }
