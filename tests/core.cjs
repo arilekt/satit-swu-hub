@@ -35,15 +35,20 @@ vm.createContext(c);vm.runInContext(read('js/quiz-engine.js'),c);
 const q=[{question:'Q',options:['A','B'],answer:1,explanation:'Because B'}];
 assert.throws(()=>c.window.QuizEngine.validate([{...q[0],answer:2}]));
 const panel=new Node('section');c.window.QuizEngine.mount(panel,{id:'mock',title:'mock',time_limit_minutes:1},q);
-panel.children[0].onclick();assert.equal(c.window.QuizEngine.isActive(),true);
-const form=panel.children[1];form.children[0].children[2].children[0].onchange();
-form.onsubmit({preventDefault(){}});assert.equal(attempts[0].score,1);assert.equal(attempts[0].total,1);assert.equal(c.window.QuizEngine.isActive(),false);
+const startButton=panel.children[1];assert.match(startButton.textContent,/เริ่ม/);startButton.onclick();assert.equal(c.window.QuizEngine.isActive(),true);
+const [bar,form]=panel.children;assert.match(bar.children[1].textContent,/00:00 \/ 01:00/);
+form.children[0].children[2].children[0].onchange();assert.match(bar.children[0].textContent,/1\/1/);
+now=95000;tick();assert.match(bar.children[1].textContent,/เกินเวลา 00:35/);assert.equal(c.window.QuizEngine.isActive(),true,'going over the time never submits by itself');
+form.onsubmit({preventDefault(){}});assert.equal(attempts[0].score,1);assert.equal(attempts[0].total,1);assert.equal(attempts[0].elapsed_seconds,95);assert.equal(attempts[0].timedOut,true);assert.equal(c.window.QuizEngine.isActive(),false);
+const review=panel.children[2].children[0],texts=JSON.stringify(review.children.map(n=>n.children?n.children.map(x=>x.textContent):n.textContent));
+assert.match(texts,/พอใจตอบข้อนี้ ถูกต้อง/);assert.match(JSON.stringify(review.children.at(-1).children.map(x=>x.textContent)),/Because B/);assert.match(panel.children[0].children[1].textContent,/1 \/ 1/);
 form.onsubmit({preventDefault(){}});assert.equal(attempts.length,1);
-const timed=new Node('section');c.window.QuizEngine.mount(timed,{id:'timed',title:'timed',time_limit_minutes:1},q);timed.children[0].onclick();
-now=61000;tick();assert.equal(attempts[1].timedOut,true);assert.equal(attempts[1].score,0);assert.equal(attempts[1].answers[0].selected,null);
-const abandoned=new Node('section');c.window.QuizEngine.mount(abandoned,{id:'leave',title:'leave',time_limit_minutes:1},q);abandoned.children[0].onclick();c.window.QuizEngine.dispose();
+now=0;const second=new Node('section');c.window.QuizEngine.mount(second,{id:'two',title:'two',time_limit_minutes:1},q);second.children[1].onclick();
+now=30000;second.children[0].children[2].onclick();assert.equal(attempts[1].score,0);assert.equal(attempts[1].answers[0].selected,null);assert.equal(attempts[1].timedOut,false);
+assert.match(JSON.stringify(second.children[2].children[0].children.map(n=>n.children?n.children.map(x=>x.textContent):'')),/ข้อที่ถูก/);
+const abandoned=new Node('section');c.window.QuizEngine.mount(abandoned,{id:'leave',title:'leave',time_limit_minutes:1},q);abandoned.children[1].onclick();c.window.QuizEngine.dispose();
 assert.equal(attempts.length,2);assert.equal(listeners.size,0);assert.ok(cleared>0);
-console.log('PASS: syntax, content-and-exam catalogue, file paths, persistence, undo, filtered progress, detailed export, schema, scoring, single submit, deadline, abandonment cleanup');
+console.log('PASS: syntax, content-and-exam catalogue, file paths, persistence, undo, filtered progress, detailed export, schema, scoring, single submit, count-up timer that may run over, review shows chosen/correct/reason, abandonment cleanup');
 
 const dates={window:{}};
 vm.createContext(dates);vm.runInContext(read('js/countdown.js'),dates);
@@ -242,32 +247,41 @@ console.log('PASS: Google Sheet sync rejects unlisted/other-app/expired/invalid 
 /* Study plan: fixed schedule from config, Sheet plan tabs seeded to match it, parser rejects bad rows. */
 {
  const planContext={window:{Catalog},document:{getElementById:()=>null},Countdown:countdown};vm.createContext(planContext);vm.runInContext(read('js/plan.js'),planContext);
- const plan=planContext.window.StudyPlan,days=plan.schedule(config),dates=Object.keys(days).sort();
+ const plan=planContext.window.StudyPlan,days=plan.schedule(config),dates=Object.keys(days).sort(),pretest=config.admissions.programs.find(p=>p.id==='regular').pretest_date;
  const total=config.subjects.reduce((n,s)=>n+Catalog.items(s).length,0);
  assert.equal(dates.reduce((n,d)=>n+days[d].length,0),total);
- assert.ok(dates[dates.length-1]<config.admissions.programs.find(p=>p.id==='regular').pretest_date,'plan must end before Pre-Test');
- for(const d of dates){const day=new Date(d+'T00:00:00Z').getUTCDay();assert.notEqual(day,0,'no study on Sunday');
-  if(d>='2026-11-01'&&[1,3,5].includes(day))assert.ok(days[d].length<=1&&days[d].every(x=>x.slot.time<'19:00'),'one slot before the English class');}
+ const finish=plan.finishDates(days);
+ for(const id of ['math','science','thai','social'])assert.ok(finish[id]<pretest,id+' must end before Pre-Test');
+ for(const d of dates){assert.notEqual(new Date(d+'T00:00:00Z').getUTCDay(),0,'no study on Sunday');
+  for(const x of days[d]){if(x.subject.id==='english')assert.ok(d>pretest,'English waits until after Pre-Test');assert.equal(x.minutes,plan.minutes(x.step,config.daily_plan));}}
+ // a PART takes its real length (clip + reading), a long PART still gets a day of its own, days start at the period time
+ const sci3=Object.values(days).flat().find(x=>x.step.id==='science-part03');assert.equal(sci3.minutes,178+10);
+ assert.equal(days['2026-10-05'][0].slot.time,'09:00');assert.ok(Object.values(days).every(list=>list.length===1||list.reduce((n,x)=>n+x.minutes,0)<=180));
+ for(const d of dates.filter(d=>d>='2026-11-01'))assert.equal(days[d][0].slot.time,'17:00');
+ // a lesson always comes before its own quiz
+ const at={};for(const d of dates)days[d].forEach((x,i)=>at[x.step.id]=d+i);for(const s of config.subjects)for(const step of s.steps)if(step.quiz)assert.ok(at[step.id]<at[step.quiz.id]);
+ assert.equal(plan.recurring(config.daily_plan,'2026-12-28').length,1);assert.equal(plan.recurring(config.daily_plan,'2027-01-04').length,0,'English class ends Dec 2026');
  const sheetBackend=fakeAppsScript(claimsFor);sheetBackend.post({action:'login',id_token:'tok-dad-0000000000000'});
  for(const name of ['แผน-วิธีใช้','แผน-ตั้งค่า','แผน-ช่วงเวลา','แผน-วิชา','แผน-วันพิเศษ','แผน-คลาส'])assert.ok(sheetBackend.tabs.get(name).rows.length>1,name+' seeded');
  const remote=sheetBackend.post({action:'sync',id_token:'tok-dad-0000000000000',state:{marks:{},attempts:[],settings:{}}}).plan;
  assert.equal(remote.start_date,config.daily_plan.start_date);
  assert.deepEqual(JSON.parse(JSON.stringify(remote.recurring_events)),config.daily_plan.recurring_events);
- const fromSheet=plan.schedule({...config,daily_plan:{...config.daily_plan,...remote}});
- assert.deepEqual(Object.keys(fromSheet).map(d=>d+':'+fromSheet[d].map(x=>x.step.id+'@'+x.slot.time).join(',')),dates.map(d=>d+':'+days[d].map(x=>x.step.id+'@'+x.slot.time).join(',')));
- assert.equal(sheetBackend.parsePlan([['start_date','2026-13-40'],['items_per_day','99']],[['x','2026-11-02','2026-11-01','09:00 a']],[['c','zz','19:00']]),null);
- // Thai dates (พ.ศ.), subject order/weight/note and special days from the Sheet
+ const fromSheet=plan.schedule({...config,daily_plan:{...config.daily_plan,...remote}}),key=d=>Object.keys(d).map(x=>x+':'+d[x].map(y=>y.step.id+'@'+y.slot.time).join(','));
+ assert.deepEqual(key(fromSheet),key(days),'Sheet seed gives the same plan as config');
+ assert.equal(sheetBackend.parsePlan([['วันเริ่มแผน','2026-13-40'],['นาทีเรียนต่อวัน','9999']],[['x','2026-11-02','2026-11-01','09:00',60]],[['c','zz','19:00']],[['xx','1','1','','']],[['nope','หยุด','','']]),null);
+ // Thai dates (พ.ศ.), subject order/weight/start date/note and special days from the Sheet
  assert.equal(sheetBackend.parseDate('12/10/2569'),'2026-10-12');assert.equal(sheetBackend.parseDate('2569-10-12'),'2026-10-12');assert.equal(sheetBackend.parseDate('31/02/2026'),'');
- const custom=sheetBackend.parsePlan([['วันเริ่มแผน','5/10/2569']],[],[],[['อังกฤษ','1','2','อ่านออกเสียงด้วยนะ'],['คณิต','2','1',''],['ภาษาไทย','3','',''],['xx','4','1','']],
-  [['12/10/2569','หยุด','ไปเที่ยว'],['13/10/2569','09:00 เช้า',''],['ตัวอย่าง 14/10/2569','หยุด','']]);
- assert.equal(custom.start_date,'2026-10-05');assert.deepEqual(JSON.parse(JSON.stringify(custom.subjects.map(x=>[x.id,x.weight]))),[['english',2],['math',1],['thai',1]]);
- assert.deepEqual(Object.keys(custom.days),['2026-10-12','2026-10-13']);
+ const custom=sheetBackend.parsePlan([['วันเริ่มแผน','5/10/2569']],[],[],[['อังกฤษ','1','2','','อ่านออกเสียงด้วยนะ'],['คณิต','2','1','',''],['ภาษาไทย','3','','1/11/2569',''],['xx','4','1','','']],
+  [['12/10/2569','หยุด','',''+'ไปเที่ยว'],['13/10/2569','60','13:00',''],['ตัวอย่าง 14/10/2569','หยุด','','']]);
+ assert.equal(custom.start_date,'2026-10-05');assert.equal(JSON.stringify(custom.subjects.map(x=>[x.id,x.weight,x.from||''])),JSON.stringify([['english',2,''],['math',1,''],['thai',1,'2026-11-01']]));
+ assert.equal(JSON.stringify(custom.days),JSON.stringify({'2026-10-12':{note:'ไปเที่ยว',minutes:0},'2026-10-13':{note:'',minutes:60,start:'13:00'}}));
  const customPlan={...config,daily_plan:{...config.daily_plan,...custom}},cd=plan.schedule(customPlan);
- assert.equal(cd['2026-10-05'].map(x=>x.subject.id).join(),'english,english,math,thai');
- assert.ok(!cd['2026-10-12'],'day off');assert.equal(cd['2026-10-13'].length,1);assert.equal(plan.note(customPlan,'english'),'อ่านออกเสียงด้วยนะ');
+ assert.deepEqual(cd['2026-10-05'].map(x=>x.subject.id).slice(0,2).join(),'english,english');
+ assert.ok(!cd['2026-10-12'],'day off');assert.equal(cd['2026-10-13'][0].slot.time,'13:00');assert.equal(cd['2026-10-13'].length,1);assert.equal(plan.note(customPlan,'english'),'อ่านออกเสียงด้วยนะ');
+ assert.ok(Object.keys(cd).filter(d=>cd[d].some(x=>x.subject.id==='thai')).every(d=>d>='2026-11-01'),'subject start date');
  assert.equal(Object.values(cd).reduce((n,d)=>n+d.length,0),total,'nothing dropped when days are off');
  const st=plan.standing(days,config.subjects.find(x=>x.id==='math'),{has:()=>false},'2026-10-08');assert.ok(st.behind>0&&st.ahead===0);
  // ticking lessons done never moves the plan
  assert.deepEqual(Object.keys(plan.schedule(config)),dates);
- console.log('PASS: study plan covers all '+total+' items before Pre-Test, no Sunday study, Mon/Wed/Fri slot before English class, Sheet plan tabs seeded and parsed to the same schedule, bad rows ignored');
+ console.log('PASS: study plan fills days with whole PARTs by real length, math/science/thai/social before Pre-Test, English after, class ends Dec, Sheet tabs seeded to the same plan, special days and subject settings, bad rows ignored');
 }

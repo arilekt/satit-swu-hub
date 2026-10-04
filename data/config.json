@@ -1070,80 +1070,84 @@
     ]
   },
   "daily_plan": {
-    "session_minutes": 20,
-    "break_minutes": 5,
     "start_date": "2026-10-05",
+    "start_time": "17:00",
+    "day_minutes": 90,
+    "break_minutes": 10,
+    "reading_minutes": 10,
     "rest_weekdays": [
       0
     ],
-    "items_per_day": 1,
     "periods": [
       {
         "name": "ปิดเทอม",
         "from": "2026-10-05",
         "to": "2026-10-31",
-        "session_minutes": 25,
+        "start_time": "09:00",
+        "day_minutes": 180,
         "rest_weekdays": [
           0
-        ],
-        "slots": [
-          {
-            "name": "เช้า",
-            "time": "09:00"
-          },
-          {
-            "name": "สาย",
-            "time": "10:30"
-          },
-          {
-            "name": "บ่าย",
-            "time": "13:30"
-          },
-          {
-            "name": "เย็น",
-            "time": "16:00"
-          }
         ]
       },
       {
         "name": "เปิดเทอม ก่อน Pre-Test",
-        "review_label": "ทบทวนบทที่ยังไม่มั่นใจ / ทำข้อสอบท้ายบทซ้ำ",
         "from": "2026-11-01",
         "to": "2026-11-28",
-        "session_minutes": 25,
+        "start_time": "17:00",
+        "day_minutes": 90,
+        "weekday_minutes": {
+          "1": 60,
+          "3": 60,
+          "5": 60
+        },
         "rest_weekdays": [
           0
         ],
-        "slots": [
-          {
-            "name": "หลังเลิกเรียน",
-            "time": "17:00"
-          },
-          {
-            "name": "รอบ 2",
-            "time": "17:45"
-          }
+        "review_label": "ทบทวนบทที่ยังไม่มั่นใจ / ทำข้อสอบท้ายบทซ้ำ"
+      },
+      {
+        "name": "หลัง Pre-Test",
+        "from": "2026-11-30",
+        "to": "2027-02-06",
+        "start_time": "17:00",
+        "day_minutes": 90,
+        "weekday_minutes": {
+          "1": 60,
+          "3": 60,
+          "5": 60
+        },
+        "rest_weekdays": [
+          0
         ],
-        "weekday_slots": {
-          "1": [
-            {
-              "name": "หลังเลิกเรียน",
-              "time": "17:00"
-            }
-          ],
-          "3": [
-            {
-              "name": "หลังเลิกเรียน",
-              "time": "17:00"
-            }
-          ],
-          "5": [
-            {
-              "name": "หลังเลิกเรียน",
-              "time": "17:00"
-            }
-          ]
-        }
+        "review_label": "ทบทวนตามผล Pre-Test"
+      }
+    ],
+    "subjects": [
+      {
+        "id": "math",
+        "order": 1,
+        "weight": 1
+      },
+      {
+        "id": "science",
+        "order": 2,
+        "weight": 1
+      },
+      {
+        "id": "thai",
+        "order": 3,
+        "weight": 1
+      },
+      {
+        "id": "social",
+        "order": 4,
+        "weight": 1
+      },
+      {
+        "id": "english",
+        "order": 5,
+        "weight": 1,
+        "from": "2026-11-30"
       }
     ],
     "recurring_events": [
@@ -1152,27 +1156,29 @@
         "weekdays": [
           1
         ],
-        "time": "19:30"
+        "time": "19:30",
+        "until": "2026-12-31"
       },
       {
         "title": "เรียนอังกฤษออนไลน์",
         "weekdays": [
           3
         ],
-        "time": "19:00"
+        "time": "19:00",
+        "until": "2026-12-31"
       },
       {
         "title": "เรียนอังกฤษออนไลน์",
         "weekdays": [
           5
         ],
-        "time": "19:30"
+        "time": "19:30",
+        "until": "2026-12-31"
       }
     ],
     "finish_before": "pretest",
-    "note": "ร่างแผนรอคุณพ่อยืนยัน · วิชาผลัดกัน คณิต→วิทย์→ไทย→สังคม→อังกฤษ · periods ใช้แทนค่าปกติในช่วงวันที่นั้น (slots = ช่วงต่อวัน, weekday_slots = ช่วงเฉพาะวัน 0=อา. 1=จ. ...) · จ./พ./ศ. มีเรียนอังกฤษออนไลน์ตอนค่ำ เลยวาง 1 ช่วงหลังเลิกเรียน · finish_before = ต้องจบก่อน Pre-Test · ต.ค. เรียนเข้มข้นวันละ 4 ช่วง พ.ย. เก็บตกแล้วทบทวน (review_label)"
+    "note": "แผนตั้งต้น (ร่าง) · แต่ละวันเริ่มตาม start_time แล้วเรียงทีละ PART ตามความยาวจริง (คลิป + อ่านสรุป reading_minutes, ข้อสอบท้ายบท 1.5 นาที/ข้อ) จนครบ day_minutes · PART ยาวได้ช่วงของตัวเอง พอใจพักเอง · วิชาผลัดกัน คณิต→วิทย์→ไทย→สังคม · อังกฤษ low priority เริ่มหลัง Pre-Test (subjects.from) · คลาสอังกฤษออนไลน์ถึง 31 ธ.ค. 2569 · แก้ได้ที่ Google Sheet แท็บ แผน-…"
   },
-
   "sync": {
     "google_client_id": "31265253349-l240qupng3th9ob1obp66flb9ht4gmr3.apps.googleusercontent.com",
     "apps_script_url": "https://script.google.com/macros/s/AKfycbw3nF8y7GeEJoTWXHUsmW3_CuT5Bv-9r0aEt1N06RIlZHZU-ECDGZ1c8iznqFxG_hIy/exec",

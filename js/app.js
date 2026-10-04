@@ -61,8 +61,33 @@ function videoMatch(match){
 }
 function show(kind){
  page=kind;
- for(const id of ['dashboard','lesson','parent'])$(id+'-page').hidden=id!==kind;
- for(const [id,kindName] of [['dashboard','dashboard'],['learn','lesson'],['parent','parent']]){const a=$('nav-'+id);if(kind===kindName)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
+ for(const id of ['dashboard','lesson','quiz','parent'])$(id+'-page').hidden=id!==kind;
+ for(const [id,kindName] of [['dashboard','dashboard'],['learn','lesson'],['parent','parent']]){const a=$('nav-'+id);if(kind===kindName||(kind==='quiz'&&kindName==='lesson'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
+}
+// Exams get their own page with no lesson summary next to them; the answers stay hidden until "ส่งข้อสอบ".
+async function quizPage(subject,step,token){
+ const box=$('quiz-content'),parent=Catalog.parentOf(subject,step.id);
+ const back=parent?{href:'#'+subject.id+'/'+parent.id,label:'← กลับไปบทเรียน '+partName(parent)}:{href:'#'+subject.id+'/'+Dashboard.subjectTarget(subject,Tracker).id,label:'← กลับไปห้องเรียน'+subject.name};
+ const backLink=()=>{const a=element('a',back.label,'secondary-link quiz-back');a.href=back.href;return a;};
+ const head=element('header',undefined,'quiz-head');
+ head.append(element('span',subject.icon+' '+subject.name+' · '+(parent?parent.title+' · ข้อสอบท้ายบท':'ข้อสอบจำลองรวมทั้งวิชา'),'tag'),element('h2',parent?'ข้อสอบท้ายบท · '+partName(parent):step.title,'title'));
+ box.replaceChildren(backLink(),head,element('p','กำลังเปิดข้อสอบ…'));
+ if(!step.file){box.replaceChildren(backLink(),head,element('p',parent?'ข้อสอบท้ายบทของ '+parent.title+' ยังไม่พร้อม เมื่อเตรียมเสร็จจะขึ้นที่นี่ ระหว่างนี้กลับไปทบทวนบทเรียนก่อนนะ':'ข้อสอบชุดนี้ยังไม่พร้อม','notice'));return;}
+ try{
+  await ensureMarkdown();if(token!==request)return;
+  const data=parse(await get(step.file));if(token!==request)return;
+  if(data.meta.id!==step.id)throw Error('id ในข้อสอบไม่ตรงกับ config');
+  QuizEngine.validate(data.meta.questions);
+  const minutes=Number(data.meta.time_limit_minutes)||(window.StudyPlan?StudyPlan.minutes(step):30);
+  if(!parent)head.querySelector('h2').textContent=data.meta.title;
+  head.append(element('span',data.meta.questions.length+' ข้อ · เวลาแนะนำ '+minutes+' นาที','meta'));
+  const panel=element('section',undefined,'quiz-panel');
+  box.replaceChildren(backLink(),head,panel);
+  const last=Tracker.attempts().filter(a=>a.id===step.id).pop();
+  QuizEngine.mount(panel,{id:step.id,title:data.meta.title,time_limit_minutes:minutes,last:last?{score:last.score,total:last.total,elapsed_seconds:last.elapsed_seconds}:null,back,
+   onstart:()=>{box.firstChild.hidden=true;head.classList.add('compact');window.scrollTo({top:0,behavior:'auto'});},
+   onfinish:()=>{box.firstChild.hidden=false;head.classList.remove('compact');window.scrollTo({top:0,behavior:'auto'});update();}},data.meta.questions);
+ }catch(error){if(token!==request)return;box.replaceChildren(backLink(),head,element('p','ยังเปิดข้อสอบไม่ได้: '+error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;box.append(retry);}
 }
 async function route(){
  if(!config)return;
@@ -74,7 +99,9 @@ async function route(){
  const subject=subjectId==='learn'?(current?.subject||subjectsInOrder().find(s=>s.steps.some(x=>x.file))||subjectsInOrder()[0]):config.subjects.find(s=>s.id===subjectId);
  if(!subject){show('dashboard');update();notify('ไม่พบหน้านี้ กลับหน้าหลักก่อนนะ');return;}
  const step=[...Catalog.items(subject),...(subject.exams||[])].find(s=>s.id===stepId)||(subjectId==='learn'&&current?current.step:Dashboard.subjectTarget(subject,Tracker));
- current={subject,step};show('lesson');update();
+ current={subject,step};
+ if(step.type==='exam'){show('quiz');update();await quizPage(subject,step,token);return;}
+ show('lesson');update();
  const main=$('lesson-content');main.replaceChildren(element('p','กำลังเปิดภารกิจ…'));
  try{
   const parent=Catalog.parentOf(subject,step.id);
@@ -142,7 +169,7 @@ $('history-button').onclick=()=>{
 const PLAN_KEY='satit-swu-hub:plan';let defaultPlan=null;
 function applyPlan(remote,save){
  if(!remote||typeof remote!=='object'||Array.isArray(remote))return false;
- const allowed=['start_date','items_per_day','session_minutes','rest_weekdays','periods','recurring_events','subjects','days'],next={...defaultPlan,source:'sheet'};
+ const allowed=['start_date','start_time','day_minutes','break_minutes','reading_minutes','rest_weekdays','periods','recurring_events','subjects','days'],next={...defaultPlan,source:'sheet'};
  for(const key of allowed)if(remote[key]!==undefined)next[key]=remote[key];
  if(next.periods&&!Array.isArray(next.periods))return false;
  if(next.subjects&&!Array.isArray(next.subjects))return false;

@@ -37,8 +37,15 @@ const BOOSTS=[
 ];
 const ORDER=()=>window.StudyPlan?window.StudyPlan.ordered:(c=>c.subjects);
 const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
-const dayIndex=day=>Math.round(Date.parse(day+'T00:00:00Z')/86400000);
-function boost(day=Countdown.today()){return BOOSTS[((dayIndex(day)%BOOSTS.length)+BOOSTS.length)%BOOSTS.length];}
+// A new boost each time the page opens, never the same one twice in a row on this device.
+const BOOST_KEY='satit-swu-hub:last-boost';let pickedBoost=null;
+function boost(random=Math.random){
+  if(pickedBoost!==null)return BOOSTS[pickedBoost];
+  let last=-1;try{last=Number(localStorage.getItem(BOOST_KEY));}catch(_){/* no storage */}
+  let i=Math.floor(random()*BOOSTS.length)%BOOSTS.length;if(i===last)i=(i+1)%BOOSTS.length;
+  pickedBoost=i;try{localStorage.setItem(BOOST_KEY,String(i));}catch(_){/* no storage */}
+  return BOOSTS[i];
+}
 function recommendation(config,tracker,day=Countdown.today()){
   const session=Math.max(5,Math.min(30,Number(config.daily_plan?.session_minutes)||20));
   const candidates=config.subjects.map(subject=>{
@@ -107,8 +114,8 @@ function journeyRow(config,subject,tracker,plan){
   const now=node('div',undefined,'step-now'+(current&&!current.file?' waiting':'')),text=node('div',undefined,'step-now-text');
   if(current){
     text.append(node('span',current.file?'บทที่ควรเรียนต่อ':'บทถัดไป · รอเนื้อหา','label'),node('h4',partName(current)));
-    const session=Math.max(5,Math.min(60,Number(config.daily_plan?.session_minutes)||20));
-    const time=[current.source_duration_minutes?'คลิป '+current.source_duration_minutes+' นาที':null,'เรียนครั้งละประมาณ '+Math.min(session,Number(current.study_minutes)||session)+' นาที'].filter(Boolean).join(' · ');
+    const total=window.StudyPlan?StudyPlan.minutes(current,config.daily_plan||{}):Number(current.study_minutes)||30;
+    const time=['ใช้เวลาประมาณ '+total+' นาที',current.source_duration_minutes?'คลิป '+current.source_duration_minutes+' นาที + อ่านสรุป':null].filter(Boolean).join(' · ');
     text.append(node('span',time,'time'));
     const when=plan&&plan.index?planWhen(plan.index[current.id],plan.today):null;if(when)text.append(when);
     now.append(text);
