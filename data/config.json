@@ -246,198 +246,198 @@
         {
           "id": "english-part01",
           "title": "PART 01",
-          "file": null,
+          "file": "./data/content/english-part01.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "บทสนทนาในชีวิตประจำวัน ทักทาย ลา แนะนำตัว ถามทาง และบอกเวลา",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part01-quiz",
             "title": "แบบทดสอบท้ายบท · PART 01",
-            "file": null,
+            "file": "./data/exams/english-part01-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=BtyXdnAUlGM"
         },
         {
           "id": "english-part02",
           "title": "PART 02",
-          "file": null,
+          "file": "./data/content/english-part02.md",
           "type": "lesson",
           "source_duration_minutes": 62,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ขอร้อง แสดงความเห็น ชมเชย และเชิญชวน",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part02-quiz",
             "title": "แบบทดสอบท้ายบท · PART 02",
-            "file": null,
+            "file": "./data/exams/english-part02-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=Ao170WV8e3c"
         },
         {
           "id": "english-part03",
           "title": "PART 03",
-          "file": null,
+          "file": "./data/content/english-part03.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "Articles (a/an/the) และสรรพนาม (Pronouns)",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part03-quiz",
             "title": "แบบทดสอบท้ายบท · PART 03",
-            "file": null,
+            "file": "./data/exams/english-part03-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=t8vkNCGLbIk"
         },
         {
           "id": "english-part04",
           "title": "PART 04",
-          "file": null,
+          "file": "./data/content/english-part04.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "Verb to be, do, have และคำชี้เฉพาะ this/that/these/those",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part04-quiz",
             "title": "แบบทดสอบท้ายบท · PART 04",
-            "file": null,
+            "file": "./data/exams/english-part04-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=J4AEcMAICvY"
         },
         {
           "id": "english-part05",
           "title": "PART 05",
-          "file": null,
+          "file": "./data/content/english-part05.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "Tenses และ Passive Voice",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part05-quiz",
             "title": "แบบทดสอบท้ายบท · PART 05",
-            "file": null,
+            "file": "./data/exams/english-part05-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=0hqOYTZl_C8"
         },
         {
           "id": "english-part06",
           "title": "PART 06",
-          "file": null,
+          "file": "./data/content/english-part06.md",
           "type": "lesson",
           "source_duration_minutes": 64,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "Modal Verbs และคำถาม Wh-",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part06-quiz",
             "title": "แบบทดสอบท้ายบท · PART 06",
-            "file": null,
+            "file": "./data/exams/english-part06-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=kfpo5S6nbkM"
         },
         {
           "id": "english-part07",
           "title": "PART 07",
-          "file": null,
+          "file": "./data/content/english-part07.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "Adjectives, Comparison และ Adverbs",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part07-quiz",
             "title": "แบบทดสอบท้ายบท · PART 07",
-            "file": null,
+            "file": "./data/exams/english-part07-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=YDUBknnVTFI"
         },
         {
           "id": "english-part08",
           "title": "PART 08",
-          "file": null,
+          "file": "./data/content/english-part08.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "Conditionals, Wish Sentences และ Prepositions",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part08-quiz",
             "title": "แบบทดสอบท้ายบท · PART 08",
-            "file": null,
+            "file": "./data/exams/english-part08-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=1i5lN9NRQXo"
         },
         {
           "id": "english-part09",
           "title": "PART 09",
-          "file": null,
+          "file": "./data/content/english-part09.md",
           "type": "lesson",
           "source_duration_minutes": 63,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "Quantifiers และ Indefinite Pronouns",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part09-quiz",
             "title": "แบบทดสอบท้ายบท · PART 09",
-            "file": null,
+            "file": "./data/exams/english-part09-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=daW2a3aIuSs"
         },
         {
           "id": "english-part10",
           "title": "PART 10",
-          "file": null,
+          "file": "./data/content/english-part10.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ชนิดของประโยคและ Conjunctions",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part10-quiz",
             "title": "แบบทดสอบท้ายบท · PART 10",
-            "file": null,
+            "file": "./data/exams/english-part10-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=zUXz49htFjg"
         },
         {
           "id": "english-part11",
           "title": "PART 11",
-          "file": null,
+          "file": "./data/content/english-part11.md",
           "type": "lesson",
           "source_duration_minutes": 63,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ทักษะการอ่านและกลยุทธ์ทำข้อสอบ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "english-part11-quiz",
             "title": "แบบทดสอบท้ายบท · PART 11",
-            "file": null,
+            "file": "./data/exams/english-part11-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=ukzn6cCik4s"
         }

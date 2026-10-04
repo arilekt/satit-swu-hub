@@ -11,7 +11,7 @@
 Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Complete & Validated**: Math PART 01-12 (240 ข้อ, PDF-based) ✅
 - **Complete & Validated**: Science PART 01-07 (140 ข้อ, PDF-based) ✅
-- **Pending**: Thai (9 PART), English (11 PART)
+- **Pending**: Thai (9 PART)
 - **Exists**: Social Studies (13 PART + 1 mock exam) - needs validation
 
 ---
@@ -34,10 +34,10 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Content**: 9 PART chapters expected
 - **Action**: Create content + 15-20 ข้อ per PART, validate before push
 
-### ⏳ English (อังกฤษ) - DRAFT (Local Only)
-- **Status**: Not started (files in local/private if needed)
-- **Content**: 11 PART chapters expected
-- **Action**: Create content + 15-20 ข้อ per PART, validate before push
+### ✅ English (อังกฤษ) - PUBLISHED (v0.9.1)
+- **Status**: 11 PART lessons + 11 end-of-chapter exams (220 questions) on branch `english`
+- **Checks**: all 220 questions re-solved from scratch; every key and explanation confirmed correct, no fixes needed.
+- **Note**: lessons are PDF-based drafts; PART split proposed (medium confidence), clips not verified against pages.
 
 ### ✅ Social Studies (สังคม) - EXISTS, NEEDS VALIDATION
 - **Status**: 13 PART + 1 mock exam files exist on main
