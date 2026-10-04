@@ -11,7 +11,8 @@
     questions.forEach(q=>{if(!q || typeof q.question!=='string'||!Array.isArray(q.options)||q.options.length<2||!q.options.every(x=>typeof x==='string')||!Number.isInteger(q.answer)||q.answer<0||q.answer>=q.options.length||typeof q.explanation!=='string')throw new Error('รูปแบบคำถามไม่ถูกต้อง');});
   }
   const clock=seconds=>{const s=Math.max(0,Math.round(seconds)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),pad=n=>String(n).padStart(2,'0');return (h?h+':'+pad(m):pad(m))+':'+pad(s%60);};
-  // meta: {id, title, time_limit_minutes, last?: {score,total,elapsed_seconds}, back?: {href,label}, onstart?, onfinish?}
+  // Shared by every exam (end-of-chapter, mock exams) and the mini check in lessons.
+  // meta: {id, title, time_limit_minutes, last?: {score,total,elapsed_seconds}, back?: {href,label}, start_label?, onstart?, onfinish?}
   function mount(container,meta,questions) {
     validate(questions);
     const minutes=Number(meta.time_limit_minutes||Math.ceil(questions.length*1.5));
@@ -21,7 +22,7 @@
     for(const text of [questions.length+' ข้อ · ข้อละ 1 คะแนน · เลือกคำตอบที่ถูกที่สุด','⏱ เวลาแนะนำ '+minutes+' นาที นาฬิกานับขึ้น ถ้าเกินเวลาทำต่อได้ จะได้รู้ว่าใช้เวลาเท่าไร','🔀 ลำดับคำถามสลับทุกครั้ง','📝 กด “ส่งข้อสอบ” แล้วจะเห็นข้อที่เลือก ข้อที่ถูก เหตุผล และคะแนน'])rules.append(el('li',text));
     intro.append(rules);
     if(meta.last)intro.append(el('p','ครั้งล่าสุด: '+meta.last.score+'/'+meta.last.total+' คะแนน'+(Number.isFinite(meta.last.elapsed_seconds)?' · ใช้เวลา '+clock(meta.last.elapsed_seconds):''),'quiz-last'));
-    const start=el('button','เริ่มทำข้อสอบ ▶','primary quiz-start');start.type='button';
+    const start=el('button',meta.start_label||'เริ่มทำข้อสอบ ▶','primary quiz-start');start.type='button';
     container.append(intro,start);
     start.onclick=()=>run();
     function run(){

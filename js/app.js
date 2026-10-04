@@ -104,26 +104,23 @@ async function route(){
  show('lesson');update();
  const main=$('lesson-content');main.replaceChildren(element('p','กำลังเปิดภารกิจ…'));
  try{
-  const parent=Catalog.parentOf(subject,step.id);
-  if(!step.file){main.replaceChildren(element('span',subject.name+(parent?' · '+partName(parent)+' · แบบทดสอบท้ายบท':''),'tag'),element('h2',parent?'แบบทดสอบท้ายบท':step.type==='lesson'?partName(step):step.title,'title'),element('p',parent?'ข้อสอบท้ายบทของ '+parent.title+' ยังไม่พร้อม เมื่อเตรียมเสร็จจะขึ้นที่นี่ ระหว่างนี้กลับไปทบทวนบทเรียนก่อนนะ':'บทนี้ยังรอเนื้อหา ลองเลือกบทที่พร้อมก่อนนะ','notice'));if(parent){const back=element('a','← กลับไป '+partName(parent),'secondary-link');back.href='#'+subject.id+'/'+parent.id;main.append(back);}return;}
+  // Lessons only: every exam step goes to quizPage() above, which shares QuizEngine with the mini check below.
+  if(!step.file){main.replaceChildren(element('span',subject.name,'tag'),element('h2',partName(step),'title'),element('p','บทนี้ยังรอเนื้อหา ลองเลือกบทที่พร้อมก่อนนะ','notice'));return;}
   await ensureMarkdown();if(token!==request)return;
   const data=parse(await get(step.file));if(token!==request)return;
   if(data.meta.id!==step.id)throw Error('id ในบทเรียนไม่ตรงกับ config');
-  if(step.type==='exam')QuizEngine.validate(data.meta.questions);
   if(data.meta.quick_quiz)QuizEngine.validate(data.meta.quick_quiz);
-  const head=element('header',undefined,'lesson-head'),count=Array.isArray(data.meta.questions)?data.meta.questions.length+' ข้อ':null;
-  const clip=step.source_duration_minutes?'คลิป '+step.source_duration_minutes+' นาที':null;
-  head.append(element('span',subject.icon+' '+subject.name+' · '+(step.type==='exam'?(parent?parent.title+' · แบบทดสอบท้ายบท':'ข้อสอบจำลอง'):step.title),'tag'),element('h2',data.meta.title,'title'),element('span',[step.type==='exam'?count:clip,data.meta.duration?'เรียนประมาณ '+data.meta.duration:null].filter(Boolean).join(' · '),'meta'));
-  if(step.type!=='exam'){
-   const media=video(data.meta.video_url),stage=element('section',undefined,'video-stage');stage.append(media.box);if(media.link)stage.append(media.link);
-   main.replaceChildren(head,stage);
-   const heading=element('div',undefined,'analysis-heading');heading.append(element('h3','📖 สรุปเนื้อหา'),analysisBadge(data.meta.analysis_status));main.append(heading);
-  }else main.replaceChildren(head);
-  if(!data.body.trim()){main.append(element('p','รอสรุปเนื้อหาจาก PDF','notice'));}else
-  main.append(renderMarkdown(data.body));
-  if(step.type!=='exam'){const match=videoMatch(data.meta.video_match);if(match)main.append(match);}
-  if(step.type==='exam'||data.meta.quick_quiz){const panel=element('section',undefined,'quiz-panel');panel.append(element('h3',step.type==='exam'?'สนามซ้อมข้อสอบ':'เช็กความเข้าใจเล็ก ๆ'));main.append(panel);QuizEngine.mount(panel,{id:step.id+(step.type==='exam'?'':':mini'),title:data.meta.title,time_limit_minutes:data.meta.time_limit_minutes||5},step.type==='exam'?data.meta.questions:data.meta.quick_quiz);}
-  if(step.type!=='exam'){const complete=element('button',undefined,'primary complete');complete.id='complete-button';complete.onclick=()=>{Tracker.toggle(step.id);notify(Tracker.has(step.id)?'สำเร็จอีกหนึ่งก้าวแล้วพอใจ! 🌱':'ยกเลิกสถานะเรียนจบแล้ว');};main.append(complete);if(step.quiz){const next=element('a',step.quiz.file?'ต่อด้วยแบบทดสอบท้ายบท →':'แบบทดสอบท้ายบท (รอข้อสอบ) →','next-quiz');next.href='#'+subject.id+'/'+step.quiz.id;main.append(next);}update();}
+  const head=element('header',undefined,'lesson-head'),clip=step.source_duration_minutes?'คลิป '+step.source_duration_minutes+' นาที':null;
+  head.append(element('span',subject.icon+' '+subject.name+' · '+step.title,'tag'),element('h2',data.meta.title,'title'),element('span',[clip,data.meta.duration?'เรียนประมาณ '+data.meta.duration:null].filter(Boolean).join(' · '),'meta'));
+  const media=video(data.meta.video_url),stage=element('section',undefined,'video-stage');stage.append(media.box);if(media.link)stage.append(media.link);
+  main.replaceChildren(head,stage);
+  const heading=element('div',undefined,'analysis-heading');heading.append(element('h3','📖 สรุปเนื้อหา'),analysisBadge(data.meta.analysis_status));main.append(heading);
+  main.append(data.body.trim()?renderMarkdown(data.body):element('p','รอสรุปเนื้อหาจาก PDF','notice'));
+  const match=videoMatch(data.meta.video_match);if(match)main.append(match);
+  if(data.meta.quick_quiz){const panel=element('section',undefined,'quiz-panel');panel.append(element('h3','เช็กความเข้าใจเล็ก ๆ'));main.append(panel);QuizEngine.mount(panel,{id:step.id+':mini',title:data.meta.title,time_limit_minutes:data.meta.time_limit_minutes||5,start_label:'เริ่มเช็กความเข้าใจ ▶'},data.meta.quick_quiz);}
+  const complete=element('button',undefined,'primary complete');complete.id='complete-button';complete.onclick=()=>{Tracker.toggle(step.id);notify(Tracker.has(step.id)?'สำเร็จอีกหนึ่งก้าวแล้วพอใจ! 🌱':'ยกเลิกสถานะเรียนจบแล้ว');};main.append(complete);
+  if(step.quiz){const next=element('a',step.quiz.file?'ต่อด้วยแบบทดสอบท้ายบท →':'แบบทดสอบท้ายบท (รอข้อสอบ) →','next-quiz');next.href='#'+subject.id+'/'+step.quiz.id;main.append(next);}
+  update();
  }catch(error){if(token!==request)return;main.replaceChildren(element('h2','ยังเปิดภารกิจไม่ได้'),element('p',error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;main.append(retry);}
 }
 function parentRefresh(){update();notify('บันทึกกิจกรรมบนเครื่องนี้แล้ว');}
