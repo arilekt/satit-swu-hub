@@ -82,6 +82,8 @@ HANDOFF.md (status update)
 
 ## Next Steps
 
+**Next session:** copy the prompt in `docs/NEXT-SESSION-PROMPT.md` (Thai next, same steps as Science v0.9.0).
+
 1. Confirm subject priority (Science → Thai → English? Or different order?)
 2. Create content for next subject (prep summary + 15-20 ข้อ per PART)
 3. Validate using same methodology
