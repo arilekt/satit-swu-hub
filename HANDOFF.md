@@ -13,7 +13,7 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Complete & Validated**: Science PART 01-07 (140 ข้อ, PDF-based) ✅
 - **Complete & Validated**: Thai PART 01-09 (180 ข้อ, PDF-based) ✅
 - **Complete & Validated**: Social PART 01-13 (260 ข้อ, PDF-based) ✅
-- **Pending**: English (11 PART)
+- **Complete & Validated**: English PART 01-11 (220 ข้อ, PDF-based) ✅
 
 ---
 
@@ -35,10 +35,10 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - Checks: all 180 questions re-answered. Fixed: P03 Q6 (ธนุ + อาคม = ธันวาคม, PDF example; lesson table said ธนาคม), P02 Q16 (แก้ไข is คำซ้อน, replaced by คำประสม ตากอากาศ; lesson example too), P01 Q20 and P07 Q8 distractor explanations. Answer positions 5/5/5/5 per PART.
 - Tests: 11 PASS on an LF checkout. On a Windows CRLF checkout the Social video_match regex test fails (same on main, not content-related).
 
-### ⏳ English (อังกฤษ) - DRAFT (Local Only)
-- **Status**: Not started (files in local/private if needed)
-- **Content**: 11 PART chapters expected
-- **Action**: Create content + 15-20 ข้อ per PART, validate before push
+### ✅ English (อังกฤษ) - PUBLISHED (v0.9.1)
+- **Status**: 11 PART lessons + 11 end-of-chapter exams (220 questions) on branch `english`
+- **Checks**: all 220 questions re-solved from scratch; every key and explanation confirmed correct, no fixes needed.
+- **Note**: lessons are PDF-based drafts; PART split proposed (medium confidence), clips not verified against pages.
 
 ### ✅ Social Studies (สังคม) - PART 01-13 COMPLETE (lessons + exams)
 - Source: PDF-based drafts in `local/private/data/` copied into `data/content/social-partNN.md` and `data/exams/social-partNN-exam.md`, replacing the old sample lessons (quick_quiz).
