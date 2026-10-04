@@ -756,126 +756,126 @@
         {
           "id": "math-part01",
           "title": "PART 01",
-          "file": null,
+          "file": "./data/content/math-part01.md",
           "type": "lesson",
           "source_duration_minutes": 62,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "จำนวนเต็ม การหารลงตัว ลำดับการคำนวณ และโจทย์ต้นไม้/เสา",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part01-quiz",
             "title": "แบบทดสอบท้ายบท · PART 01",
-            "file": null,
+            "file": "./data/exams/math-part01-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=kGZnJkfESw0"
         },
         {
           "id": "math-part02",
           "title": "PART 02",
-          "file": null,
+          "file": "./data/content/math-part02.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ตั้งแต่/ระหว่าง และ/หรือ อนุกรม ฟีโบนัชชี และโจทย์จับมือ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part02-quiz",
             "title": "แบบทดสอบท้ายบท · PART 02",
-            "file": null,
+            "file": "./data/exams/math-part02-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=tssa9bqx92s"
         },
         {
           "id": "math-part03",
           "title": "PART 03",
-          "file": null,
+          "file": "./data/content/math-part03.md",
           "type": "lesson",
           "source_duration_minutes": 63,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ตัวประกอบ จำนวนเฉพาะ ห.ร.ม. และ ค.ร.น.",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part03-quiz",
             "title": "แบบทดสอบท้ายบท · PART 03",
-            "file": null,
+            "file": "./data/exams/math-part03-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=HSbalkPOvu0"
         },
         {
           "id": "math-part04",
           "title": "PART 04",
-          "file": null,
+          "file": "./data/content/math-part04.md",
           "type": "lesson",
           "source_duration_minutes": 63,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "เศษส่วน เศษซ้อน และอนุกรมเศษส่วนน่ารัก",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part04-quiz",
             "title": "แบบทดสอบท้ายบท · PART 04",
-            "file": null,
+            "file": "./data/exams/math-part04-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=ZI1PxnKQv2M"
         },
         {
           "id": "math-part05",
           "title": "PART 05",
-          "file": null,
+          "file": "./data/content/math-part05.md",
           "type": "lesson",
           "source_duration_minutes": 63,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "ทศนิยม หน่วยวัด และทศนิยมซ้ำ",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part05-quiz",
             "title": "แบบทดสอบท้ายบท · PART 05",
-            "file": null,
+            "file": "./data/exams/math-part05-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=RPZMnsAmx-0"
         },
         {
           "id": "math-part06",
           "title": "PART 06",
-          "file": null,
+          "file": "./data/content/math-part06.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "สมการและโจทย์ปัญหา (แรงงาน การเคลื่อนที่ ของผสม)",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part06-quiz",
             "title": "แบบทดสอบท้ายบท · PART 06",
-            "file": null,
+            "file": "./data/exams/math-part06-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=UG2oo8M3CKk"
         },
         {
           "id": "math-part07",
           "title": "PART 07",
-          "file": null,
+          "file": "./data/content/math-part07.md",
           "type": "lesson",
           "source_duration_minutes": 63,
-          "chapter_title": null,
-          "chapter_status": "pending",
+          "chapter_title": "มุม เส้นขนาน มุมในวงกลม และรูปสามเหลี่ยม (คล้าย/ปีทาโกรัส)",
+          "chapter_status": "completed",
           "quiz": {
             "id": "math-part07-quiz",
             "title": "แบบทดสอบท้ายบท · PART 07",
-            "file": null,
+            "file": "./data/exams/math-part07-exam.md",
             "type": "exam",
             "questions": 20,
-            "study_minutes": 20
+            "study_minutes": 30
           },
           "video_url": "https://www.youtube.com/watch?v=27DFKg9rvxU"
         },
@@ -885,12 +885,12 @@
           "file": "./data/content/math-part08.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": "รูปสี่เหลี่ยม",
+          "chapter_title": "รูปสี่เหลี่ยม หน่วยพื้นที่ และรูปวงกลม",
           "chapter_status": "completed",
           "quiz": {
             "id": "math-part08-quiz",
             "title": "แบบทดสอบท้ายบท · PART 08",
-            "file": null,
+            "file": "./data/exams/math-part08-exam.md",
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
@@ -903,12 +903,12 @@
           "file": "./data/content/math-part09.md",
           "type": "lesson",
           "source_duration_minutes": 60,
-          "chapter_title": "รูปวงกลม",
+          "chapter_title": "รูปทรงสามมิติ ปริมาตร และพื้นที่ผิว",
           "chapter_status": "completed",
           "quiz": {
             "id": "math-part09-quiz",
             "title": "แบบทดสอบท้ายบท · PART 09",
-            "file": null,
+            "file": "./data/exams/math-part09-exam.md",
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
@@ -921,12 +921,12 @@
           "file": "./data/content/math-part10.md",
           "type": "lesson",
           "source_duration_minutes": 62,
-          "chapter_title": "รูปสามมิติและปริมาตร",
+          "chapter_title": "บัญญัติไตรยางค์ อัตราส่วน ร้อยละ กำไร–ขาดทุน และดอกเบี้ย",
           "chapter_status": "completed",
           "quiz": {
             "id": "math-part10-quiz",
             "title": "แบบทดสอบท้ายบท · PART 10",
-            "file": null,
+            "file": "./data/exams/math-part10-exam.md",
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
@@ -939,12 +939,12 @@
           "file": "./data/content/math-part11.md",
           "type": "lesson",
           "source_duration_minutes": 63,
-          "chapter_title": "บัญญัติไตรยางค์",
+          "chapter_title": "แผนภูมิ สถิติ การนับ และความน่าจะเป็น",
           "chapter_status": "completed",
           "quiz": {
             "id": "math-part11-quiz",
             "title": "แบบทดสอบท้ายบท · PART 11",
-            "file": null,
+            "file": "./data/exams/math-part11-exam.md",
             "type": "exam",
             "questions": 20,
             "study_minutes": 30
@@ -957,12 +957,12 @@
           "file": "./data/content/math-part12.md",
           "type": "lesson",
           "source_duration_minutes": 61,
-          "chapter_title": "ร้อยละและอัตราส่วน",
+          "chapter_title": "คู่อันดับและกราฟ เลขยกกำลัง และเซต",
           "chapter_status": "completed",
           "quiz": {
             "id": "math-part12-quiz",
             "title": "แบบทดสอบท้ายบท · PART 12",
-            "file": null,
+            "file": "./data/exams/math-part12-exam.md",
             "type": "exam",
             "questions": 20,
             "study_minutes": 30

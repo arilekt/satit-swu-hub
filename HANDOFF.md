@@ -1,34 +1,27 @@
 # HANDOFF - Satit SWU Hub Content Status
 
-**Last Updated:** 2026-10-04  
-**Status:** Math PART 08-12 validation complete ✅  
-**Branch:** claude/trusting-easley-b8c9c2
+**Last Updated:** 2026-10-05  
+**Status:** Math PART 01-12 published from the PDF-based set (lessons + 240 exam questions) ✅  
+**Branch:** claude/project-thread-nj7kqq
 
 ---
 
 ## Summary
 
 Comprehensive test prep content for 5 subjects across 53 chapters:
-- **Complete & Validated**: Math PART 08-12 (100 ข้อ with 2 errors fixed) ✅
-- **Pending**: Science (7 PART), Thai (9 PART), English (11 PART), Math PART 01-07
+- **Complete & Validated**: Math PART 01-12 (240 ข้อ, PDF-based) ✅
+- **Pending**: Science (7 PART), Thai (9 PART), English (11 PART)
 - **Exists**: Social Studies (13 PART + 1 mock exam) - needs validation
 
 ---
 
 ## Current Status by Subject
 
-### ✅ Math (คณิต) - COMPLETE & PUSHED TO MAIN
-- **PART 08**: ✅ 20 ข้อ (Validated - Q20 fixed: answer 48→46 ม.)
-- **PART 09**: ✅ 20 ข้อ (Validated - all 5 spot-checked correct)
-- **PART 10**: ✅ 20 ข้อ (Validated - all 5 spot-checked correct)
-- **PART 11**: ✅ 20 ข้อ (Validated - Q20 rewritten for valid solution)
-- **PART 12**: ✅ 20 ข้อ (Validated - all 5 spot-checked correct)
-- **Methodology**: Systematic spot-check (5 random per PART) with full step-by-step calculations
-- **Errors Fixed**: 2 (PART 08 Q20, PART 11 Q20)
-- **Status**: Pushed to main with commits:
-  - `77a4f08`: fix validation errors
-  - `90d074c`: update HANDOFF status
-- **Next**: Science (วิทย์) or other subjects
+### ✅ Math (คณิต) - PART 01-12 COMPLETE (lessons + exams)
+- Source: the PDF-based set authored page by page in `local/private/data/` (AUTHORING-SPEC), copied into `data/content/math-partNN.md` and `data/exams/math-partNN-exam.md`. This replaces the earlier general-knowledge PART 08-12 files, which had no exams.
+- Exam files use the config quiz ids (`math-partNN-quiz`), 20 questions each, 30 minutes. Lessons carry `analysis_status: "pdf-verified"` and `chapter_title`.
+- Checks: every one of the 240 questions re-solved from scratch, all keys correct; 6 wrong-option explanations fixed (P02 Q7, P05 Q11, P06 Q12, P11 Q8, P12 Q6, Q11). `validate_content.py --subject math` 0 errors. Video ids match the owner's list for all 12 PARTs.
+- Owner priority for the rest: Science → Thai → Social → English. PDF-based drafts for every subject already exist in `local/private/data/` (validation.json: 1,040 questions, 0 errors).
 
 ### ⏳ Science (วิทย์) - DRAFT (Local Only)
 - **Status**: Not started (files in local/private if needed)

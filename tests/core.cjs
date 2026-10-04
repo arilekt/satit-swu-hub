@@ -116,7 +116,7 @@ assert.equal(dashboard.recommendation(socialOnly,fresh,'2026-10-03').minutes,15)
 assert.equal(dashboard.recommendation(socialOnly,{has:id=>id==='social-part01'},'2026-10-03').step.id,'social-part02');
 assert.ok(dashboard.recommendation(config,fresh,'2026-10-03').step.file,'recommends only ready content');
 assert.ok(dashboard.recommendation(config,{has:()=>true},'2026-10-03').review);
-assert.equal(dashboard.recommendation({...config,subjects:config.subjects.map(s=>({...s,steps:s.steps.map(step=>({...step,file:null}))}))},fresh,'2026-10-03'),null);
+assert.equal(dashboard.recommendation({...config,subjects:config.subjects.map(s=>({...s,steps:s.steps.map(step=>({...step,file:null,quiz:step.quiz&&{...step.quiz,file:null}}))}))},fresh,'2026-10-03'),null); // no lesson and no exam ready
 assert.equal(dashboard.subjectTarget(config.subjects[1],fresh).id,'english-part01');
 const editorStorage=new Map();
 function editor(){const context={window:{dispatchEvent(){}},localStorage:{getItem:k=>editorStorage.get(k)||null,setItem:(k,v)=>editorStorage.set(k,v),removeItem:k=>editorStorage.delete(k)},CustomEvent:class{}};
