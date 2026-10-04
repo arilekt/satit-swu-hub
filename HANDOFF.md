@@ -11,7 +11,8 @@
 Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Complete & Validated**: Math PART 01-12 (240 ข้อ, PDF-based) ✅
 - **Complete & Validated**: Science PART 01-07 (140 ข้อ, PDF-based) ✅
-- **Pending**: Thai (9 PART), English (11 PART)
+- **Complete**: Thai PART 01-09 (180 ข้อ, v0.10.0)
+- **Pending**: English (11 PART)
 - **Exists**: Social Studies (13 PART + 1 mock exam) - needs validation
 
 ---
@@ -29,10 +30,10 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - Exam ids `science-partNN-quiz`, 20 questions each, 30 minutes; lessons carry `chapter_title` and `analysis_status: "pdf-verified"`. Video ids and source_duration_minutes unchanged.
 - Checks: all 140 questions re-solved, all keys correct; lessons proofread. One note added in PART 03 (the PDF lists หัวล้าน as X-linked; most textbooks treat it as sex-influenced). Known PDF typos already corrected in the drafts: CaCO₃ (PDF Ca₂CO₃), N₂O (PDF NO₂), Saturn now has the most confirmed moons.
 
-### ⏳ Thai (ไทย) - DRAFT (Local Only)
-- **Status**: Not started (files in local/private if needed)
-- **Content**: 9 PART chapters expected
-- **Action**: Create content + 15-20 ข้อ per PART, validate before push
+### ✅ Thai (ไทย) - PART 01-09 COMPLETE (lessons + exams)
+- Source: PDF-based set from `local/private/data/`, copied into `data/content/thai-partNN.md` and `data/exams/thai-partNN-exam.md`; exam ids renamed to the config quiz ids (`thai-partNN-quiz`). Lessons carry `chapter_title` and `analysis_status: "pdf-verified"`.
+- Checks: all 180 questions re-answered. Fixed: P03 Q6 (ธนุ + อาคม = ธันวาคม, PDF example; lesson table said ธนาคม), P02 Q16 (แก้ไข is คำซ้อน, replaced by คำประสม ตากอากาศ; lesson example too), P01 Q20 and P07 Q8 distractor explanations. Answer positions 5/5/5/5 per PART.
+- Tests: 11 PASS on an LF checkout. On a Windows CRLF checkout the Social video_match regex test fails (same on main, line endings only).
 
 ### ⏳ English (อังกฤษ) - DRAFT (Local Only)
 - **Status**: Not started (files in local/private if needed)
@@ -82,7 +83,7 @@ HANDOFF.md (status update)
 
 ## Next Steps
 
-**Next session:** copy the prompt in `docs/NEXT-SESSION-PROMPT.md` (Thai next, same steps as Science v0.9.0).
+**Next session:** copy the prompt in `docs/NEXT-SESSION-PROMPT.md` (Thai done in v0.10.0; Social next, same steps).
 
 1. Confirm subject priority (Science → Thai → English? Or different order?)
 2. Create content for next subject (prep summary + 15-20 ข้อ per PART)
