@@ -65,7 +65,9 @@ main{min-height:70vh;outline:none}
 .login-logo{height:64px;width:auto;object-fit:contain;margin-bottom:14px}
 .login-content h1{font-size:26px;margin-bottom:8px}
 .login-content>p{font-size:var(--fs-sm);color:var(--muted)}
-.google-button-wrapper{margin:20px 0;min-height:48px;display:flex;justify-content:center}
+.google-button-wrapper{margin:20px 0;min-height:48px;display:flex;justify-content:center;align-items:center}
+.fallback-signin-btn{background:var(--surface-2);border:1px solid var(--line);color:var(--ink);padding:10px 20px;border-radius:12px;font-weight:500;font-size:var(--fs-sm)}
+.fallback-signin-btn:hover{background:var(--line)}
 .login-status{margin:12px 0 0}
 .login-note{font-size:var(--fs-xs);color:var(--muted);margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
 body.locked .top-nav,body.locked .sync-chip,body.locked .avatar,body.locked .page:not(.login-gating){display:none!important}
