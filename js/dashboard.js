@@ -114,6 +114,27 @@ function ticket(container,value,show){
   if(!url){container.append(node('span','ยังไม่ได้ใส่บัตรสอบ','ticket-missing'));return;}
   const a=node('a','🎫 เปิดบัตรสอบ','ticket-link');a.href=url;a.target='_blank';a.rel='noopener noreferrer';container.append(a);
 }
+function pretestDetails(box,d,subjects,ticketHref){
+  box.replaceChildren();
+  const head=node('header',undefined,'pd-head');head.append(node('span','รายละเอียดวันสอบ Pre-Test','eyebrow'),node('h2',d.title||'Pre-Test'));if(d.school)head.append(node('p',d.school,'muted'));box.append(head);
+  const facts=node('div',undefined,'pd-facts');
+  for(const [icon,label,value] of [['📅','วันสอบ',d.date_text],['🏫','อาคารสอบ',d.building],['🚪','ห้องสอบ',d.room]])if(value){const f=node('div',undefined,'pd-fact');f.append(node('span',icon+' '+label,'pd-label'),node('strong',value));facts.append(f);}
+  box.append(facts);
+  if(Array.isArray(d.schedule)&&d.schedule.length){
+    box.append(node('h3','⏰ ตารางสอบ'));const list=node('ol',undefined,'pd-schedule');
+    for(const row of d.schedule){const subject=subjects.find(s=>s.id===row.subject_id),li=node('li',undefined,row.break?'pd-break':'');li.append(node('span',row.time,'pd-time'),node('span',(subject?subject.icon+' ':row.break?'🍱 ':'')+row.subject,'pd-subject'),node('span',row.minutes+' นาที','pd-min'));list.append(li);}
+    box.append(list);
+  }
+  const cols=node('div',undefined,'pd-cols');
+  const listBox=(title,items,cls)=>{if(!Array.isArray(items)||!items.length)return;const sec=node('section',undefined,'pd-box '+cls);sec.append(node('h3',title));const ul=node('ul');items.forEach(x=>ul.append(node('li',x)));sec.append(ul);cols.append(sec);};
+  listBox('🎒 ต้องนำไปด้วย',d.bring,'pd-bring');listBox('💡 ข้อควรรู้',d.notes,'pd-notes');box.append(cols);
+  if(Array.isArray(d.travel)&&d.travel.length){const det=node('details',undefined,'pd-travel');det.append(node('summary','🚇 การเดินทางไปสนามสอบ'));const ul=node('ul');for(const t of d.travel){const li=node('li');li.append(node('strong',t.mode),node('span',' '+t.how));ul.append(li);}det.append(ul);box.append(det);}
+  const foot=node('div',undefined,'pd-foot');
+  if(ticketHref){const a=node('a','🎫 เปิดบัตรสอบจริง','primary');a.href=ticketHref;a.target='_blank';a.rel='noopener noreferrer';foot.append(a);}
+  if(d.privacy_note)foot.append(node('p','🔒 '+d.privacy_note,'fine-print'));
+  if(d.source_note)foot.append(node('p',d.source_note,'fine-print'));
+  box.append(foot);
+}
 function render(config,activities,tracker){
   const $=id=>document.getElementById(id);
   todayLabel($('today-date'));$('daily-boost').textContent=boost();
@@ -127,6 +148,9 @@ function render(config,activities,tracker){
   $('real-exam-date').textContent=Countdown.label(exam);
   counters($('exam-counter'),exam);
   ticket($('pretest-ticket'),regular.pretest_ticket_url,focus.phase==='pretest');
+  const details=regular.pretest_details,more=$('pretest-more'),panel=$('pretest-details');
+  more.hidden=!(details&&focus.phase==='pretest');if(more.hidden)panel.hidden=true;
+  if(!more.hidden){pretestDetails(panel,details,config.subjects,ticketUrl(regular.pretest_ticket_url));if(!more.onclick)more.onclick=()=>{panel.hidden=!panel.hidden;more.setAttribute('aria-expanded',String(!panel.hidden));more.textContent=panel.hidden?'📋 รายละเอียดวันสอบ':'✕ ปิดรายละเอียด';if(!panel.hidden)panel.scrollIntoView({behavior:'smooth',block:'start'});};}
   ticket($('exam-ticket'),regular.exam_ticket_url,true);
   $('result-notice').hidden=true;
   const groups=eventGroups(activities,Countdown.today()),list=$('activity-summary');list.replaceChildren();

@@ -91,7 +91,28 @@ body.locked{overflow:hidden}
 .real-exam .exam-date,.real-exam .exam-message{color:var(--muted)}
 .other-events{background:var(--surface-2);border:1px solid var(--line)}
 .other-events h3{font-size:18px;color:var(--muted)}
-.ticket{margin-top:8px}
+.card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.ticket{display:inline-flex}
+button.ticket-link{cursor:pointer;font-family:inherit}
+.pretest-details{margin-top:12px;background:var(--surface);border:2px solid var(--red);border-radius:var(--radius);padding:16px 20px;scroll-margin-top:80px}
+.pd-head h2{font-size:22px;color:var(--red-dark);margin-top:2px}
+.pd-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.pd-fact{background:var(--red-soft);border-radius:12px;padding:10px 14px;min-width:0}
+.pd-label{display:block;font-size:var(--fs-xs);color:var(--muted)}
+.pd-fact strong{font-size:20px}
+.pretest-details h3{font-size:20px;margin:14px 0 6px}
+.pd-schedule{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.pd-schedule li{display:grid;grid-template-columns:170px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 12px;border-radius:10px;background:var(--surface-2)}
+.pd-schedule .pd-break{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.pd-time{font-weight:600;font-variant-numeric:tabular-nums}
+.pd-min{font-size:var(--fs-xs);color:var(--muted);white-space:nowrap}
+.pd-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pd-box ul,.pd-travel ul{margin:0;padding-left:22px}
+.pd-box li,.pd-travel li{margin:4px 0}
+.pd-travel{margin-top:12px;border-top:1px solid var(--line)}
+.pd-travel summary{min-height:48px;display:flex;align-items:center;font-weight:600;cursor:pointer;font-size:20px}
+.pd-foot{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.pd-foot .fine-print{margin-top:6px}
 .ticket-link{display:inline-flex;align-items:center;min-height:48px;padding:0 16px;border-radius:12px;font-weight:600;font-size:var(--fs-sm);background:var(--surface);color:var(--red);border:1px solid var(--red-line)}
 .pretest .ticket-link{background:#fff;color:var(--red);border-color:#fff}
 .ticket-missing{font-size:var(--fs-xs);opacity:.85}
@@ -304,6 +325,9 @@ footer span{display:block}
  .subject-steps.no-prev{grid-template-columns:1fr}
  .today-date{text-align:left}
  .exam-grid{grid-template-columns:1fr 1fr}
+ .pd-facts,.pd-cols{grid-template-columns:1fr}
+ .pd-schedule li{grid-template-columns:1fr auto}
+ .pd-subject{grid-column:1/-1;order:3}
  .other-events{grid-column:1/-1}
  #subjects{grid-template-columns:repeat(3,minmax(0,1fr))}
  .subject-steps{grid-template-columns:1fr 1fr}
