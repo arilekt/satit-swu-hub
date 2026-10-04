@@ -10,7 +10,8 @@
 
 Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Complete & Validated**: Math PART 01-12 (240 ข้อ, PDF-based) ✅
-- **Pending**: Science (7 PART), Thai (9 PART), English (11 PART)
+- **Complete (branch thai, awaiting merge)**: Thai PART 01-09 (180 ข้อ)
+- **Pending**: Science (7 PART), English (11 PART)
 - **Exists**: Social Studies (13 PART + 1 mock exam) - needs validation
 
 ---
@@ -28,10 +29,10 @@ Comprehensive test prep content for 5 subjects across 53 chapters:
 - **Content**: 7 PART chapters expected
 - **Action**: Create content + 15-20 ข้อ per PART, validate before push
 
-### ⏳ Thai (ไทย) - DRAFT (Local Only)
-- **Status**: Not started (files in local/private if needed)
-- **Content**: 9 PART chapters expected
-- **Action**: Create content + 15-20 ข้อ per PART, validate before push
+### ✅ Thai (ไทย) - PART 01-09 COMPLETE (lessons + exams), branch `thai`
+- Source: PDF-based set from `local/private/data/`, copied into `data/content/thai-partNN.md` and `data/exams/thai-partNN-exam.md`; exam ids renamed to the config quiz ids (`thai-partNN-quiz`). Lessons carry `chapter_title` and `analysis_status: "pdf-verified"`.
+- Checks: all 180 questions re-answered. Fixed: P03 Q6 (ธนุ + อาคม = ธันวาคม, PDF example; lesson table said ธนาคม), P02 Q16 (แก้ไข is คำซ้อน, replaced by คำประสม ตากอากาศ; lesson example too), P01 Q20 and P07 Q8 distractor explanations. Answer positions 5/5/5/5 per PART.
+- Tests: 11 PASS on an LF checkout. On a Windows CRLF checkout the Social video_match regex test fails (same on main, not content-related).
 
 ### ⏳ English (อังกฤษ) - DRAFT (Local Only)
 - **Status**: Not started (files in local/private if needed)
