@@ -21,7 +21,9 @@
     const intro=el('div',undefined,'quiz-intro'),rules=el('ul',undefined,'quiz-rules');
     for(const text of [questions.length+' ข้อ · ข้อละ 1 คะแนน · เลือกคำตอบที่ถูกที่สุด','⏱ เวลาแนะนำ '+minutes+' นาที นาฬิกานับขึ้น ถ้าเกินเวลาทำต่อได้ จะได้รู้ว่าใช้เวลาเท่าไร','🔀 ลำดับคำถามสลับทุกครั้ง','📝 กด “ส่งข้อสอบ” แล้วจะเห็นข้อที่เลือก ข้อที่ถูก เหตุผล และคะแนน'])rules.append(el('li',text));
     intro.append(rules);
-    if(meta.last)intro.append(el('p','ครั้งล่าสุด: '+meta.last.score+'/'+meta.last.total+' คะแนน'+(Number.isFinite(meta.last.elapsed_seconds)?' · ใช้เวลา '+clock(meta.last.elapsed_seconds):''),'quiz-last'));
+    // history (an array, or a function returning one) = this exam's earlier attempts: show the statistics component
+    if(meta.history&&window.ExamStats)intro.append(window.ExamStats.render(typeof meta.history==='function'?meta.history():meta.history));
+    else if(meta.last)intro.append(el('p','ครั้งล่าสุด: '+meta.last.score+'/'+meta.last.total+' คะแนน'+(Number.isFinite(meta.last.elapsed_seconds)?' · ใช้เวลา '+clock(meta.last.elapsed_seconds):''),'quiz-last'));
     const start=el('button',meta.start_label||'เริ่มทำข้อสอบ ▶','primary quiz-start');start.type='button';
     container.append(intro,start);
     start.onclick=()=>run();
@@ -62,10 +64,12 @@
     function result(ordered,answers,score,used){
       container.replaceChildren();
       const wrong=ordered.filter((q,i)=>answers[i]!==null&&answers[i]!==q.answer).length,skipped=answers.filter(a=>a===null).length,pct=Math.round(score/ordered.length*100);
-      const card=el('section',undefined,'quiz-score '+(pct>=80?'great':pct>=50?'good':'low'));
+      const stats=window.ExamStats,level=stats?stats.levelFor(score*100/ordered.length):null,grade=stats?stats.tier(level,stats.grading()):null;
+      const card=el('section',undefined,'quiz-score '+(grade!==null?(grade>=2?'great':grade===1?'good':'low'):pct>=80?'great':pct>=50?'good':'low'));
       card.append(el('span','คะแนน','label'),el('strong',score+' / '+ordered.length,'score'),el('span',pct+'% · ถูก '+score+' · ผิด '+wrong+(skipped?' · ไม่ได้ตอบ '+skipped:''),'detail'),
         el('span','⏱ ใช้เวลา '+clock(used)+(used>limit?' · เกินเวลาแนะนำ '+clock(used-limit):' · เวลาแนะนำ '+clock(limit)),'detail'+(used>limit?' over':'')),
         el('p',score===ordered.length?'เยี่ยมมาก! ลองอธิบายเหตุผลให้คุณพ่อฟังนะ':'ข้อที่พลาดคือโอกาสเรียนรู้ อ่านเหตุผลด้านล่างแล้วลองใหม่ได้เลย','cheer'));
+      if(stats)card.insertBefore(stats.badge(level),card.children[2]);
       const filters=el('div',undefined,'quiz-filter'),all=el('button','ดูทุกข้อ','secondary active'),missed=el('button','เฉพาะข้อที่พลาด ('+(wrong+skipped)+')','secondary');all.type='button';missed.type='button';filters.append(all,missed);
       const list=el('div',undefined,'quiz-review'),cards=[];
       const option=(kind,text,j,tag)=>{const row=el('div',undefined,'review-option'+(kind?' '+kind:''));row.append(el('span',LETTERS[j]||String(j+1),'opt-letter'),el('span',text,'opt-text'));if(tag)row.append(el('span',tag,'tag'));return row;};

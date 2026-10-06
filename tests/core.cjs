@@ -333,6 +333,15 @@ console.log('PASS: Apps Script sessions: 90-day revocable device sessions (hash 
  words.rows.splice(1);words.rows.push(['สู้ ๆ นะ','']);words.rows.push(['วันสอบแล้ว ใจเย็น ๆ','2027-02-07']);words.rows.push(['x'.repeat(500),'']);words.rows.push(['','']);
  r=sync();assert.equal(r.extras.mottos.length,3);assert.equal(r.extras.mottos[1].date,'2027-02-07');assert.equal(r.extras.mottos[2].text.length,200);
  words.rows.splice(1);assert.equal(sync().extras.mottos,null);
+ // Score levels (เกณฑ์คะแนน): seeded to equal the website defaults, validated, sorted, null when unusable
+ const es=(()=>{const c={window:{},document:{}};vm.createContext(c);vm.runInContext(read('js/exam-stats.js'),c);return c.window.ExamStats;})();
+ r=sync();assert.deepEqual(r.extras.grading,JSON.parse(JSON.stringify(es.DEFAULT_GRADING)));
+ const grade=g.tabs.get('เกณฑ์คะแนน');
+ grade.rows[3][1]=75;grade.rows[2][1]='ไม่รู้';
+ r=sync();assert.deepEqual(r.extras.grading.map(l=>l.label),['ต้องฝึกเพิ่ม','ดีมาก','ยอดเยี่ยม']);assert.equal(r.extras.grading[1].above,true);assert.equal(r.extras.grading[0].above,false);assert.equal(r.extras.grading[1].percent,75);
+ grade.rows[1][1]='101';assert.deepEqual(sync().extras.grading.map(l=>l.label),['ดีมาก','ยอดเยี่ยม'],'out-of-range percent dropped');
+ grade.rows.splice(2);assert.equal(sync().extras.grading,null,'one level is not a scale');
+ grade.rows.splice(1);assert.equal(sync().extras.grading,null);
  // A tab the parent deleted is recreated with its starter rows, never an error
  g.tabs.delete('กิจกรรม');r=sync();assert.equal(r.ok,true);assert.equal(r.extras.activities.length,activities.events.length);
 }

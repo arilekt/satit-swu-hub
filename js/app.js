@@ -94,7 +94,7 @@ async function quizPage(subject,step,token){
   const panel=element('section',undefined,'quiz-panel');
   box.replaceChildren(backLink(),head,panel);
   const last=Tracker.attempts().filter(a=>a.id===step.id).pop();
-  QuizEngine.mount(panel,{id:step.id,title:data.meta.title,time_limit_minutes:minutes,last:last?{score:last.score,total:last.total,elapsed_seconds:last.elapsed_seconds}:null,back,
+  QuizEngine.mount(panel,{id:step.id,title:data.meta.title,time_limit_minutes:minutes,history:()=>Tracker.attempts().filter(a=>a.id===step.id),last:last?{score:last.score,total:last.total,elapsed_seconds:last.elapsed_seconds}:null,back,
    onstart:()=>{box.firstChild.hidden=true;head.classList.add('compact');window.scrollTo({top:0,behavior:'auto'});},
    onfinish:()=>{box.firstChild.hidden=false;head.classList.remove('compact');window.scrollTo({top:0,behavior:'auto'});update();}},data.meta.questions);
  }catch(error){if(token!==request)return;box.replaceChildren(backLink(),head,element('p','ยังเปิดข้อสอบไม่ได้: '+error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;box.append(retry);}
@@ -188,7 +188,7 @@ function applyExtras(extras,save){
  if(!extras||typeof extras!=='object')return false;
  latestExtras=extras;
  try{ParentTools.setRemote(Array.isArray(extras.activities)?{title:'กิจกรรมของพอใจ',source_note:'จาก Google Sheet',events:extras.activities}:null);}catch(_){/* keep the previous activities */}
- Tracker.setSheetDates(extras.dates||null);Dashboard.setBoosts(extras.mottos||null);
+ Tracker.setSheetDates(extras.dates||null);Dashboard.setBoosts(extras.mottos||null);ExamStats.setGrading(extras.grading||null);
  if(save)try{localStorage.setItem(EXTRAS_KEY,JSON.stringify(extras));}catch(_){/* keep in memory */}
  return true;
 }

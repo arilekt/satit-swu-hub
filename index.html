@@ -4,9 +4,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#bd2637"><meta name="description" content="ภารกิจเตรียมสอบ ม.1 ของพอใจ เรียนทีละก้าว เติบโตทุกวัน"><title>SPSM · เส้นทางสู่ ม.1 สาธิต มศว</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/style.css?v=20261006-153520">
+<link rel="stylesheet" href="./css/style.css?v=20261006-160606">
 <script defer src="./vendor/marked.min.js"></script><script defer src="./vendor/js-yaml.min.js"></script><script defer src="./vendor/purify.min.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="./js/catalog.js?v=20261006-153520"></script><script defer src="./js/tracker.js?v=20261006-153520"></script><script defer src="./js/quiz-engine.js?v=20261006-153520"></script><script defer src="./js/countdown.js?v=20261006-153520"></script><script defer src="./js/calendar.js?v=20261006-153520"></script><script defer src="./js/plan.js?v=20261006-153520"></script><script defer src="./js/dashboard.js?v=20261006-153520"></script><script defer src="./js/parent.js?v=20261006-153520"></script><script defer src="./js/parent-dashboard.js?v=20261006-153520"></script><script defer src="./js/sync.js?v=20261006-153520"></script><script defer src="./js/app.js?v=20261006-153520"></script><script defer src="./js/build-info.js?v=20261006-153520"></script>
+<script defer src="./js/catalog.js?v=20261006-160606"></script><script defer src="./js/tracker.js?v=20261006-160606"></script><script defer src="./js/exam-stats.js?v=20261006-160606"></script><script defer src="./js/quiz-engine.js?v=20261006-160606"></script><script defer src="./js/countdown.js?v=20261006-160606"></script><script defer src="./js/calendar.js?v=20261006-160606"></script><script defer src="./js/plan.js?v=20261006-160606"></script><script defer src="./js/dashboard.js?v=20261006-160606"></script><script defer src="./js/parent.js?v=20261006-160606"></script><script defer src="./js/parent-dashboard.js?v=20261006-160606"></script><script defer src="./js/sync.js?v=20261006-160606"></script><script defer src="./js/app.js?v=20261006-160606"></script><script defer src="./js/build-info.js?v=20261006-160606"></script>
 </head>
 <body class="locked">
 <a class="skip" href="#main">ข้ามไปเนื้อหา</a>
@@ -25,7 +25,7 @@
       <p id="login-status" class="login-status notice" role="status" aria-live="polite"></p>
       <button id="login-retry" class="fallback-signin-btn" type="button" hidden>ลองอีกครั้ง</button>
       <p class="login-note">โปรดเข้าสู่ระบบด้วยอีเมลที่คุณพ่อไว้วางใจให้เข้าได้</p>
-      <small id="version-display" style="display:block;margin-top:1rem;color:#999;font-size:0.8em;text-align:center;">v1.2.1 · build 20261006-153520</small>
+      <small id="version-display" style="display:block;margin-top:1rem;color:#999;font-size:0.8em;text-align:center;">v1.3.0 · build 20261006-160606</small>
     </div>
   </div>
 </section>
@@ -49,6 +49,6 @@
 <details class="pd-tools"><summary>เพิ่มบทเรียนใหม่จากเอกสาร (ทำบนคอมของคุณพ่อ)</summary><div class="pd-tools-body"><ol class="pd-steps"><li>วางไฟล์ต้นฉบับ (PDF, ภาพ, ข้อความ) ไว้ที่ <code>local/inbox/ชื่อวิชา/</code></li><li>สั่งสร้างร่างบทเรียนหรือข้อสอบ เปลี่ยน <code>ไฟล์</code> และ <code>รหัสบท</code> ให้ตรงกับที่ต้องการ <button class="secondary" data-copy=".\.venv\Scripts\python tools/mission_cli.py generate local/inbox/วิชา/ไฟล์.pdf --step รหัสบท">คัดลอกคำสั่ง</button></li><li>ตรวจร่างที่ได้ใน <code>local/drafts/…/draft.md</code> แล้วสั่ง <code>validate</code></li><li>สั่ง <code>import … --replace</code> บทใหม่จะขึ้นในห้องเรียนของพอใจเมื่อ commit และ push</li></ol><p class="pd-legend">เครื่องมือ AI ทำงานบนเครื่องคุณพ่อ ไม่เรียก API จากเว็บของพอใจ · <a href="./tools/README.md" target="_blank" rel="noopener noreferrer">เปิดคู่มือเต็ม ↗</a></p></div></details>
 </section>
 </main>
-<footer><span>เส้นทางสู่ฝัน สอบเข้า ม.1 สาธิต มศว โดยวางแผนโค้งสุดท้ายก่อนเข้าสู่รั้วเทา-แดง ประสานมิตร คุณพ่อและเหล่า AI ทั้งหลายคอยช่วยสนับสนุนและเป็นกำลังใจให้นะ สู้ ๆ</span><small id="build-info" data-build-id="20261006-153520">v1.2.1 · build 20261006-153520 · อัปเดต 06/10/2569 15:35 น. (ไทย)</small><small id="build-update" hidden></small></footer>
+<footer><span>เส้นทางสู่ฝัน สอบเข้า ม.1 สาธิต มศว โดยวางแผนโค้งสุดท้ายก่อนเข้าสู่รั้วเทา-แดง ประสานมิตร คุณพ่อและเหล่า AI ทั้งหลายคอยช่วยสนับสนุนและเป็นกำลังใจให้นะ สู้ ๆ</span><small id="build-info" data-build-id="20261006-160606">v1.3.0 · build 20261006-160606 · อัปเดต 06/10/2569 16:06 น. (ไทย)</small><small id="build-update" hidden></small></footer>
 <div id="status" role="status" aria-live="polite"></div>
 </body></html>
