@@ -289,6 +289,73 @@ console.log('PASS: Google Sheet sync rejects unlisted/other-app/expired/invalid 
 }
 console.log('PASS: Apps Script sessions: 90-day revocable device sessions (hash only), daily sliding renewal, expiry, logout/logout-all, allowlist re-check, denied vs auth vs session_expired codes, empty hand-made tabs get headers');
 
+/* Sheet-managed extras: exam dates, activities and daily messages are edited in the Sheet and arrive with every sync. */
+{
+ const dad='tok-dad-00000000000000';
+ const g=fakeAppsScript(claimsFor),sync=()=>g.post({action:'sync',id_token:dad,state:{}});
+ let r=sync();assert.equal(r.ok,true);
+ // Seeded from the website's own data, so nothing changes until the parent edits the Sheet
+ const regular=config.admissions.programs.find(p=>p.id===config.admissions.primary_program);
+ assert.equal(r.extras.dates.exam_date,regular.exam_date);assert.equal(r.extras.dates.result_date,regular.pretest_results_date);
+ assert.equal(r.extras.activities.length,activities.events.length);
+ activities.events.forEach((e,i)=>{const x=r.extras.activities[i];for(const k of ['date','start','end','title','location','description'])assert.equal(x[k],e[k],k);assert.equal(x.series,activities.title);assert.match(x.id,/^[a-z0-9-]{1,100}$/);});
+ assert.equal(new Set(r.extras.activities.map(x=>x.id)).size,activities.events.length);
+ assert.deepEqual(r.extras.mottos.map(m=>m.text),[...dashboard.BOOSTS]);assert.ok(r.extras.mottos.every(m=>m.date===undefined));
+ const firstIds=r.extras.activities.map(x=>x.id);
+ // Activities: plain rows, Thai/พ.ศ. dates, bad rows dropped, hidden rows hidden, ids stable
+ const acts=g.tabs.get('กิจกรรม');
+ acts.rows.push(['2026-12-20','','','งานวันเกิดยาย','บ้านยาย','','','']);
+ acts.rows.push(['20/12/2569','13:00','12:00','เวลาสลับ','','','','']);
+ acts.rows.push(['ไม่ใช่วันที่','','','วันที่ผิด','','','','']);
+ acts.rows.push(['2026-12-22','','','','','','','']);
+ acts.rows.push(['2026-12-23','','','ซ่อนอยู่','','','','ซ่อน']);
+ r=sync();assert.equal(r.extras.activities.length,activities.events.length+2);
+ const bday=r.extras.activities.find(x=>x.title==='งานวันเกิดยาย'),swap=r.extras.activities.find(x=>x.title==='เวลาสลับ');
+ assert.equal(bday.location,'บ้านยาย');assert.equal(bday.start,undefined);assert.ok(!bday.id.includes('-'),'ungrouped events keep their own id');
+ assert.equal(swap.date,'2026-12-20');assert.equal(swap.start,undefined);assert.equal(swap.end,undefined);
+ assert.deepEqual(r.extras.activities.slice(0,activities.events.length).map(x=>x.id),firstIds,'ids do not change when rows are added');
+ acts.rows[1][7]='ไม่';assert.equal(sync().extras.activities.length,activities.events.length+1);acts.rows[1][7]='';
+ acts.rows.splice(2,acts.rows.length-2);   // header + first event only
+ assert.equal(sync().extras.activities.length,1);
+ acts.rows[1][7]='ซ่อน';assert.deepEqual(sync().extras.activities,[],'every row hidden = deliberately empty');
+ acts.rows.splice(1);assert.equal(sync().extras.activities,null,'no rows at all = use the website file');
+ // Dates
+ const dates=g.tabs.get('กำหนดการ');
+ dates.rows[1][1]='1/3/2570';dates.rows[2][1]='ยังไม่รู้';
+ r=sync();assert.equal(r.extras.dates.exam_date,'2027-03-01');assert.equal(r.extras.dates.result_date,undefined,'invalid date ignored');
+ dates.rows[1][1]='';assert.equal(sync().extras.dates,null);
+ // Daily messages: undated rotate, dated ones are for that day, cap on length
+ const words=g.tabs.get('กำลังใจ');
+ words.rows.splice(1);words.rows.push(['สู้ ๆ นะ','']);words.rows.push(['วันสอบแล้ว ใจเย็น ๆ','2027-02-07']);words.rows.push(['x'.repeat(500),'']);words.rows.push(['','']);
+ r=sync();assert.equal(r.extras.mottos.length,3);assert.equal(r.extras.mottos[1].date,'2027-02-07');assert.equal(r.extras.mottos[2].text.length,200);
+ words.rows.splice(1);assert.equal(sync().extras.mottos,null);
+ // A tab the parent deleted is recreated with its starter rows, never an error
+ g.tabs.delete('กิจกรรม');r=sync();assert.equal(r.ok,true);assert.equal(r.extras.activities.length,activities.events.length);
+}
+console.log('PASS: Sheet extras: dates, activities (ids, hiding, bad rows) and daily messages are seeded from the website data, parsed from the Sheet, validated and sent with every sync');
+
+/* The website prefers the Sheet's values and falls back to its own files when the Sheet has none. */
+{
+ const tools=editor(),own=activities.events.length;
+ tools.setRemote({title:'จาก Sheet',events:[{id:'ab1',date:'2026-12-20',title:'T',series:'S'}]});
+ assert.equal(tools.activities().events.length,1);assert.equal(tools.activities().events[0].series,'S');
+ assert.throws(()=>tools.setRemote({events:[{id:'BAD ID',title:'x',date:'2026-12-20'}]}));assert.equal(tools.activities().events.length,1,'a bad payload keeps the previous one');
+ tools.setRemote(null);assert.equal(tools.activities().events.length,own);
+ stored.clear();const tr=tracker();tr.setExamDate('2027-03-01');
+ tr.setSheetDates({exam_date:'2027-02-09'});assert.equal(tr.examDate(),'2027-02-09');assert.equal(tr.resultDate(),null);
+ assert.equal(tr.syncPayload().settings.examDate.value,'2027-03-01','Sheet dates are never written back');
+ tr.setSheetDates({exam_date:'bad'});assert.equal(tr.examDate(),'2027-03-01');tr.setSheetDates(null);assert.equal(tr.examDate(),'2027-03-01');
+ const list=[{text:'ปกติ A'},{text:'ปกติ B'},{text:'เฉพาะวันนี้',date:'2026-10-06'}];
+ dashboard.setBoosts(list);
+ assert.equal(dashboard.boost(()=>0.99,'2026-10-06'),'เฉพาะวันนี้');
+ for(const random of [0,0.4,0.99])assert.ok(['ปกติ A','ปกติ B'].includes(dashboard.boost(()=>random,'2026-10-07')));
+ dashboard.setBoosts(null);assert.ok(dashboard.BOOSTS.includes(dashboard.boost(()=>0.5,'2026-10-07')));
+ dashboard.setBoosts([]);assert.ok(dashboard.BOOSTS.includes(dashboard.boost(()=>0.5,'2026-10-07')),'empty list falls back');
+ const groups=dashboard.eventGroups({title:'ไม่ใช้',events:[{id:'e1',date:'2026-12-12',title:'A',series:'งานใหญ่'},{id:'e2',date:'2026-12-13',title:'B',series:'งานใหญ่'},{id:'e3',date:'2026-12-14',title:'C'}]},'2026-10-01');
+ assert.equal(groups.length,2);assert.equal(groups[0].title,'งานใหญ่');assert.equal(groups[0].dates.length,2);assert.equal(groups[1].title,'C');
+}
+console.log('PASS: website uses Sheet activities/dates/messages when present (validated, never written back) and falls back to its own files');
+
 /* Client transport: transient Google/Apps Script failures retry; real answers never do. */
 {
  const post=syncContext.window.MissionSync._post;

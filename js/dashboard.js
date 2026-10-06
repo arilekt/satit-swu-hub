@@ -38,13 +38,17 @@ const BOOSTS=[
 const ORDER=()=>window.StudyPlan?window.StudyPlan.ordered:(c=>c.subjects);
 const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 // A new boost each time the page opens, never the same one twice in a row on this device.
-const BOOST_KEY='satit-swu-hub:last-boost';let pickedBoost=null;
-function boost(random=Math.random){
-  if(pickedBoost!==null)return BOOSTS[pickedBoost];
+const BOOST_KEY='satit-swu-hub:last-boost';let pickedBoost=null,sheetBoosts=null;
+// Messages from the Sheet's กำลังใจ tab: [{text, date?}]. A dated one is shown only that day; the rest rotate. Empty = built-in list.
+function setBoosts(list){sheetBoosts=Array.isArray(list)?list.filter(m=>m&&typeof m.text==='string'&&m.text).map(m=>({text:m.text,date:m.date})):null;if(sheetBoosts&&!sheetBoosts.length)sheetBoosts=null;pickedBoost=null;}
+function boost(random=Math.random,today=Countdown.today()){
+  const dated=sheetBoosts&&sheetBoosts.find(m=>m.date&&m.date===today);if(dated)return dated.text;
+  const pool=sheetBoosts&&sheetBoosts.some(m=>!m.date)?sheetBoosts.filter(m=>!m.date).map(m=>m.text):BOOSTS;
+  if(pickedBoost!==null&&pickedBoost<pool.length)return pool[pickedBoost];
   let last=-1;try{last=Number(localStorage.getItem(BOOST_KEY));}catch(_){/* no storage */}
-  let i=Math.floor(random()*BOOSTS.length)%BOOSTS.length;if(i===last)i=(i+1)%BOOSTS.length;
+  let i=Math.floor(random()*pool.length)%pool.length;if(i===last&&pool.length>1)i=(i+1)%pool.length;
   pickedBoost=i;try{localStorage.setItem(BOOST_KEY,String(i));}catch(_){/* no storage */}
-  return BOOSTS[i];
+  return pool[i];
 }
 function recommendation(config,tracker,day=Countdown.today()){
   const session=Math.max(5,Math.min(30,Number(config.daily_plan?.session_minutes)||20));
@@ -78,11 +82,11 @@ const shortDate=(date,opts={day:'numeric',month:'short'})=>new Intl.DateTimeForm
 // Group events from the same series (id prefix) into one line with a date range.
 function eventGroups(activities,from){
   const series=new Map();
-  for(const e of activities.events){const key=e.id.includes('-')?e.id.split('-')[0]:e.id;if(!series.has(key))series.set(key,[]);series.get(key).push(e);}
+  for(const e of activities.events){const key=e.series?'s:'+e.series:e.id.includes('-')?e.id.split('-')[0]:e.id;if(!series.has(key))series.set(key,[]);series.get(key).push(e);}
   const out=[];
   for(const events of series.values()){
     const dates=[...new Set(events.map(e=>e.date))].sort();if(dates[dates.length-1]<from)continue;
-    const title=events.length>1?(activities.title||events[0].title):events[0].title;
+    const title=events.length>1?(events[0].series||activities.title||events[0].title):events[0].title;
     const first=dates[0],last=dates[dates.length-1];
     const range=first===last?shortDate(first):first.slice(0,7)===last.slice(0,7)?shortDate(first,{day:'numeric'})+'–'+shortDate(last):shortDate(first)+' – '+shortDate(last);
     out.push({title,first,last,range,dates});
@@ -200,5 +204,5 @@ function render(config,activities,tracker){
   $('schedule-source').textContent=config.admissions.source_note;
   if(window.PlanCalendar)PlanCalendar.render(config,activities,tracker,groups);
 }
-window.Dashboard={ticketUrl,recommendation,subjectTarget,render,boost,eventGroups,BOOSTS};
+window.Dashboard={ticketUrl,recommendation,subjectTarget,render,boost,setBoosts,eventGroups,BOOSTS};
 })();

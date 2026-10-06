@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 const KEY='satit-swu-hub:activities:v1';
-let base={title:'กิจกรรมของพอใจ',events:[]},override=null,blocked=false;
+let base={title:'กิจกรรมของพอใจ',events:[]},override=null,remote=null,blocked=false;
 const clone=x=>JSON.parse(JSON.stringify(x));
 function validate(data){
   if(!data||typeof data!=='object'||!Array.isArray(data.events)||data.events.length>200)throw Error('ไฟล์กิจกรรมต้องมี events ไม่เกิน 200 รายการ');
@@ -16,6 +16,7 @@ function validate(data){
     if(hasTime&&(!/^([01]\d|2[0-3]):[0-5]\d$/.test(e.start||'')||!/^([01]\d|2[0-3]):[0-5]\d$/.test(e.end||'')||e.end<=e.start))throw Error('เวลาเริ่มและสิ้นสุดต้องครบ และสิ้นสุดหลังเวลาเริ่มในวันเดียวกัน');
     const result={id:e.id,date:e.date,title:e.title.trim()};
     for(const key of ['location','description','source_note']){if(e[key]!==undefined&&(typeof e[key]!=='string'||e[key].length>2000))throw Error('รายละเอียดกิจกรรมไม่ถูกต้อง');if(e[key])result[key]=e[key];}
+    if(e.series!==undefined){if(typeof e.series!=='string'||e.series.length>200)throw Error('ชื่อชุดกิจกรรมไม่ถูกต้อง');if(e.series)result.series=e.series;}
     if(hasTime){result.start=e.start;result.end=e.end;}
     return result;
   });
@@ -23,9 +24,11 @@ function validate(data){
 }
 function save(data){if(blocked)throw Error('อ่านข้อมูลกิจกรรมเดิมไม่ได้ กรุณาสำรองข้อมูลและตรวจพื้นที่จัดเก็บก่อน');const clean=validate(data);localStorage.setItem(KEY,JSON.stringify(clean));override=clean;}
 function init(data){base=validate(data);try{const raw=localStorage.getItem(KEY);if(raw)override=validate(JSON.parse(raw));}catch(_){blocked=true;window.dispatchEvent(new CustomEvent('storage-warning',{detail:'อ่านกิจกรรมที่บันทึกไว้ไม่ได้ ข้อมูลจากเว็บยังแสดงได้ แต่ยังแก้ข้อมูลบนเครื่องไม่ได้'}));}}
-function activities(){return clone(override||base);}
-function upsert(event){const data=activities(),index=data.events.findIndex(e=>e.id===event.id);if(index<0)data.events.push({...event,source_note:event.source_note||'กิจกรรมที่คุณพ่อตั้งบนเครื่อง'});else data.events[index]=event;save(data);}
-function remove(id){const data=activities();data.events=data.events.filter(e=>e.id!==id);save(data);}
+function activities(){return clone(remote||override||base);}
+// Activities typed into the Google Sheet win over the website's own file; null (or no rows) goes back to it.
+function setRemote(data){remote=data?validate(data):null;}
+function upsert(event){const data=clone(override||base),index=data.events.findIndex(e=>e.id===event.id);if(index<0)data.events.push({...event,source_note:event.source_note||'กิจกรรมที่คุณพ่อตั้งบนเครื่อง'});else data.events[index]=event;save(data);}
+function remove(id){const data=clone(override||base);data.events=data.events.filter(e=>e.id!==id);save(data);}
 function reset(){if(blocked)throw Error('ข้อมูลเก่าอ่านไม่ได้ กรุณาสำรองก่อนล้างข้อมูล');localStorage.removeItem(KEY);override=null;}
 function downloadJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
 function render(config,tracker){
@@ -41,5 +44,5 @@ function render(config,tracker){
   actions.append(edit,del);row.append(title,date,actions);$('managed-events').append(row);
  }
 }
-window.ParentTools={init,validate,activities,upsert,remove,reset,replace:save,downloadJSON,render};
+window.ParentTools={init,validate,setRemote,activities,upsert,remove,reset,replace:save,downloadJSON,render};
 })();

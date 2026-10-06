@@ -212,6 +212,7 @@
       const data = await call('sync', {state: Tracker.syncPayload()});
       Tracker.applyRemote(data.state);
       window.dispatchEvent(new CustomEvent('plan-remote', {detail: data.plan && typeof data.plan === 'object' ? data.plan : null}));
+      if (data.extras && typeof data.extras === 'object') window.dispatchEvent(new CustomEvent('extras-remote', {detail: data.extras})); // absent on an older backend, null if the tabs could not be read
       email = data.email || email; lastSync = new Date(); lastError = ''; errorKind = '';
     } catch (error) {
       if (error.code === 'session_expired' || error.code === 'denied') { busy = false; authFailed(error); render(); return {ok: false, error: lastError}; }

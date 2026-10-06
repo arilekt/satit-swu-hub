@@ -197,11 +197,23 @@ document.getElementById('plan-sync')?.addEventListener('click',async e=>{
  const time=new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit'});
  status.className='plan-sync-status '+(result&&result.ok?'ok':'error');
  status.textContent=result&&result.ok?'✅ อัปเดตแล้ว '+time+' น. · '+(config.daily_plan.source==='sheet'?'แผนจาก Sheet':'แผนตั้งต้น'):'⚠️ ซิงก์ไม่สำเร็จ'+(result&&result.error?' ('+result.error+')':'')+' · ใช้แผนเดิมในเครื่อง';});
+// Dates, activities and daily messages typed into the Google Sheet: cached for the next visit, applied on every sync.
+const EXTRAS_KEY='satit-swu-hub:extras:v1';let started=false;
+function applyExtras(extras,save){
+ if(!extras||typeof extras!=='object')return false;
+ try{ParentTools.setRemote(Array.isArray(extras.activities)?{title:'กิจกรรมของพอใจ',source_note:'จาก Google Sheet',events:extras.activities}:null);}catch(_){/* keep the previous activities */}
+ Tracker.setSheetDates(extras.dates||null);Dashboard.setBoosts(extras.mottos||null);
+ if(save)try{localStorage.setItem(EXTRAS_KEY,JSON.stringify(extras));}catch(_){/* keep in memory */}
+ return true;
+}
+window.addEventListener('extras-remote',e=>{if(applyExtras(e.detail,true)&&started)update();});
 async function start(){
  defaultPlan={...config.daily_plan,source:'default'};config.daily_plan=defaultPlan;
  try{const cached=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');if(cached)applyPlan(cached,false);}catch(_){/* use default */}
  let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
- ParentTools.init(activities);await route();setInterval(update,60000);
+ ParentTools.init(activities);
+ try{applyExtras(JSON.parse(localStorage.getItem(EXTRAS_KEY)||'null'),false);}catch(_){/* no cached Sheet data */}
+ started=true;await route();setInterval(update,60000);
 }
 // The app renders nothing until MissionSync confirms the signed-in account is allowed.
 async function boot(){

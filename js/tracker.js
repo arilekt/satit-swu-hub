@@ -7,7 +7,7 @@
   const EPOCH = '1970-01-01T00:00:00.000Z';
   const cleanMarks = raw => {const marks={};if(raw&&typeof raw==='object'&&!Array.isArray(raw))for(const [id,m] of Object.entries(raw))if(m&&typeof m.done==='boolean'&&typeof m.at==='string'&&!isNaN(new Date(m.at).getTime()))marks[id]={done:m.done,at:m.at};return marks;};
   const cleanSettingsAt = raw => {const out={};for(const key of ['examDate','resultDate'])if(raw&&typeof raw[key]==='string'&&!isNaN(new Date(raw[key]).getTime()))out[key]=raw[key];return out;};
-  let state = blank(), writable = true;
+  let state = blank(), writable = true, sheetDates = {};
   const dateValid = value => {if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const date=new Date(value+'T00:00:00Z');return !isNaN(date.getTime())&&date.toISOString().slice(0,10)===value;};
   function warning(message) { window.dispatchEvent(new CustomEvent('storage-warning', {detail:message})); }
   try {
@@ -63,9 +63,11 @@
       state=next;save('remote');
     },
     exportData:()=>JSON.parse(JSON.stringify({...state,exported_at:new Date().toISOString()})),
-    examDate:()=>state.examDate,
+    examDate:()=>sheetDates.exam_date||state.examDate,
     setExamDate(value) {state.examDate=dateValid(value)?value:null;state.settingsAt={...state.settingsAt,examDate:new Date().toISOString()};save();},
-    resultDate:()=>state.resultDate,
+    resultDate:()=>sheetDates.result_date||state.resultDate,
+    /* Dates typed in the Sheet override this device's own, but are never written back to it. */
+    setSheetDates(dates) {sheetDates={};if(dates&&typeof dates==='object')for(const key of ['exam_date','result_date'])if(dateValid(dates[key]))sheetDates[key]=dates[key];},
     setResultDate(value) {state.resultDate=dateValid(value)?value:null;state.settingsAt={...state.settingsAt,resultDate:new Date().toISOString()};save();},
     stats(config) { const ids=config.subjects.flatMap(s=>Catalog.items(s).map(x=>x.id));const done=ids.filter(id=>this.has(id)).length;return {done,total:ids.length,percent:Math.round(done/ids.length*100)}; },
     summary(config) { const all=this.stats(config);return ['สรุปภารกิจของ'+config.learner,'เรียนจบ '+all.done+'/'+all.total+' ภารกิจ ('+all.percent+'%)',...config.subjects.map(s=>{const all=Catalog.items(s);return s.name+': '+all.filter(x=>this.has(x.id)).length+'/'+all.length;}),...state.attempts.slice(-5).map(a=>'ข้อสอบ '+a.title+': '+a.score+'/'+a.total+' ('+new Date(a.date).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok'})+')')].join('\n'); }
