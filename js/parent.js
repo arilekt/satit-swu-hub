@@ -31,18 +31,5 @@ function upsert(event){const data=clone(override||base),index=data.events.findIn
 function remove(id){const data=clone(override||base);data.events=data.events.filter(e=>e.id!==id);save(data);}
 function reset(){if(blocked)throw Error('ข้อมูลเก่าอ่านไม่ได้ กรุณาสำรองก่อนล้างข้อมูล');localStorage.removeItem(KEY);override=null;}
 function downloadJSON(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
-function render(config,tracker){
- const $=id=>document.getElementById(id);
- const regular=config.admissions.programs.find(p=>p.id===config.admissions.primary_program);
- $('exam-date').value=tracker.examDate()||regular.exam_date;$('result-date').value=tracker.resultDate()||regular.pretest_results_date||'';
- $('activity-storage-note').textContent=override?'กำลังใช้ไฟล์กิจกรรมที่แก้บนเครื่องนี้ · ส่งออก activities.json แล้วแทนไฟล์ data/activities.json เพื่อเผยแพร่ทุกเครื่อง':'กำลังใช้กิจกรรมจากไฟล์กลางบนเว็บ';
- $('managed-events').replaceChildren();
- for(const event of activities().events.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||'')))){
-  const row=document.createElement('div');row.className='managed-event';const title=document.createElement('strong');title.textContent=event.title;const date=document.createElement('p');date.textContent=Countdown.label(event.date)+(event.start?' · '+event.start+'–'+event.end:'');const actions=document.createElement('div');actions.className='actions';
-  const edit=document.createElement('button');edit.className='secondary';edit.textContent='แก้ไข';edit.onclick=()=>{for(const key of ['id','title','date','location','start','end','description'])$('event-'+key).value=event[key]||'';$('event-title').focus();$('event-form').scrollIntoView({block:'center'});};
-  const del=document.createElement('button');del.className='secondary';del.textContent='ลบ';del.onclick=()=>{if(confirm('ลบกิจกรรม “'+event.title+'” บนเครื่องนี้ไหม?')){try{remove(event.id);window.dispatchEvent(new Event('activities-changed'));}catch(e){window.dispatchEvent(new CustomEvent('storage-warning',{detail:e.message}));}}};
-  actions.append(edit,del);row.append(title,date,actions);$('managed-events').append(row);
- }
-}
-window.ParentTools={init,validate,setRemote,activities,upsert,remove,reset,replace:save,downloadJSON,render};
+window.ParentTools={init,validate,setRemote,activities,upsert,remove,reset,replace:save,downloadJSON};
 })();

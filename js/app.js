@@ -34,10 +34,17 @@ function updateSidebar(){
   const more=[...extras,...(current.subject.exams||[])];
   if(more.length){$('lessons').append(element('div','ข้อสอบจำลองรวมทั้งวิชา','lesson-subheading'));more.forEach(step=>$('lessons').append(link(step,element('span',step.title,'quiz-label'),'lesson','รอข้อสอบ')));}
 }
+// "สำหรับคุณพ่อ": everything shown comes from progress on this device plus what the Sheet delivered with the last sync.
+function renderParent(){
+ const today=Countdown.today(),activities=ParentTools.activities();
+ ParentDashboard.render($('pd-root'),{config,tracker:Tracker,schedule:window.StudyPlan?StudyPlan.schedule(config):{},today,subjectsInOrder:subjectsInOrder(),extras:latestExtras,
+  nextActivity:Dashboard.eventGroups(activities,today)[0]||null,activityCount:activities.events.length,boostText:Dashboard.boost(),examDate:Tracker.examDate(),resultDate:Tracker.resultDate()});
+}
+document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});
 function update(){
  if(!config)return;
  Dashboard.render(config,ParentTools.activities(),Tracker);
- if(page==='parent')ParentTools.render(config,Tracker);
+ if(page==='parent')renderParent();
  if(page==='lesson'){updateSidebar();const button=$('complete-button');if(button)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';}
 }
 function video(url){
@@ -131,34 +138,12 @@ async function route(){
   update();
  }catch(error){if(token!==request)return;main.replaceChildren(element('h2','ยังเปิดภารกิจไม่ได้'),element('p',error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;main.append(retry);}
 }
-function parentRefresh(){update();notify('บันทึกกิจกรรมบนเครื่องนี้แล้ว');}
 window.addEventListener('progress-changed',update);
-window.addEventListener('activities-changed',parentRefresh);
 window.addEventListener('hashchange',()=>{const intendedHash=location.hash;route().then(()=>{if(location.hash===intendedHash){$('main').focus({preventScroll:true});window.scrollTo({top:0,behavior:'auto'});}});});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)update();});
 window.addEventListener('beforeunload',e=>{if(QuizEngine.isActive()){e.preventDefault();e.returnValue='';}});
 document.querySelector('.skip').onclick=e=>{e.preventDefault();$('main').focus();};
-$('exam-date').onchange=e=>Tracker.setExamDate(e.target.value);
-$('result-date').onchange=e=>Tracker.setResultDate(e.target.value);
-$('reset-exam-date').onclick=()=>Tracker.setExamDate(null);
-$('reset-result-date').onclick=()=>Tracker.setResultDate(null);
 $('download-calendar').onclick=()=>{if(config)MissionCalendar.download(MissionCalendar.list(config,ParentTools.activities(),Tracker));};
-$('cancel-edit-event').onclick=()=>{$('event-form').reset();$('event-id').value='';};
-$('event-form').onsubmit=e=>{
- e.preventDefault();try{
- const id=$('event-id').value||'event-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
- const existing=ParentTools.activities().events.find(x=>x.id===id)||{};
- const event={...existing,id};for(const key of ['title','date','location','start','end','description'])event[key]=$('event-'+key).value;
- ParentTools.upsert(event);$('event-form').reset();$('event-id').value='';parentRefresh();
- }catch(error){notify('ยังบันทึกไม่ได้: '+error.message);}
-};
-$('export-config').onclick=()=>{const next=JSON.parse(JSON.stringify(config)),regular=next.admissions.programs.find(p=>p.id===next.admissions.primary_program);regular.exam_date=Tracker.examDate()||regular.exam_date;regular.pretest_results_date=Tracker.resultDate()||regular.pretest_results_date;next.exam_date=regular.exam_date;ParentTools.downloadJSON(next,'config.json');};
-$('export-activities').onclick=()=>ParentTools.downloadJSON(ParentTools.activities(),'activities.json');
-$('reset-activities').onclick=()=>{if(confirm('กลับไปใช้กิจกรรมจากเว็บไหม? การแก้บนเครื่องนี้จะถูกล้าง ควรส่งออกก่อน'))try{ParentTools.reset();update();notify('ใช้กิจกรรมจากเว็บแล้ว');}catch(error){notify(error.message);}};
-$('import-activities').onchange=async e=>{
- const file=e.target.files[0];if(!file)return;
- try{if(file.size>1024*1024)throw Error('ไฟล์ใหญ่เกิน 1 MB');const data=ParentTools.validate(JSON.parse(await file.text()));if(!confirm('นำเข้า '+data.events.length+' กิจกรรมแทนรายการบนเครื่องนี้ไหม? ควรส่งออกของเดิมก่อน'))return;ParentTools.replace(data);parentRefresh();}catch(error){notify('นำเข้าไม่ได้: '+error.message);}finally{e.target.value='';}
-};
 $('copy-summary').onclick=async()=>{if(!config)return;const text=Tracker.summary(config);try{await navigator.clipboard.writeText(text);notify('คัดลอกสรุปแล้ว');}catch(_){$('summary-fallback').hidden=false;$('summary-fallback').value=text;$('summary-fallback').focus();$('summary-fallback').select();notify('แตะค้างแล้วเลือกคัดลอกข้อความ');}};
 $('export-progress').onclick=()=>ParentTools.downloadJSON(Tracker.exportData(),'satit-progress.json');
 $('import-progress').onchange=async e=>{
@@ -198,9 +183,10 @@ document.getElementById('plan-sync')?.addEventListener('click',async e=>{
  status.className='plan-sync-status '+(result&&result.ok?'ok':'error');
  status.textContent=result&&result.ok?'✅ อัปเดตแล้ว '+time+' น. · '+(config.daily_plan.source==='sheet'?'แผนจาก Sheet':'แผนตั้งต้น'):'⚠️ ซิงก์ไม่สำเร็จ'+(result&&result.error?' ('+result.error+')':'')+' · ใช้แผนเดิมในเครื่อง';});
 // Dates, activities and daily messages typed into the Google Sheet: cached for the next visit, applied on every sync.
-const EXTRAS_KEY='satit-swu-hub:extras:v1';let started=false;
+const EXTRAS_KEY='satit-swu-hub:extras:v1';let started=false,latestExtras=null;
 function applyExtras(extras,save){
  if(!extras||typeof extras!=='object')return false;
+ latestExtras=extras;
  try{ParentTools.setRemote(Array.isArray(extras.activities)?{title:'กิจกรรมของพอใจ',source_note:'จาก Google Sheet',events:extras.activities}:null);}catch(_){/* keep the previous activities */}
  Tracker.setSheetDates(extras.dates||null);Dashboard.setBoosts(extras.mottos||null);
  if(save)try{localStorage.setItem(EXTRAS_KEY,JSON.stringify(extras));}catch(_){/* keep in memory */}

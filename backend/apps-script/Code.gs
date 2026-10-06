@@ -566,7 +566,18 @@ function sheetText(name, patterns) { return rows(name).map(function (r) { return
 /** Dates, activities and daily messages the parent edits by hand in the Sheet; null if the tabs cannot be read. */
 function readExtras() {
   try {
-    return parseExtras(sheetText('กำหนดการ', ['', 'yyyy-MM-dd']), sheetText('กิจกรรม', ['yyyy-MM-dd', 'HH:mm', 'HH:mm']), sheetText('กำลังใจ', ['', 'yyyy-MM-dd']));
+    var extras = parseExtras(sheetText('กำหนดการ', ['', 'yyyy-MM-dd']), sheetText('กิจกรรม', ['yyyy-MM-dd', 'HH:mm', 'HH:mm']), sheetText('กำลังใจ', ['', 'yyyy-MM-dd']));
+    extras.sheet = sheetLinks(['กำหนดการ', 'กิจกรรม', 'กำลังใจ', 'แผน-ช่วงเวลา']);
+    return extras;
+  } catch (error) { return null; }
+}
+
+/** Where the parent's tabs are, so the website can offer "open this tab" (sent only to allowed accounts). */
+function sheetLinks(names) {
+  try {
+    var book = SpreadsheetApp.getActiveSpreadsheet(), tabs = {};
+    names.forEach(function (name) { var tab = book.getSheetByName(name); if (tab) tabs[name] = tab.getSheetId(); });
+    return {url: book.getUrl(), tabs: tabs};
   } catch (error) { return null; }
 }
 

@@ -193,13 +193,13 @@ console.log('PASS: 52 PART lessons each followed by a 20-question end-of-chapter
 
 /* Google Sheet sync: Apps Script backend against an in-memory spreadsheet, plus tracker merge. */
 function fakeAppsScript(claimsFor){
- const tabs=new Map(),props={GOOGLE_CLIENT_ID:'client-1.apps.googleusercontent.com',ALLOWED_EMAILS:'dad@example.com, Porjai@Example.com'};
+ let sheetIds=100;const tabs=new Map(),props={GOOGLE_CLIENT_ID:'client-1.apps.googleusercontent.com',ALLOWED_EMAILS:'dad@example.com, Porjai@Example.com'};
  const cell=v=>typeof v==='string'&&v.startsWith("'")?v.slice(1):v;
- function tab(name){const rows=[];return {rows,appendRow:r=>rows.push(r.map(cell)),setFrozenRows(){},setColumnWidth(){},getLastRow:()=>rows.length,
+ function tab(name){const rows=[],id=++sheetIds;return {rows,getSheetId:()=>id,appendRow:r=>rows.push(r.map(cell)),setFrozenRows(){},setColumnWidth(){},getLastRow:()=>rows.length,
   getDataRange:()=>({getValues:()=>rows.map(r=>[...r])}),
   getRange:(row,col,n,w)=>({getValues:()=>rows.slice(row-1,row-1+n).map(r=>r.slice(col-1,col-1+w)),setValues:vals=>vals.forEach((v,i)=>{rows[row-1+i]=v.map(cell);})})};}
  const ctx={JSON,Date,Object,Array,String,Number,Math,isFinite,isNaN,encodeURIComponent,
-  SpreadsheetApp:{getActiveSpreadsheet:()=>({getSheetByName:n=>tabs.get(n)||null,insertSheet:n=>{const t=tab(n);tabs.set(n,t);return t;}})},
+  SpreadsheetApp:{getActiveSpreadsheet:()=>({getSheetByName:n=>tabs.get(n)||null,insertSheet:n=>{const t=tab(n);tabs.set(n,t);return t;},getUrl:()=>'https://docs.google.com/spreadsheets/d/FAKE-book_1/edit'})},
   PropertiesService:{getScriptProperties:()=>({getProperty:k=>props[k]||null})},
   CacheService:{getScriptCache:()=>({get:()=>null,put(){}})},
   Utilities:{base64EncodeWebSafe:x=>Buffer.from(x).toString('base64url'),computeDigest:(_,s)=>require('node:crypto').createHash('sha256').update(String(s)).digest(),DigestAlgorithm:{SHA_256:1},getUuid:()=>require('node:crypto').randomUUID()},
@@ -302,6 +302,10 @@ console.log('PASS: Apps Script sessions: 90-day revocable device sessions (hash 
  assert.equal(new Set(r.extras.activities.map(x=>x.id)).size,activities.events.length);
  assert.deepEqual(r.extras.mottos.map(m=>m.text),[...dashboard.BOOSTS]);assert.ok(r.extras.mottos.every(m=>m.date===undefined));
  const firstIds=r.extras.activities.map(x=>x.id);
+ // Links for the parent dashboard's "open tab" cards (only ever sent to an allowed account)
+ assert.equal(r.extras.sheet.url,'https://docs.google.com/spreadsheets/d/FAKE-book_1/edit');
+ for(const name of ['กำหนดการ','กิจกรรม','กำลังใจ','แผน-ช่วงเวลา'])assert.equal(r.extras.sheet.tabs[name],g.tabs.get(name).getSheetId());
+ assert.equal(g.post({action:'sync',id_token:'tok-stranger-0000000000',state:{}}).extras,undefined);
  // Activities: plain rows, Thai/พ.ศ. dates, bad rows dropped, hidden rows hidden, ids stable
  const acts=g.tabs.get('กิจกรรม');
  acts.rows.push(['2026-12-20','','','งานวันเกิดยาย','บ้านยาย','','','']);
