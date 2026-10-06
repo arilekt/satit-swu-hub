@@ -5,7 +5,7 @@ const {URL} = require('node:url');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-const read = name => fs.readFileSync(path.join(root,name),'utf8');
+const read = name => fs.readFileSync(path.join(root,name),'utf8').split('\r\n').join('\n'); // Windows checkouts may use CRLF
 for(const name of ['app','tracker','quiz-engine','catalog'])new vm.Script(read('js/'+name+'.js'));
 const config=JSON.parse(read('data/config.json'));
 assert.deepEqual(config.subjects.map(s=>s.steps.length),[14,11,7,9,12]);
@@ -202,12 +202,12 @@ function fakeAppsScript(claimsFor){
   SpreadsheetApp:{getActiveSpreadsheet:()=>({getSheetByName:n=>tabs.get(n)||null,insertSheet:n=>{const t=tab(n);tabs.set(n,t);return t;}})},
   PropertiesService:{getScriptProperties:()=>({getProperty:k=>props[k]||null})},
   CacheService:{getScriptCache:()=>({get:()=>null,put(){}})},
-  Utilities:{base64EncodeWebSafe:x=>String(x),computeDigest:(_,s)=>s,DigestAlgorithm:{SHA_256:1}},
+  Utilities:{base64EncodeWebSafe:x=>Buffer.from(x).toString('base64url'),computeDigest:(_,s)=>require('node:crypto').createHash('sha256').update(String(s)).digest(),DigestAlgorithm:{SHA_256:1},getUuid:()=>require('node:crypto').randomUUID()},
   UrlFetchApp:{fetch:url=>{const claims=claimsFor(decodeURIComponent(url.split('id_token=')[1]));return {getResponseCode:()=>claims?200:400,getContentText:()=>JSON.stringify(claims)};}},
   LockService:{getScriptLock:()=>({waitLock(){},releaseLock(){}})},
   ContentService:{MimeType:{JSON:'json'},createTextOutput:text=>({setMimeType(){return this;},text})}};
  vm.createContext(ctx);vm.runInContext(read('backend/apps-script/Code.gs'),ctx);
- ctx.post=body=>JSON.parse(ctx.doPost({postData:{contents:JSON.stringify(body)}}).text);ctx.tabs=tabs;return ctx;
+ ctx.post=body=>JSON.parse(ctx.doPost({postData:{contents:JSON.stringify(body)}}).text);ctx.tabs=tabs;ctx.props=props;ctx.makeTab=tab;return ctx;
 }
 const future=Math.floor(Date.UTC(2030,0,1)/1000);
 const claimsFor=t=>({dad:{aud:'client-1.apps.googleusercontent.com',iss:'https://accounts.google.com',email:'dad@example.com',email_verified:'true',exp:String(future)},
@@ -248,6 +248,62 @@ const fakeJwt='x.'+Buffer.from(JSON.stringify({email:'พอใจ@example.com',
 assert.equal(syncContext.window.MissionSync._decode(fakeJwt).email,'พอใจ@example.com');
 assert.deepEqual(config.sync&&Object.keys(config.sync).slice(0,2),['google_client_id','apps_script_url']);
 console.log('PASS: Google Sheet sync rejects unlisted/other-app/expired/invalid tokens, allows listed accounts, merges two devices (newest mark wins, attempts union without duplicates, dates), drops malformed data, uploads legacy progress');
+
+/* Sessions: a verified Google login is exchanged for a long-lived, revocable device session. */
+{
+ const dad='tok-dad-00000000000000',kid='tok-kid-0000000000000';
+ const gs2=fakeAppsScript(claimsFor);
+ const login=gs2.post({action:'login',id_token:dad,device:'iPad Safari'});
+ assert.equal(login.ok,true);assert.equal(login.email,'dad@example.com');assert.match(login.session,/^[0-9a-f]{64}$/);
+ const days=(new Date(login.expires_at)-Date.now())/86400000;assert.ok(days>89&&days<=90,'session lasts 90 days');
+ assert.ok(!JSON.stringify(gs2.tabs.get('sessions').rows).includes(login.session),'only a hash of the session is stored');
+ assert.equal(gs2.post({action:'whoami',session:login.session}).email,'dad@example.com');
+ assert.equal(gs2.post({action:'sync',session:login.session,state:{}}).ok,true);
+ for(const bad of [login.session.replace(/.$/,c=>c==='0'?'1':'0'),'short',''])assert.equal(gs2.post({action:'whoami',session:bad}).code,'session_expired');
+ assert.equal(gs2.post({action:'login',id_token:'tok-stranger-0000000000'}).code,'denied');
+ assert.equal(gs2.post({action:'login',id_token:'tok-garbage-xxxxxxxxxx'}).code,'auth');
+ // a session cannot be used to mint another session
+ assert.equal(gs2.post({action:'login',session:login.session}).ok,false);
+ // idle use renews the expiry, but only once a day
+ const cur=()=>gs2.tabs.get('sessions').rows[1],threeDays=new Date(Date.now()-3*86400000).toISOString();
+ cur()[3]=new Date(Date.now()+10*86400000).toISOString();cur()[4]=threeDays;
+ assert.equal(gs2.post({action:'whoami',session:login.session}).ok,true);
+ assert.ok(new Date(cur()[3])-Date.now()>89*86400000,'expiry renewed');assert.ok(Date.now()-new Date(cur()[4])<60000,'last_seen updated');
+ const renewed=cur()[3];assert.equal(gs2.post({action:'whoami',session:login.session}).ok,true);assert.equal(cur()[3],renewed,'no second write within a day');
+ // expiry
+ cur()[3]='2020-01-01T00:00:00.000Z';assert.equal(gs2.post({action:'whoami',session:login.session}).code,'session_expired');
+ // logout revokes just this device; logout_all revokes every device of that account
+ const a=gs2.post({action:'login',id_token:dad}).session,b=gs2.post({action:'login',id_token:dad}).session,k=gs2.post({action:'login',id_token:kid}).session;
+ assert.equal(gs2.post({action:'logout',session:a}).ok,true);
+ assert.equal(gs2.post({action:'whoami',session:a}).code,'session_expired');assert.equal(gs2.post({action:'whoami',session:b}).ok,true);
+ assert.equal(gs2.post({action:'logout_all',session:b}).ok,true);
+ assert.equal(gs2.post({action:'whoami',session:b}).code,'session_expired');assert.equal(gs2.post({action:'whoami',session:k}).email,'porjai@example.com');
+ // removing an address from ALLOWED_EMAILS cuts off its sessions
+ gs2.props.ALLOWED_EMAILS='dad@example.com';assert.equal(gs2.post({action:'whoami',session:k}).code,'denied');
+ // a tab created by hand but still empty gets its header row (and plan seed) instead of staying blank
+ const gs3=fakeAppsScript(claimsFor);gs3.tabs.set('log',gs3.makeTab());gs3.tabs.set('แผน-ตั้งค่า',gs3.makeTab());
+ gs3.post({action:'login',id_token:dad});
+ assert.deepEqual([...gs3.tabs.get('log').rows[0]],['time','email','action','detail']);
+ assert.equal(gs3.tabs.get('log').rows[1][2],'login');assert.equal(gs3.tabs.get('แผน-ตั้งค่า').rows[0][0],'หัวข้อ');assert.equal(gs3.tabs.get('แผน-ตั้งค่า').rows[1][0],'วันเริ่มแผน');
+ assert.deepEqual([...gs3.tabs.get('sessions').rows[0]],['hash','email','created_at','expires_at','last_seen','device','revoked']);
+}
+console.log('PASS: Apps Script sessions: 90-day revocable device sessions (hash only), daily sliding renewal, expiry, logout/logout-all, allowlist re-check, denied vs auth vs session_expired codes, empty hand-made tabs get headers');
+
+/* Client transport: transient Google/Apps Script failures retry; real answers never do. */
+{
+ const post=syncContext.window.MissionSync._post;
+ const mk=steps=>{const calls=[],sleeps=[];let i=0;return {calls,sleeps,fetch:async()=>{calls.push(1);const s=steps[Math.min(i++,steps.length-1)];if(s instanceof Error)throw s;return {ok:s.status>=200&&s.status<300,status:s.status,json:async()=>{if(s.bad)throw new SyntaxError('bad json');return s.body;}};},sleep:async ms=>{sleeps.push(ms);}};};
+ const ok={status:200,body:{ok:true,n:1}},nf={status:404,body:null};
+ (async()=>{
+  let m=mk([nf,nf,ok]);assert.deepEqual(await post('u',{a:1},m),{ok:true,n:1});assert.equal(m.calls.length,3);assert.deepEqual(m.sleeps,[700,1800]);
+  m=mk([nf,nf,nf]);await assert.rejects(()=>post('u',{},m),e=>e.transient===true&&/404/.test(e.message));assert.equal(m.calls.length,3);
+  m=mk([new TypeError('Failed to fetch'),{status:503,body:null},ok]);assert.equal((await post('u',{},m)).ok,true);assert.equal(m.calls.length,3);
+  m=mk([{status:200,bad:true},ok]);assert.equal((await post('u',{},m)).ok,true);
+  m=mk([{status:200,body:{ok:false,code:'denied',error:'บัญชี x ยังไม่ได้รับอนุญาต'}}]);await assert.rejects(()=>post('u',{},m),e=>e.code==='denied'&&!e.transient&&/อนุญาต/.test(e.message));assert.equal(m.calls.length,1);
+  m=mk([{status:400,body:null}]);await assert.rejects(()=>post('u',{},m),e=>!e.transient);assert.equal(m.calls.length,1);
+  console.log('PASS: client transport retries 404/408/429/5xx/network/bad-JSON up to 3 times (700ms, 1.8s), marks exhausted retries transient, and never retries a real backend answer');
+ })().catch(e=>{console.error(e);process.exit(1);});
+}
 
 /* Study plan: fixed schedule from config, Sheet plan tabs seeded to match it, parser rejects bad rows. */
 {

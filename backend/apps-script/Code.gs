@@ -16,6 +16,7 @@ var SHEETS = {
   attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json', 'email'],
   settings: ['key', 'value', 'updated_at', 'email'],
   log: ['time', 'email', 'action', 'detail'],
+  sessions: ['hash', 'email', 'created_at', 'expires_at', 'last_seen', 'device', 'revoked'],
   'แผน-วิธีใช้': ['วิธีปรับแผนการเรียนของพอใจ (แท็บนี้อ่านอย่างเดียว ไม่มีผลกับแผน)'],
   'แผน-ตั้งค่า': ['หัวข้อ', 'ค่า', 'คำอธิบาย'],
   'แผน-ช่วงเวลา': ['ชื่อช่วง', 'ตั้งแต่วันที่', 'ถึงวันที่', 'เริ่มเรียนกี่โมง', 'นาทีเรียนต่อวัน', 'นาทีเฉพาะบางวัน', 'วันพัก', 'ข้อความวันทบทวน'],
@@ -76,8 +77,22 @@ var SUBJECT_ALIASES = {'คณิต': 'math', 'คณิตศาสตร์':
 var DAY_CODES = {'อา': 0, 'จ': 1, 'อ': 2, 'พ': 3, 'พฤ': 4, 'ศ': 5, 'ส': 6};
 var SETTING_KEYS = ['examDate', 'resultDate'];
 var MAX_ATTEMPTS_RETURNED = 100;
+var SESSION_DAYS = 90;
+var SESSION_RENEW_MS = 24 * 60 * 60 * 1000; // renew the expiry at most once a day
+var SESSION_EXPIRED = 'หมดเวลาเข้าสู่ระบบ กรุณาเข้าสู่ระบบด้วย Google อีกครั้ง';
+var SESSION_PATTERN = /^[0-9a-f]{64}$/;
 
 /* ---------- pure helpers (unit tested in tests/core.cjs) ---------- */
+
+/** Errors carry a machine-readable code the website uses: auth | denied | session_expired | config | error. */
+function authError(code, message) { var e = new Error(message); e.code = code; return e; }
+
+/** May this stored session row be used now? Returns {email, renew} or throws session_expired / denied. */
+function checkSession(row, allowed, nowMs) {
+  if (!row || row.revoked || !(new Date(row.expires_at).getTime() > nowMs)) throw authError('session_expired', SESSION_EXPIRED);
+  if (allowed.indexOf(row.email) < 0) throw authError('denied', 'บัญชี ' + row.email + ' ยังไม่ได้รับอนุญาต');
+  return {email: row.email, renew: !(nowMs - new Date(row.last_seen).getTime() < SESSION_RENEW_MS)};
+}
 
 function attemptKey(a) { return a.id + '|' + a.date; }
 
@@ -221,12 +236,12 @@ function parsePlan(settingRows, periodRows, classRows, subjectRows, dayRows) {
 }
 
 function checkClaims(claims, clientId, allowed, nowSeconds) {
-  if (!claims || claims.aud !== clientId) throw new Error('token ไม่ได้ออกให้เว็บนี้');
-  if (['accounts.google.com', 'https://accounts.google.com'].indexOf(claims.iss) < 0) throw new Error('ผู้ออก token ไม่ถูกต้อง');
-  if (String(claims.email_verified) !== 'true') throw new Error('อีเมลยังไม่ยืนยันกับ Google');
-  if (!(Number(claims.exp) > nowSeconds)) throw new Error('token หมดอายุ กรุณาเข้าสู่ระบบใหม่');
+  if (!claims || claims.aud !== clientId) throw authError('auth', 'token ไม่ได้ออกให้เว็บนี้');
+  if (['accounts.google.com', 'https://accounts.google.com'].indexOf(claims.iss) < 0) throw authError('auth', 'ผู้ออก token ไม่ถูกต้อง');
+  if (String(claims.email_verified) !== 'true') throw authError('auth', 'อีเมลยังไม่ยืนยันกับ Google');
+  if (!(Number(claims.exp) > nowSeconds)) throw authError('auth', 'token หมดอายุ กรุณาเข้าสู่ระบบใหม่');
   var email = String(claims.email || '').toLowerCase();
-  if (allowed.indexOf(email) < 0) throw new Error('บัญชี ' + email + ' ยังไม่ได้รับอนุญาต');
+  if (allowed.indexOf(email) < 0) throw authError('denied', 'บัญชี ' + email + ' ยังไม่ได้รับอนุญาต');
   return email;
 }
 
@@ -234,11 +249,21 @@ function checkClaims(claims, clientId, allowed, nowSeconds) {
 
 function doGet() { return json({ok: true, service: 'satit-swu-hub-sync'}); }
 
+/**
+ * Actions:
+ *   login       {id_token, device}  Google token -> new 90-day device session {session, expires_at}
+ *   whoami      {session | id_token}
+ *   sync        {session | id_token, state}
+ *   logout      {session}           revoke this device
+ *   logout_all  {session}           revoke every device of this account
+ * Only a SHA-256 hash of a session is stored in the sheet; the allowlist is re-checked on every call.
+ */
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
-    var email = verify(body.id_token);
-    if (body.action === 'login') return doLogin(email);
+    if (body.action === 'login') return doLogin(verify(body.id_token), body);
+    if (body.action === 'logout' || body.action === 'logout_all') return doLogout(body, body.action === 'logout_all');
+    var email = authenticate(body);
     if (body.action === 'whoami') return json({ok: true, email: email});
     if (body.action !== 'sync') throw new Error('ไม่รู้จักคำสั่ง');
     var lock = LockService.getScriptLock();
@@ -251,33 +276,101 @@ function doPost(e) {
       return json({ok: true, email: email, state: responseState(result.merged), plan: readPlan()});
     } finally { lock.releaseLock(); }
   } catch (error) {
-    return json({ok: false, error: String(error && error.message || error)});
+    return json({ok: false, error: String(error && error.message || error), code: error && error.code || 'error'});
   }
 }
 
-function doLogin(email) {
+function authenticate(body) {
+  if (body.session !== undefined && body.session !== null) return useSession(body.session);
+  return verify(body.id_token);
+}
+
+function doLogin(email, body) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
   try {
     Object.keys(SHEETS).forEach(function (name) { sheet(name); });
-    appendLog(email, 'login', 'successful');
-    return json({ok: true, email: email});
-  } catch (error) {
-    return json({ok: false, error: String(error && error.message || error)});
+    var now = new Date(), token = newSessionToken(), device = String(body.device || '').slice(0, 80);
+    var session = {hash: hashSession(token), email: email, created_at: now.toISOString(), last_seen: now.toISOString(),
+      expires_at: new Date(now.getTime() + SESSION_DAYS * 86400000).toISOString(), device: device, revoked: false};
+    sheet('sessions').appendRow(sessionValues(session));
+    appendLog(email, 'login', 'new session ' + device.slice(0, 40));
+    return json({ok: true, email: email, session: token, expires_at: session.expires_at});
+  } finally { lock.releaseLock(); }
+}
+
+function doLogout(body, everywhere) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var token = String(body.session || ''), mine = SESSION_PATTERN.test(token) ? findSession(hashSession(token)) : null;
+    if (!mine) return json({ok: true, revoked: 0}); // already gone: logging out is idempotent
+    var revoked = 0;
+    readSessions().forEach(function (s) {
+      if ((everywhere ? s.email === mine.email : s.hash === mine.hash) && !s.revoked) { s.revoked = true; writeSession(s); revoked++; }
+    });
+    appendLog(mine.email, everywhere ? 'logout_all' : 'logout', revoked + ' sessions');
+    return json({ok: true, revoked: revoked});
+  } finally { lock.releaseLock(); }
+}
+
+function newSessionToken() { return (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, ''); }
+function hashSession(token) { return Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, token)); }
+
+function sessionValues(s) { return [s.hash, s.email, text(s.created_at), text(s.expires_at), text(s.last_seen), text(s.device || ''), s.revoked === true]; }
+
+function readSessions() {
+  var values = sheet('sessions').getDataRange().getValues(), out = [];
+  for (var i = 1; i < values.length; i++) {
+    var r = values[i];
+    if (r[0]) out.push({n: i + 1, hash: String(r[0]), email: String(r[1]).toLowerCase(), created_at: iso(r[2]), expires_at: iso(r[3]), last_seen: iso(r[4]),
+      device: String(r[5] === undefined ? '' : r[5]), revoked: r[6] === true || r[6] === 'TRUE'});
   }
+  return out;
+}
+
+function findSession(hash) {
+  var all = readSessions();
+  for (var i = 0; i < all.length; i++) { if (all[i].hash === hash) return all[i]; }
+  return null;
+}
+
+function writeSession(s) { sheet('sessions').getRange(s.n, 1, 1, 7).setValues([sessionValues(s)]); }
+
+function useSession(token) {
+  if (typeof token !== 'string' || !SESSION_PATTERN.test(token)) throw authError('session_expired', SESSION_EXPIRED);
+  var hash = hashSession(token), found = checkSession(findSession(hash), allowedEmails(), Date.now());
+  if (found.renew) {
+    var lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    try {
+      var fresh = findSession(hash); // re-read under the lock: it may have been revoked meanwhile
+      checkSession(fresh, allowedEmails(), Date.now());
+      var now = new Date();
+      fresh.last_seen = now.toISOString(); fresh.expires_at = new Date(now.getTime() + SESSION_DAYS * 86400000).toISOString();
+      writeSession(fresh);
+    } finally { lock.releaseLock(); }
+  }
+  return found.email;
+}
+
+function allowedEmails() {
+  var allowed = String(PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '').split(',').map(function (x) { return x.trim().toLowerCase(); }).filter(String);
+  if (!allowed.length) throw authError('config', 'ยังไม่ได้ตั้งค่า ALLOWED_EMAILS ใน Script properties');
+  return allowed;
 }
 
 function verify(idToken) {
-  if (typeof idToken !== 'string' || idToken.length < 20) throw new Error('กรุณาเข้าสู่ระบบด้วย Google ก่อน');
-  var props = PropertiesService.getScriptProperties();
-  var clientId = props.getProperty('GOOGLE_CLIENT_ID');
-  var allowed = String(props.getProperty('ALLOWED_EMAILS') || '').split(',').map(function (x) { return x.trim().toLowerCase(); }).filter(String);
-  if (!clientId || !allowed.length) throw new Error('ยังไม่ได้ตั้งค่า GOOGLE_CLIENT_ID หรือ ALLOWED_EMAILS ใน Script properties');
+  if (typeof idToken !== 'string' || idToken.length < 20) throw authError('auth', 'กรุณาเข้าสู่ระบบด้วย Google ก่อน');
+  var clientId = PropertiesService.getScriptProperties().getProperty('GOOGLE_CLIENT_ID'), allowed = allowedEmails();
+  if (!clientId) throw authError('config', 'ยังไม่ได้ตั้งค่า GOOGLE_CLIENT_ID ใน Script properties');
   var cache = CacheService.getScriptCache();
   var cacheKey = 'tok:' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, idToken));
   var cached = cache.get(cacheKey);
   var claims = cached ? JSON.parse(cached) : null;
   if (!claims) {
     var response = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken), {muteHttpExceptions: true});
-    if (response.getResponseCode() !== 200) throw new Error('token ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่');
+    if (response.getResponseCode() !== 200) throw authError('auth', 'token ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่');
     claims = JSON.parse(response.getContentText());
   }
   var email = checkClaims(claims, clientId, allowed, Date.now() / 1000);
@@ -285,22 +378,25 @@ function verify(idToken) {
   return email;
 }
 
+/** A tab that is missing, or was created by hand and left empty, gets its header row (and starter rows). */
 function sheet(name) {
   var book = SpreadsheetApp.getActiveSpreadsheet();
-  var tab = book.getSheetByName(name);
-  if (!tab) {
-    tab = book.insertSheet(name); tab.appendRow(SHEETS[name]); tab.setFrozenRows(1);
-    (PLAN_SEED[name] || []).forEach(function (row) { tab.appendRow(row); });
-    if (PLAN_SEED[name]) {
-      try { // cosmetic only: bold header, hover notes, wider columns
-        var header = tab.getRange(1, 1, 1, SHEETS[name].length);
-        header.setFontWeight('bold').setBackground('#f3d6da');
-        if (HEADER_NOTES[name]) header.setNotes([HEADER_NOTES[name]]);
-        for (var c = 1; c <= SHEETS[name].length; c++) tab.setColumnWidth(c, name === 'แผน-วิธีใช้' ? 760 : 170);
-      } catch (_) { /* formatting is optional */ }
-    }
-  }
+  var tab = book.getSheetByName(name) || book.insertSheet(name);
+  if (tab.getLastRow() === 0) initTab(tab, name);
   return tab;
+}
+
+function initTab(tab, name) {
+  tab.appendRow(SHEETS[name]); tab.setFrozenRows(1);
+  (PLAN_SEED[name] || []).forEach(function (row) { tab.appendRow(row); });
+  if (PLAN_SEED[name]) {
+    try { // cosmetic only: bold header, hover notes, wider columns
+      var header = tab.getRange(1, 1, 1, SHEETS[name].length);
+      header.setFontWeight('bold').setBackground('#f3d6da');
+      if (HEADER_NOTES[name]) header.setNotes([HEADER_NOTES[name]]);
+      for (var c = 1; c <= SHEETS[name].length; c++) tab.setColumnWidth(c, name === 'แผน-วิธีใช้' ? 760 : 170);
+    } catch (_) { /* formatting is optional */ }
+  }
 }
 
 function rows(name) {
@@ -361,6 +457,6 @@ function readPlan() {
   } catch (error) { return null; }
 }
 
-function appendLog(email, action, detail) { sheet('log').appendRow([text(new Date().toISOString()), email, action, detail]); }
+function appendLog(email, action, detail) { sheet('log').appendRow([text(new Date().toISOString()), email, action, text(detail)]); }
 
 function json(data) { return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON); }
