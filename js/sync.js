@@ -41,6 +41,7 @@
       let data;
       try { data = await response.json(); } catch (_) { last = failure('Google Sheet ตอบกลับไม่ถูกต้อง', {transient: true}); continue; }
       if (!data || data.ok !== true) throw failure((data && data.error) || 'Google Sheet ตอบกลับผิดพลาด', {code: data && data.code || 'error', transient: false});
+      if (io.check && !io.check(data)) { last = failure('Google Sheet ตอบกลับไม่ครบ ลองใหม่อีกครั้ง', {transient: true}); continue; } // e.g. the doGet reply to a POST
       return data;
     }
     throw last;
@@ -133,9 +134,10 @@
   }
 
   /* Every backend call: the device session when we have one, else the fresh Google token. */
+  const REPLY_SHAPE = {sync: d => !!d.state && typeof d.state === 'object', whoami: d => typeof d.email === 'string', login: d => typeof d.session === 'string' && typeof d.email === 'string'};
   function call(action, payload, auth) {
     const credentials = auth || (session ? {session: session.token} : {id_token: token});
-    return post(settings.apps_script_url, {action, ...credentials, ...payload});
+    return post(settings.apps_script_url, {action, ...credentials, ...payload}, {check: REPLY_SHAPE[action]});
   }
 
   /* A Google login (or a stored session) was refused or could not be checked. Only "denied"/"auth"/

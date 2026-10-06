@@ -370,6 +370,9 @@ console.log('PASS: website uses Sheet activities/dates/messages when present (va
   m=mk([nf,nf,nf]);await assert.rejects(()=>post('u',{},m),e=>e.transient===true&&/404/.test(e.message));assert.equal(m.calls.length,3);
   m=mk([new TypeError('Failed to fetch'),{status:503,body:null},ok]);assert.equal((await post('u',{},m)).ok,true);assert.equal(m.calls.length,3);
   m=mk([{status:200,bad:true},ok]);assert.equal((await post('u',{},m)).ok,true);
+  // Apps Script sometimes answers a POST with the doGet reply: right shape or retry
+  m=mk([{status:200,body:{ok:true,service:'satit-swu-hub-sync'}},{status:200,body:{ok:true,state:{marks:{}}}}]);assert.deepEqual((await post('u',{},{...m,check:d=>!!d.state})).state,{marks:{}});assert.equal(m.calls.length,2);
+  m=mk([{status:200,body:{ok:true,service:'x'}}]);await assert.rejects(()=>post('u',{},{...m,check:d=>!!d.state}),e=>e.transient===true);assert.equal(m.calls.length,3);
   m=mk([{status:200,body:{ok:false,code:'denied',error:'บัญชี x ยังไม่ได้รับอนุญาต'}}]);await assert.rejects(()=>post('u',{},m),e=>e.code==='denied'&&!e.transient&&/อนุญาต/.test(e.message));assert.equal(m.calls.length,1);
   m=mk([{status:400,body:null}]);await assert.rejects(()=>post('u',{},m),e=>!e.transient);assert.equal(m.calls.length,1);
   console.log('PASS: client transport retries 404/408/429/5xx/network/bad-JSON up to 3 times (700ms, 1.8s), marks exhausted retries transient, and never retries a real backend answer');
