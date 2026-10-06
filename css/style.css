@@ -491,7 +491,7 @@ a.pd-sheet:hover{transform:translateY(-2px);border-color:var(--red-line);box-sha
 .es-more{margin-top:6px}.es-more summary{cursor:pointer;color:var(--red);font-weight:500;padding:4px 0;list-style:none}.es-more summary::before{content:"▸ "}.es-more[open] summary::before{content:"▾ "}
 .es-top{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:end;margin-top:8px}
 .es-bars{position:relative;height:84px;display:flex;align-items:flex-end;gap:6px;border-bottom:1px solid var(--line)}
-.es-bar{flex:1;min-width:10px;border-radius:4px 4px 0 0}
+.es-bar{flex:0 0 20px;border-radius:4px 4px 0 0}
 .es-bar.es-t0{background:#e0b457}.es-bar.es-t1{background:#7f9bd0}.es-bar.es-t2{background:#4fa377}.es-bar.es-t3{background:#d4a021}
 .es-pass{position:absolute;left:0;right:0;border-top:2px dashed var(--faint);opacity:.55;pointer-events:none}
 .es-history{list-style:none;margin:0;padding:0;display:grid;gap:5px}
