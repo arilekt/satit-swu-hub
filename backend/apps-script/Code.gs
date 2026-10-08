@@ -11,6 +11,17 @@
  *   ALLOWED_EMAILS    comma separated, e.g. dad@gmail.com,porjai@gmail.com
  */
 
+function setupAllSheets() {
+  var book = SpreadsheetApp.getActiveSpreadsheet();
+  Object.keys(SHEETS).forEach(function (name) {
+    if (!book.getSheetByName(name)) {
+      sheet(name);
+      Logger.log('Created sheet: ' + name);
+    }
+  });
+  return 'เสร็จสิ้น: สร้างแท็บที่ขาดหายไปครบทุกแท็บแล้ว';
+}
+
 var SHEETS = {
   marks: ['step_id', 'done', 'updated_at', 'email'],
   attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json', 'email'],
