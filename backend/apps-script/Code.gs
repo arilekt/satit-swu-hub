@@ -403,6 +403,9 @@ function doPost(e) {
     var lock = LockService.getScriptLock();
     lock.waitLock(20000);
     try {
+      Object.keys(SHEETS).forEach(function (name) {
+        if (!SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name)) sheet(name);
+      });
       var incoming = cleanPayload(body.state);
       var result = mergeState(readState(), incoming);
       writeChanges(result.changed, incoming, email);
@@ -587,8 +590,13 @@ function sheetText(name, patterns) { return rows(name).map(function (r) { return
 /** Dates, activities and daily messages the parent edits by hand in the Sheet; null if the tabs cannot be read. */
 function readExtras() {
   try {
-    var extras = parseExtras(sheetText('กำหนดการ', ['', 'yyyy-MM-dd']), sheetText('กิจกรรม', ['yyyy-MM-dd', 'HH:mm', 'HH:mm']), sheetText('กำลังใจ', ['', 'yyyy-MM-dd']), sheetText('เกณฑ์คะแนน', []));
-    extras.sheet = sheetLinks(['กำหนดการ', 'กิจกรรม', 'กำลังใจ', 'แผน-ช่วงเวลา']);
+    var dates = [], acts = [], mottos = [], grading = [];
+    try { dates = sheetText('กำหนดการ', ['', 'yyyy-MM-dd']); } catch (_) {}
+    try { acts = sheetText('กิจกรรม', ['yyyy-MM-dd', 'HH:mm', 'HH:mm']); } catch (_) {}
+    try { mottos = sheetText('กำลังใจ', ['', 'yyyy-MM-dd']); } catch (_) {}
+    try { grading = sheetText('เกณฑ์คะแนน', []); } catch (_) {}
+    var extras = parseExtras(dates, acts, mottos, grading);
+    extras.sheet = sheetLinks(['กำหนดการ', 'กิจกรรม', 'กำลังใจ', 'แผน-ช่วงเวลา', 'แผน-ตั้งค่า', 'แผน-วิชา', 'แผน-วันพิเศษ', 'แผน-คลาส']);
     return extras;
   } catch (error) { return null; }
 }

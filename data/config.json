@@ -1234,6 +1234,7 @@
   "sync": {
     "google_client_id": "31265253349-l240qupng3th9ob1obp66flb9ht4gmr3.apps.googleusercontent.com",
     "apps_script_url": "https://script.google.com/macros/s/AKfycbwQtF5Ku6ut0i2oLldig24MH-JxHMJtNDEb_hmkKFFqvr30Y5gCA8sTxwqnDJppxgs/exec",
+    "sheet_url": "https://docs.google.com/spreadsheets/d/1RBCcYE6RoVjMDt3oOw70DUQ5LnDr25D1_ushOAY6X7U/edit?gid=1258865635#gid=1258865635",
     "note": "ค่าสาธารณะ ไม่ใช่รหัสลับ ใส่หลังทำตาม docs/GOOGLE-SHEET-SYNC.md เว้นว่างไว้ = เก็บผลเรียนเฉพาะเครื่อง"
   }
 }

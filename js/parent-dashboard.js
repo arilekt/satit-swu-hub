@@ -209,6 +209,7 @@ function renderSheets(ctx) {
   const {config, extras, nextActivity, activityCount, boostText} = ctx, plan = config.daily_plan || {};
   const program = config.admissions.programs.find(p => p.id === config.admissions.primary_program) || config.admissions.programs[0];
   const exam = ctx.examDate || program.exam_date, result = ctx.resultDate || program.pretest_results_date;
+  const fallbackUrl = (config && config.sync && config.sync.sheet_url) || null;
   const cards = [
     {tab: 'กำหนดการ', icon: '📅', title: 'กำหนดการ', lines: ['สอบจริง ' + (exam ? window.Countdown.label(exam) : 'ยังไม่ระบุ'), 'ประกาศผล Pre-Test ' + (result ? window.Countdown.label(result) : 'ยังไม่ระบุ')]},
     {tab: 'กิจกรรม', icon: '📌', title: 'กิจกรรม', lines: [nextActivity ? 'ถัดไป: ' + nextActivity.title + ' · ' + nextActivity.range : 'ไม่มีกิจกรรมที่ยังไม่ถึง', 'มีทั้งหมด ' + activityCount + ' รายการ']},
@@ -217,7 +218,7 @@ function renderSheets(ctx) {
   ];
   const grid = el('div', 'pd-sheets');
   for (const c of cards) {
-    const href = sheetLink(extras, c.tab), a = el(href ? 'a' : 'div', 'pd-sheet' + (href ? '' : ' pd-off'));
+    const href = sheetLink(extras, c.tab) || fallbackUrl, a = el(href ? 'a' : 'div', 'pd-sheet' + (href ? '' : ' pd-off'));
     if (href) { a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
     a.append(el('span', 'pd-ic', c.icon), el('b', undefined, c.title), ...c.lines.map(t => el('p', undefined, t)), el('span', 'pd-go', href ? 'เปิดแท็บ ↗' : 'เปิดได้หลังซิงก์กับ Google Sheet'));
     grid.append(a);
