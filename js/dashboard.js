@@ -197,7 +197,7 @@ function render(config,activities,tracker){
   if(!groups.length)list.append(node('li','ยังไม่มีกิจกรรมอื่นตอนนี้','muted'));
   for(const g of groups.slice(0,3)){const li=node('li');li.append(node('span',g.title),node('span',g.range,'when'));list.append(li);}
   const stats=tracker.stats(config);$('overall-caption').textContent='รวมทุกวิชา จบแล้ว '+stats.done+'/'+stats.total+' ภารกิจ';
-  const planDays=window.StudyPlan?StudyPlan.schedule(config):null,plan=planDays?{days:planDays,index:StudyPlan.index(planDays),today:Countdown.today()}:null;
+  const planDays=window.StudyPlan?StudyPlan.schedule(config,tracker):null,plan=planDays?{days:planDays,index:StudyPlan.index(planDays),today:Countdown.today()}:null;
   $('subject-progress').replaceChildren(...ORDER()(config).map(subject=>journeyRow(config,subject,tracker,plan)));
   MissionCalendar.render($('calendar-events'),activities.events.map(e=>({...e,source_note:e.source_note||activities.source_note})).sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))));
   $('other-schedules').replaceChildren();config.admissions.programs.filter(p=>p.id!==regular.id).forEach(program=>{const row=node('div',undefined,'other-program');row.append(node('h3',program.name),node('p','Pre-Test · '+Countdown.label(program.pretest_date)+' · สอบจริง · '+Countdown.label(program.exam_date)));$('other-schedules').append(row);});

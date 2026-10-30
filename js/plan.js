@@ -41,11 +41,14 @@ const clock=(start,add)=>{const [h,m]=start.split(':').map(Number),t=h*60+m+add;
 // Returns {date:[{subject,step,minutes,slot:{time,end},period}]} for every planned day, or null when no start date is set.
 // Days are filled in queue order; when the next PART does not fit what is left of the day, a later one that fits
 // may go first (looking a few items ahead, never before an earlier item of the same subject).
-function schedule(config){
+// Moving start_date forward re-plans what is left: items ticked done before that day (Bangkok) are left out.
+function schedule(config,tracker){
   const plan=config.daily_plan||{},start=plan.start_date;
   if(typeof start!=='string'||!DATE.test(start))return null;
+  const startAt=Date.parse(start+'T00:00:00+07:00'),marks=tracker&&typeof tracker.exportData==='function'?tracker.exportData().marks||{}:{};
+  const doneBefore=id=>{const m=marks[id];return !!(m&&m.done&&Date.parse(m.at)<startAt);};
   const set=settings(config),pending=[];
-  const lists=ordered(config).map(subject=>({subject,w:clamp(set[subject.id]?.weight,1,3,1),from:DATE.test(set[subject.id]?.from||'')?set[subject.id].from:'',items:window.Catalog.items(subject)}));
+  const lists=ordered(config).map(subject=>({subject,w:clamp(set[subject.id]?.weight,1,3,1),from:DATE.test(set[subject.id]?.from||'')?set[subject.id].from:'',items:window.Catalog.items(subject).filter(step=>!doneBefore(step.id))}));
   for(let round=0;lists.some(l=>round*l.w<l.items.length);round++)for(const l of lists)for(const step of l.items.slice(round*l.w,(round+1)*l.w))pending.push({subject:l.subject,step,from:l.from,minutes:minutes(step,plan)});
   const days={};
   for(let n=dayNumber(start),guard=0;pending.length&&guard<1500;n++,guard++){
@@ -93,7 +96,7 @@ function render(config,activities,tracker,groups){
   const [y,m]=month.split('-').map(Number);
   document.getElementById('plan-title').textContent='ปฏิทินแผนการเรียน · '+new Intl.DateTimeFormat('th-TH',{timeZone:'UTC',month:'long',year:'numeric'}).format(new Date(Date.UTC(y,m-1,1)));
   const box=document.getElementById('plan-calendar');box.replaceChildren();
-  const plan=StudyPlan.schedule(config);
+  const plan=StudyPlan.schedule(config,tracker);
   if(!plan){box.append(node('p','ยังไม่ได้กำหนดวันเริ่มแผนการเรียน (daily_plan.start_date ใน config)','notice'));return;}
   const regular=config.admissions.programs.find(p=>p.id===config.admissions.primary_program);
   const keyDates={};const mark=(date,label)=>{if(date)(keyDates[date]=keyDates[date]||[]).push(label);};

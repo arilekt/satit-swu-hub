@@ -427,5 +427,10 @@ console.log('PASS: website uses Sheet activities/dates/messages when present (va
  const st=plan.standing(days,config.subjects.find(x=>x.id==='math'),{has:()=>false},'2026-10-08');assert.ok(st.behind>0&&st.ahead===0);
  // ticking lessons done never moves the plan
  assert.deepEqual(Object.keys(plan.schedule(config)),dates);
+ // moving the start date re-plans what is left: items done before it drop out, items done after it stay put
+ const replan={...config,daily_plan:{...config.daily_plan,start_date:'2026-10-30'}},marks={'math-part01':{done:true,at:'2026-10-29T16:59:00Z'},'math-part02':{done:true,at:'2026-10-29T17:01:00Z'}};
+ const ids=d=>Object.values(d).flat().map(x=>x.step.id),rp=ids(plan.schedule(replan,{exportData:()=>({marks})}));
+ assert.ok(!rp.includes('math-part01')&&rp.includes('math-part02')&&rp.length===ids(plan.schedule(replan)).length-1);
+ assert.equal(Object.keys(plan.schedule(replan,{exportData:()=>({marks})})).sort()[0],'2026-10-30');
  console.log('PASS: study plan fills days with whole PARTs by real length, math/science/thai/social before Pre-Test, English after, class ends Dec, Sheet tabs seeded to the same plan, special days and subject settings, bad rows ignored');
 }
