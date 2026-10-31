@@ -29,7 +29,7 @@ function compute({config, tracker, schedule = {}, today, subjectsInOrder}) {
   for (const date of Object.keys(schedule).sort()) for (const x of schedule[date]) {
     const id = x.subject.id;
     if (!first[id]) first[id] = date;
-    if (date <= today) planned[id] = (planned[id] || 0) + 1;
+    if (date < today) planned[id] = (planned[id] || 0) + 1;
   }
   // items done before the plan's start date are left out of the plan (re-plan), so they count as due
   const start = config.daily_plan && config.daily_plan.start_date, startAt = Date.parse(start + 'T00:00:00+07:00');
