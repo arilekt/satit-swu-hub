@@ -37,7 +37,7 @@ function updateSidebar(){
 // "สำหรับคุณพ่อ": everything shown comes from progress on this device plus what the Sheet delivered with the last sync.
 function renderParent(){
  const today=Countdown.today(),activities=ParentTools.activities();
- ParentDashboard.render($('pd-root'),{config,tracker:Tracker,schedule:window.StudyPlan?StudyPlan.schedule(config):{},today,subjectsInOrder:subjectsInOrder(),extras:latestExtras,
+ ParentDashboard.render($('pd-root'),{config,tracker:Tracker,schedule:window.StudyPlan?StudyPlan.schedule(config,Tracker)||{}:{},today,subjectsInOrder:subjectsInOrder(),extras:latestExtras,
   nextActivity:Dashboard.eventGroups(activities,today)[0]||null,activityCount:activities.events.length,boostText:Dashboard.boost(),examDate:Tracker.examDate(),resultDate:Tracker.resultDate()});
 }
 document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});

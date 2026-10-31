@@ -29,10 +29,15 @@ function compute({config, tracker, schedule = {}, today, subjectsInOrder}) {
   for (const date of Object.keys(schedule).sort()) for (const x of schedule[date]) {
     const id = x.subject.id;
     if (!first[id]) first[id] = date;
-    if (date <= today) planned[id] = (planned[id] || 0) + 1;
+    if (date < today) planned[id] = (planned[id] || 0) + 1;
   }
+  // items done before the plan's start date are left out of the plan (re-plan), so they count as due
+  const start = config.daily_plan && config.daily_plan.start_date, startAt = Date.parse(start + 'T00:00:00+07:00');
+  const marksBefore = Number.isFinite(startAt) && typeof tracker.exportData === 'function' ? tracker.exportData().marks || {} : {};
+  const doneBefore = id => { const m = marksBefore[id]; return !!(m && m.done && Date.parse(m.at) < startAt); };
   const rows = subjects.map(subject => {
-    const items = Catalog.items(subject), total = items.length, done = items.filter(item => tracker.has(item.id)).length, due = Math.min(planned[subject.id] || 0, total);
+    const items = Catalog.items(subject), total = items.length, done = items.filter(item => tracker.has(item.id)).length;
+    const due = Math.min((planned[subject.id] || 0) + items.filter(item => doneBefore(item.id)).length, total);
     return {id: subject.id, name: subject.name, icon: subject.icon || '', done, total, planned: due, ...standing(done, due, first[subject.id])};
   });
   const sum = key => rows.reduce((n, r) => n + r[key], 0);

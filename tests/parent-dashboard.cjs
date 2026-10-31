@@ -56,11 +56,11 @@ const model = run({});
 
 // 1. per-subject progress against the plan
 const [math, science, english] = model.subjects;
-eq([math.done, math.total, math.planned, math.state, math.label], [5, 6, 3, 'ok', 'นำ 2 ภารกิจ']);
-eq([science.done, science.total, science.planned, science.state, science.label], [0, 4, 1, 'warn', 'ช้า 1 ภารกิจ']);
+eq([math.done, math.total, math.planned, math.state, math.label], [5, 6, 2, 'ok', 'นำ 3 ภารกิจ']);
+eq([science.done, science.total, science.planned, science.state, science.label], [0, 4, 0, 'idle', 'เริ่ม 6 ต.ค.']);
 eq([english.done, english.total, english.planned, english.state], [0, 2, 0, 'idle']);
 assert.match(english.label, /เริ่ม 1 ธ\.ค\./);
-eq([model.overall.done, model.overall.total, model.overall.percent, model.overall.planned, model.overall.state], [5, 12, 42, 4, 'ok']);
+eq([model.overall.done, model.overall.total, model.overall.percent, model.overall.planned, model.overall.state], [5, 12, 42, 2, 'ok']);
 assert.equal(PD.compute({config, tracker: {...tracker, has: () => false}, schedule: {}, today: '2026-10-06'}).subjects[0].label, 'ยังไม่เริ่ม');
 
 // 2. exam results (mini-quizzes are not exams)
