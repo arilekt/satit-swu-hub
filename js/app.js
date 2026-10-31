@@ -157,6 +157,22 @@ $('history-button').onclick=()=>{
 };
 // Study plan: data/config.json is the default; the plan tabs in Google Sheet override it after sync.
 const PLAN_KEY='satit-swu-hub:plan';let defaultPlan=null;
+// daily_plan.override in data/config.json is a re-plan that wins over the Sheet and the defaults: a later start date,
+// periods placed first (other periods are clipped around them) and classes_until (no class after that day).
+function pinDefaults(next){
+ const o=defaultPlan.override;if(!o||typeof o!=='object')return next;
+ if(typeof o.start_date==='string'&&o.start_date>(next.start_date||''))next.start_date=o.start_date;
+ const day=(date,n)=>new Date(Date.parse(date+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
+ const pins=Array.isArray(o.periods)?o.periods:[];
+ if(pins.length){
+  let rest=(Array.isArray(next.periods)?next.periods:[]).filter(p=>p&&typeof p.from==='string'&&typeof p.to==='string');
+  for(const pin of pins)rest=rest.flatMap(p=>[p.from<pin.from?{...p,to:p.to<pin.from?p.to:day(pin.from,-1)}:null,p.to>pin.to?{...p,from:p.from>pin.to?p.from:day(pin.to,1)}:null].filter(Boolean));
+  next.periods=[...pins,...rest];
+ }
+ const until=o.classes_until;
+ if(typeof until==='string'&&Array.isArray(next.recurring_events))next.recurring_events=next.recurring_events.map(e=>({...e,until:e.until&&e.until<until?e.until:until}));
+ return next;
+}
 function applyPlan(remote,save){
  if(!remote||typeof remote!=='object'||Array.isArray(remote))return false;
  const allowed=['start_date','start_time','day_minutes','break_minutes','reading_minutes','rest_weekdays','periods','recurring_events','subjects','days'],next={...defaultPlan,source:'sheet'};
@@ -166,6 +182,7 @@ function applyPlan(remote,save){
  if(Array.isArray(remote.periods)&&!remote.periods.every(p=>p&&Number.isFinite(Number(p.day_minutes))))next.periods=defaultPlan.periods;
  if(next.subjects&&!Array.isArray(next.subjects))return false;
  if(next.days&&(typeof next.days!=='object'||Array.isArray(next.days)))return false;
+ pinDefaults(next);
  config.daily_plan=next;
  if(save)try{localStorage.setItem(PLAN_KEY,JSON.stringify(remote));}catch(_){/* keep in memory */}
  return true;
@@ -194,7 +211,7 @@ function applyExtras(extras,save){
 }
 window.addEventListener('extras-remote',e=>{if(applyExtras(e.detail,true)&&started)update();});
 async function start(){
- defaultPlan={...config.daily_plan,source:'default'};config.daily_plan=defaultPlan;
+ defaultPlan={...config.daily_plan,source:'default'};defaultPlan=pinDefaults({...defaultPlan});config.daily_plan=defaultPlan;
  try{const cached=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');if(cached)applyPlan(cached,false);}catch(_){/* use default */}
  let activities={title:'กิจกรรมของพอใจ',events:[]};try{activities=await get('./data/activities.json',true);}catch(_){notify('โหลดกิจกรรมไม่สำเร็จ แสดงวันสอบก่อน ลองเปิดเว็บใหม่เพื่อโหลดกิจกรรม');}
  ParentTools.init(activities);
