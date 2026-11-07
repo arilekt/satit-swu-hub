@@ -711,9 +711,11 @@ function getOrCreateLearnerSpreadsheet(email) {
     }
   } catch (_) { /* mapping sheet doesn't exist yet */ }
   var newBook = SpreadsheetApp.create('SPSM - ' + emailLower);
-  newBook.deleteSheet(newBook.getSheets()[0]);
+  var firstSheet = newBook.getSheets()[0];
+  firstSheet.setName('marks');
+  initTab(firstSheet, 'marks');
   Object.keys(SHEETS).forEach(function (name) {
-    if (['log', 'sessions', 'ผู้ใช้', 'พ่อและศิษย์', 'สเปรดชีตของแต่ละคน'].indexOf(name) < 0) {
+    if (name !== 'marks' && ['log', 'sessions', 'ผู้ใช้', 'พ่อและศิษย์', 'สเปรดชีตของแต่ละคน'].indexOf(name) < 0) {
       var newTab = newBook.insertSheet(name);
       initTab(newTab, name);
     }
