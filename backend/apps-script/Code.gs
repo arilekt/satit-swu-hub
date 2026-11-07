@@ -1,6 +1,6 @@
 /**
  * SPSM เส้นทางสู่ ม.1 sync backend (Google Apps Script bound to one Google Sheet).
- * Generated: 2026-10-05 01:52 Bangkok
+ * Generated: 2026-11-07 09:41 Bangkok (build 20261107-094151)
  *
  * Every request carries a Google ID token from the website's Sign-In button. The token is
  * verified with Google, its audience must equal GOOGLE_CLIENT_ID and its email must be in
@@ -12,7 +12,7 @@
  * Script properties (Project Settings → Script properties):
  *   GOOGLE_CLIENT_ID  OAuth Web client ID used by the site
  *   ALLOWED_EMAILS    comma separated, e.g. dad@gmail.com,porjai@gmail.com (fallback only)
- *   LEARNER_EMAIL     primary learner's email for data migration (used by migrateEmptyEmails())
+ *   LEARNER_EMAIL     primary learner's email for data migration (used by migrateLearnerData())
  *   PARENT_EMAILS     comma separated email addresses of parent accounts (for multi-student dashboard)
  */
 
