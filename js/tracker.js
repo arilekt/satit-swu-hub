@@ -76,6 +76,8 @@
     /* Dates typed in the Sheet override this device's own, but are never written back to it. */
     setSheetDates(dates) {sheetDates={};if(dates&&typeof dates==='object')for(const key of ['exam_date','result_date'])if(dateValid(dates[key]))sheetDates[key]=dates[key];},
     setResultDate(value) {state.resultDate=dateValid(value)?value:null;state.settingsAt={...state.settingsAt,resultDate:new Date().toISOString()};save();},
+    getAvatar() { return state.settings && state.settings.avatar ? state.settings.avatar.value : null; },
+    setAvatar(dataUrl) { if(typeof dataUrl==='string'&&dataUrl.startsWith('data:')){const now=new Date().toISOString();state.settings={...state.settings,avatar:{value:dataUrl,at:now}};state.marks={...state.marks,avatar:{done:true,at:now}};save();} },
     stats(config) { const ids=config.subjects.flatMap(s=>Catalog.items(s).map(x=>x.id));const done=ids.filter(id=>this.has(id)).length;return {done,total:ids.length,percent:Math.round(done/ids.length*100)}; },
     summary(config) { const all=this.stats(config);return ['สรุปภารกิจของ'+config.learner,'เรียนจบ '+all.done+'/'+all.total+' ภารกิจ ('+all.percent+'%)',...config.subjects.map(s=>{const all=Catalog.items(s);return s.name+': '+all.filter(x=>this.has(x.id)).length+'/'+all.length;}),...state.attempts.slice(-5).map(a=>'ข้อสอบ '+a.title+': '+a.score+'/'+a.total+' ('+new Date(a.date).toLocaleDateString('th-TH',{timeZone:'Asia/Bangkok'})+')')].join('\n'); }
   };

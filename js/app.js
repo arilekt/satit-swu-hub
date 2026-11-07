@@ -57,10 +57,12 @@ function renderParentMulti(students, states) {
  if (data) ParentMultiDashboard.render($('pd-root'), data);
 }
 document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});
+const avatarImg=$('avatar');if(avatarImg){avatarImg.style.cursor='pointer';avatarImg.addEventListener('click',async()=>{const input=document.createElement('input');input.type='file';input.accept='image/*';input.onchange=async e=>{const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=async ev=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),maxWidth=128;canvas.width=maxWidth;canvas.height=Math.round(img.height*maxWidth/img.width);ctx.drawImage(img,0,0,canvas.width,canvas.height);const compressed=canvas.toDataURL('image/jpeg',0.7);Tracker.setAvatar(compressed);avatarImg.src=compressed;notify('บันทึกรูปภาพแล้ว');};img.src=ev.target.result;};reader.readAsDataURL(file);};input.click();});}
 function update(){
  if(!config)return;
  Dashboard.render(config,ParentTools.activities(),Tracker);
  const greetingName=$('learner-greeting-name');if(greetingName)greetingName.textContent=window.Config?.learnerName||'ผู้เรียน';
+ const avatarImg=$('avatar');if(avatarImg){avatarImg.title=window.Config?.learnerEmail||'ผู้เรียน';const stored=Tracker.getAvatar();if(stored)avatarImg.src=stored;}
  if(page==='parent')renderParent();
  if(page==='lesson'){updateSidebar();const button=$('complete-button');if(button)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';}
 }
