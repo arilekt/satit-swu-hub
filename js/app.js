@@ -40,6 +40,22 @@ function renderParent(){
  ParentDashboard.render($('pd-root'),{config,tracker:Tracker,schedule:window.StudyPlan?StudyPlan.schedule(config,Tracker)||{}:{},today,subjectsInOrder:subjectsInOrder(),extras:latestExtras,
   nextActivity:Dashboard.eventGroups(activities,today)[0]||null,activityCount:activities.events.length,boostText:Dashboard.boost(),examDate:Tracker.examDate(),resultDate:Tracker.resultDate()});
 }
+// Multi-student dashboard for parents
+function renderParentMulti(students, states) {
+ if (!Array.isArray(students) || students.length < 2) return; // not a multi-student parent
+ const today = Countdown.today();
+ const trackers = students.map(email => ({
+   syncPayload: () => states[email] || {marks: {}, attempts: [], settings: {}},
+   applyRemote: () => {},
+   has: id => {const m = (states[email]?.marks || {})[id]; return !!(m && m.done);},
+   attempts: () => states[email]?.attempts || [],
+   exportData: () => states[email] || {marks: {}, attempts: []},
+   examDate: () => null,
+   resultDate: () => null
+ }));
+ const data = ParentMultiDashboard.compute({students, trackers, config, today, subjectsInOrder: subjectsInOrder()});
+ if (data) ParentMultiDashboard.render($('pd-root'), data);
+}
 document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});
 function update(){
  if(!config)return;
@@ -210,6 +226,7 @@ function applyExtras(extras,save){
  return true;
 }
 window.addEventListener('extras-remote',e=>{if(applyExtras(e.detail,true)&&started)update();});
+window.addEventListener('parent-data-loaded',e=>{if(page==='parent'&&e.detail?.students&&e.detail?.states)renderParentMulti(e.detail.students,e.detail.states);});
 async function start(){
  defaultPlan={...config.daily_plan,source:'default'};defaultPlan=pinDefaults({...defaultPlan});config.daily_plan=defaultPlan;
  try{const cached=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');if(cached)applyPlan(cached,false);}catch(_){/* use default */}

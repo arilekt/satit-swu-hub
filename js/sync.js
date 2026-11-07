@@ -222,6 +222,7 @@
       window.dispatchEvent(new CustomEvent('plan-remote', {detail: data.plan && typeof data.plan === 'object' ? data.plan : null}));
       if (data.extras && typeof data.extras === 'object') window.dispatchEvent(new CustomEvent('extras-remote', {detail: data.extras})); // absent on an older backend, null if the tabs could not be read
       email = data.email || email; lastSync = new Date(); lastError = ''; errorKind = '';
+      if (signedIn()) initParentDashboard();
     } catch (error) {
       if (error.code === 'session_expired' || error.code === 'denied') { busy = false; authFailed(error); render(); return {ok: false, error: lastError}; }
       lastError = error.message;
@@ -248,5 +249,26 @@
     if (session) resume().then(() => { if (accessGranted) sync(); });
   }
 
-  window.MissionSync = {init, sync, signOut, signOutAll, retry, configured: () => configured(), _decode: decode, _post: post};
+  // Parent account methods for multi-student dashboard
+  async function listStudents() {
+    if (!configured() || !signedIn()) throw Error('ยังไม่ได้เข้าสู่ระบบ');
+    return call('listStudents');
+  }
+
+  async function readMultipleStates(students) {
+    if (!configured() || !signedIn()) throw Error('ยังไม่ได้เข้าสู่ระบบ');
+    return call('readMultipleStates', {students: students || []});
+  }
+
+  async function initParentDashboard() {
+    try {
+      const {students} = await listStudents();
+      if (Array.isArray(students) && students.length > 1) {
+        const {states} = await readMultipleStates(students);
+        window.dispatchEvent(new CustomEvent('parent-data-loaded', {detail: {students, states}}));
+      }
+    } catch (_) { /* not a parent account or network error */ }
+  }
+
+  window.MissionSync = {init, sync, signOut, signOutAll, retry, configured: () => configured(), listStudents, readMultipleStates, initParentDashboard, _decode: decode, _post: post};
 })();

@@ -501,3 +501,13 @@ a.pd-sheet:hover{transform:translateY(-2px);border-color:var(--red-line);box-sha
 .es-legend{margin:12px 0 0;font-size:13.5px;color:var(--faint)}
 .quiz-score .es-badge{margin:2px 0}
 @media (max-width:560px){.es-top{grid-template-columns:1fr}.es-history li{grid-template-columns:90px 50px auto 1fr}}
+
+/* ---- Parent multi-dashboard (comparing multiple students) ---- */
+.parent-multi-dashboard{padding:16px 0}
+.parent-multi-dashboard h2{margin-bottom:20px}
+.student-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.student-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;text-align:center;display:flex;flex-direction:column}
+.student-card h3{font-size:19px;margin-bottom:16px;color:var(--ink)}
+.student-stats{display:flex;flex-direction:column;gap:12px}
+.stat-percent{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--red)}
+.stat-label{font-size:var(--fs-sm);color:var(--muted)}
