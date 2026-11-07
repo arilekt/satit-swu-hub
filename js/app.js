@@ -177,10 +177,13 @@ const updateAvatarInfo=()=>{
  const email=$('avatar-email'),role=$('avatar-role'),dropdown=$('avatar-dropdown');
  if(currentEmail){email.textContent=currentEmail;role.textContent=isParentAccount?'บัญชีคุณพ่อ':'บัญชีนักเรียน';}
  $('nav-parent').hidden=!isParentAccount;
+ $('avatar-reset-progress').hidden=isParentAccount||currentEmail==='porjai.tummontree@gmail.com';
+ try{const saved=localStorage.getItem('satit-swu-hub:avatar:'+currentEmail);if(saved)document.querySelectorAll('img.avatar').forEach(img=>{img.src=saved;});}catch(_){}
 };
 $('avatar-button')?.addEventListener('click',e=>{const dropdown=$('avatar-dropdown');dropdown.hidden=!dropdown.hidden;if(!dropdown.hidden)updateAvatarInfo();});
-$('avatar-change-photo')?.addEventListener('click',e=>{notify('ส่วนเปลี่ยนรูปมาจาก Google Account ได้ที่ accounts.google.com');});
+$('avatar-photo-input')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(file){if(!file.type.startsWith('image/')){notify('โปรแกรมรับเฉพาะไฟล์รูปเท่านั้น');return;}const reader=new FileReader();reader.onload=evt=>{try{localStorage.setItem('satit-swu-hub:avatar:'+currentEmail,evt.target.result);document.querySelectorAll('img.avatar').forEach(img=>{img.src=evt.target.result;});notify('เปลี่ยนรูปแล้ว');}catch(_){notify('บันทึกรูปไม่สำเร็จ');}e.target.value='';};reader.readAsDataURL(file);}});
 $('avatar-close')?.addEventListener('click',e=>{$('avatar-dropdown').hidden=true;});
+$('avatar-reset-progress')?.addEventListener('click',async e=>{if(!confirm('ยืนยันการรีเซ็ตความคืบหน้าเป็น 0? การกระทำนี้ไม่สามารถยกเลิกได้'))return;try{await window.MissionSync.resetProgress();const key='satit-swu-hub:v1:'+(currentEmail?currentEmail.toLowerCase().replace(/[^a-z0-9]/g,'_'):'');localStorage.removeItem(key);notify('รีเซ็ตความคืบหน้าแล้ว กำลังรีโหลด...');setTimeout(()=>location.reload(),1000);}catch(error){notify('รีเซ็ตไม่สำเร็จ: '+error.message);}});
 document.addEventListener('click',e=>{const dropdown=$('avatar-dropdown'),btn=$('avatar-button');if(!dropdown?.hidden&&e.target!==btn&&!btn?.contains(e.target)&&!dropdown?.contains(e.target))dropdown.hidden=true;});
 window.addEventListener('parent-data-loaded',e=>{isParentAccount=true;updateAvatarInfo();});
 window.addEventListener('email-changed',e=>{if(e.detail){currentEmail=e.detail;updateAvatarInfo();}});

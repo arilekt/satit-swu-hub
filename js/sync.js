@@ -139,7 +139,7 @@
   }
 
   /* Every backend call: the device session when we have one, else the fresh Google token. */
-  const REPLY_SHAPE = {sync: d => !!d.state && typeof d.state === 'object', whoami: d => typeof d.email === 'string', login: d => typeof d.session === 'string' && typeof d.email === 'string'};
+  const REPLY_SHAPE = {sync: d => !!d.state && typeof d.state === 'object', whoami: d => typeof d.email === 'string', login: d => typeof d.session === 'string' && typeof d.email === 'string', resetProgress: d => typeof d.message === 'string'};
   function call(action, payload, auth) {
     const credentials = auth || (session ? {session: session.token} : {id_token: token});
     return post(settings.apps_script_url, {action, ...credentials, ...payload}, {check: REPLY_SHAPE[action]});
@@ -270,5 +270,10 @@
     } catch (_) { /* not a parent account or network error */ }
   }
 
-  window.MissionSync = {init, sync, signOut, signOutAll, retry, configured: () => configured(), listStudents, readMultipleStates, initParentDashboard, _decode: decode, _post: post};
+  async function resetProgress() {
+    if (!configured() || !signedIn()) throw Error('ยังไม่ได้เข้าสู่ระบบ');
+    return call('resetProgress');
+  }
+
+  window.MissionSync = {init, sync, signOut, signOutAll, retry, configured: () => configured(), listStudents, readMultipleStates, initParentDashboard, resetProgress, _decode: decode, _post: post};
 })();

@@ -511,6 +511,9 @@ function doPost(e) {
       });
       return json({ok: true, states: states});
     }
+    if (body.action === 'resetProgress') {
+      return doResetProgress(email);
+    }
     if (body.action !== 'sync') throw new Error('ไม่รู้จักคำสั่ง');
     var lock = LockService.getScriptLock();
     lock.waitLock(20000);
@@ -572,6 +575,31 @@ function newSessionToken() { return (Utilities.getUuid() + Utilities.getUuid()).
 function hashSession(token) { return Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, token)); }
 
 function sessionValues(s) { return [s.hash, s.email, text(s.created_at), text(s.expires_at), text(s.last_seen), text(s.device || ''), s.revoked === true]; }
+
+function doResetProgress(email) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var book = getOrCreateLearnerSpreadsheet(email);
+    var marksTab = book.getSheetByName('marks');
+    if (marksTab && marksTab.getLastRow() > 1) {
+      marksTab.deleteRows(2, marksTab.getLastRow() - 1);
+    }
+    var attemptsTab = book.getSheetByName('attempts');
+    if (attemptsTab && attemptsTab.getLastRow() > 1) {
+      attemptsTab.deleteRows(2, attemptsTab.getLastRow() - 1);
+    }
+    var settingsTab = book.getSheetByName('settings');
+    if (settingsTab && settingsTab.getLastRow() > 1) {
+      settingsTab.deleteRows(2, settingsTab.getLastRow() - 1);
+    }
+    appendLog(email, 'resetProgress', 'cleared all progress data');
+    return json({ok: true, message: 'Progress reset to 0'});
+  } catch (e) {
+    Logger.log('doResetProgress error for ' + email + ': ' + String(e));
+    throw e;
+  } finally { lock.releaseLock(); }
+}
 
 function readSessions() {
   var values = sheet('sessions').getDataRange().getValues(), out = [];
