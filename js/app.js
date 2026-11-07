@@ -175,12 +175,13 @@ $('history-button').onclick=()=>{
 };
 // Avatar menu: show account details and parent status
 let currentEmail=null,isParentAccount=false;
-const updateAvatarInfo=()=>{
- const email=$('avatar-email'),role=$('avatar-role'),dropdown=$('avatar-dropdown');
+const updateAvatarInfo=async ()=>{
+ const email=$('avatar-email'),role=$('avatar-role'),buildEl=$('avatar-build'),dropdown=$('avatar-dropdown');
  if(currentEmail){email.textContent=currentEmail;role.textContent=isParentAccount?'บัญชีคุณพ่อ':'บัญชีนักเรียน';}
  $('nav-parent').hidden=false;
  $('avatar-reset-progress').hidden=currentEmail===config?.learner_email;
  try{const saved=localStorage.getItem('satit-swu-hub:avatar:'+currentEmail);if(saved)document.querySelectorAll('img.avatar').forEach(img=>{img.src=saved;});}catch(_){}
+ try{const resp=await window.MissionSync?.whoami();if(resp?.ok&&resp?.build){buildEl.textContent='Backend · '+resp.build;}else if(window.AppVersion?.build){buildEl.textContent='Frontend · '+window.AppVersion.build;}}catch(_){if(window.AppVersion?.build)buildEl.textContent='Frontend · '+window.AppVersion.build;}
 };
 $('avatar-button')?.addEventListener('click',e=>{const dropdown=$('avatar-dropdown');dropdown.hidden=!dropdown.hidden;if(!dropdown.hidden)updateAvatarInfo();});
 $('avatar-photo-input')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(file){if(!file.type.startsWith('image/')){notify('โปรแกรมรับเฉพาะไฟล์รูปเท่านั้น');return;}const reader=new FileReader();reader.onload=evt=>{try{localStorage.setItem('satit-swu-hub:avatar:'+currentEmail,evt.target.result);document.querySelectorAll('img.avatar').forEach(img=>{img.src=evt.target.result;});notify('เปลี่ยนรูปแล้ว');}catch(_){notify('บันทึกรูปไม่สำเร็จ');}e.target.value='';};reader.readAsDataURL(file);}});
