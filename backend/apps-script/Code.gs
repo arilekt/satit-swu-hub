@@ -46,6 +46,59 @@ function migrateEmptyEmails() {
   return 'โยกย้ายข้อมูลเดิม ' + updated + ' แถว → ' + defaultEmail;
 }
 
+function migrateLearnerData() {
+  var defaultEmail = PropertiesService.getScriptProperties().getProperty('LEARNER_EMAIL') || '';
+  if (!defaultEmail) throw Error('ตั้งค่า LEARNER_EMAIL ใน Script properties ก่อน');
+  var emailLower = String(defaultEmail).toLowerCase();
+  var book = getOrCreateLearnerSpreadsheet(emailLower);
+  var mainBook = SpreadsheetApp.getActiveSpreadsheet();
+  var migrated = {marks: 0, attempts: 0, settings: 0};
+
+  var marksTab = mainBook.getSheetByName('marks');
+  if (marksTab) {
+    var data = marksTab.getLastRow() > 1 ? marksTab.getDataRange().getValues().slice(1) : [];
+    data.forEach(function (r) {
+      var email = String(r[3] || '').toLowerCase();
+      if (email === emailLower && r[0]) {
+        var learnerMarksTab = book.getSheetByName('marks');
+        if (!learnerMarksTab) { learnerMarksTab = book.insertSheet('marks'); initTab(learnerMarksTab, 'marks'); }
+        learnerMarksTab.appendRow([r[0], r[1], r[2]]);
+        migrated.marks++;
+      }
+    });
+  }
+
+  var attemptsTab = mainBook.getSheetByName('attempts');
+  if (attemptsTab) {
+    var data = attemptsTab.getLastRow() > 1 ? attemptsTab.getDataRange().getValues().slice(1) : [];
+    var learnerAttemptsTab = book.getSheetByName('attempts');
+    if (!learnerAttemptsTab) { learnerAttemptsTab = book.insertSheet('attempts'); initTab(learnerAttemptsTab, 'attempts'); }
+    data.forEach(function (r) {
+      var email = String(r[9] || '').toLowerCase();
+      if (email === emailLower && r[0]) {
+        learnerAttemptsTab.appendRow([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8]]);
+        migrated.attempts++;
+      }
+    });
+  }
+
+  var settingsTab = mainBook.getSheetByName('settings');
+  if (settingsTab) {
+    var data = settingsTab.getLastRow() > 1 ? settingsTab.getDataRange().getValues().slice(1) : [];
+    data.forEach(function (r) {
+      var email = String(r[3] || '').toLowerCase();
+      if (email === emailLower && SETTING_KEYS.indexOf(r[0]) >= 0) {
+        var learnerSettingsTab = book.getSheetByName('settings');
+        if (!learnerSettingsTab) { learnerSettingsTab = book.insertSheet('settings'); initTab(learnerSettingsTab, 'settings'); }
+        learnerSettingsTab.appendRow([r[0], r[1], r[2]]);
+        migrated.settings++;
+      }
+    });
+  }
+
+  return 'ย้ายข้อมูล ' + emailLower + ': marks ' + migrated.marks + ' เรคอร์ด, attempts ' + migrated.attempts + ' เรคอร์ด, settings ' + migrated.settings + ' เรคอร์ด (ข้อมูลเดิมใน main sheet ยังเก็บไว้)';
+}
+
 var SHEETS = {
   marks: ['step_id', 'done', 'updated_at'],
   attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json'],
