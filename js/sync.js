@@ -263,9 +263,13 @@
   async function initParentDashboard() {
     try {
       const {students} = await listStudents();
-      if (Array.isArray(students) && students.length > 1) {
-        const {states} = await readMultipleStates(students);
-        window.dispatchEvent(new CustomEvent('parent-data-loaded', {detail: {students, states}}));
+      if (Array.isArray(students)) {
+        if (students.length > 1) {
+          const {states} = await readMultipleStates(students);
+          window.dispatchEvent(new CustomEvent('parent-data-loaded', {detail: {students, states}}));
+        } else if (students.length === 1) {
+          window.dispatchEvent(new CustomEvent('parent-data-loaded', {detail: {students, states: {}}}));
+        }
       }
     } catch (_) { /* not a parent account or network error */ }
   }

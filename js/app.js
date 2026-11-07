@@ -176,8 +176,8 @@ let currentEmail=null,isParentAccount=false;
 const updateAvatarInfo=()=>{
  const email=$('avatar-email'),role=$('avatar-role'),dropdown=$('avatar-dropdown');
  if(currentEmail){email.textContent=currentEmail;role.textContent=isParentAccount?'บัญชีคุณพ่อ':'บัญชีนักเรียน';}
- $('nav-parent').hidden=!isParentAccount;
- $('avatar-reset-progress').hidden=isParentAccount||currentEmail==='porjai.tummontree@gmail.com';
+ $('nav-parent').hidden=false;
+ $('avatar-reset-progress').hidden=true;
  try{const saved=localStorage.getItem('satit-swu-hub:avatar:'+currentEmail);if(saved)document.querySelectorAll('img.avatar').forEach(img=>{img.src=saved;});}catch(_){}
 };
 $('avatar-button')?.addEventListener('click',e=>{const dropdown=$('avatar-dropdown');dropdown.hidden=!dropdown.hidden;if(!dropdown.hidden)updateAvatarInfo();});
