@@ -60,6 +60,7 @@ document.addEventListener('click',e=>{const button=e.target.closest&&e.target.cl
 function update(){
  if(!config)return;
  Dashboard.render(config,ParentTools.activities(),Tracker);
+ const greetingName=$('learner-greeting-name');if(greetingName)greetingName.textContent=window.Config?.learnerName||'ผู้เรียน';
  if(page==='parent')renderParent();
  if(page==='lesson'){updateSidebar();const button=$('complete-button');if(button)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';}
 }

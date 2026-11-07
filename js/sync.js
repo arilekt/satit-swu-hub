@@ -217,8 +217,8 @@
     busy = true; render();
     try {
       const data = await call('sync', {state: Tracker.syncPayload()});
-      Tracker.applyRemote(data.state);
       if (data.email && typeof data.email === 'string') { Tracker.setEmail(data.email); if (window.Config) window.Config.learnerName = nameFromEmail(data.email); }
+      Tracker.applyRemote(data.state);
       window.dispatchEvent(new CustomEvent('plan-remote', {detail: data.plan && typeof data.plan === 'object' ? data.plan : null}));
       if (data.extras && typeof data.extras === 'object') window.dispatchEvent(new CustomEvent('extras-remote', {detail: data.extras})); // absent on an older backend, null if the tabs could not be read
       email = data.email || email; lastSync = new Date(); lastError = ''; errorKind = '';
