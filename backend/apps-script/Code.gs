@@ -12,6 +12,7 @@
  * Script properties (Project Settings → Script properties):
  *   GOOGLE_CLIENT_ID  OAuth Web client ID used by the site
  *   ALLOWED_EMAILS    comma separated, e.g. dad@gmail.com,porjai@gmail.com (fallback only)
+ *   LEARNER_EMAIL     primary learner's email for data migration (used by migrateEmptyEmails())
  */
 
 function setupAllSheets() {
@@ -26,7 +27,9 @@ function setupAllSheets() {
 }
 
 function migrateEmptyEmails() {
-  var defaultEmail = 'dad@gmail.com', updated = 0;
+  var defaultEmail = PropertiesService.getScriptProperties().getProperty('LEARNER_EMAIL') || '';
+  if (!defaultEmail) throw Error('ตั้งค่า LEARNER_EMAIL ใน Script properties ก่อนเรียกใช้ migrateEmptyEmails()');
+  var updated = 0;
   ['marks', 'attempts', 'settings'].forEach(function (name) {
     var tab = sheet(name), data = tab.getDataRange().getValues();
     for (var i = 1; i < data.length; i++) {
