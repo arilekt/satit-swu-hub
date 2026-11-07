@@ -15,7 +15,7 @@ if(lastIdx<text.length)parts.push({type:'text',content:text.substring(lastIdx)})
 const subjectsInOrder=()=>window.StudyPlan?StudyPlan.ordered(config):config.subjects;
 const partName=step=>step.title+': '+(step.chapter_title||'รอชื่อบท');
 function updateSidebar(){
-  if(!current)return;
+  if(!current||!window.Dashboard)return;
   $('subjects').replaceChildren();
   subjectsInOrder().forEach(subject=>{const lessons=subject.steps.filter(s=>s.type==='lesson'),link=element('a',undefined,'subject'+(subject.id===current.subject.id?' active':''));link.href='#'+subject.id+'/'+Dashboard.subjectTarget(subject,Tracker).id;link.append(element('span',subject.icon+' '+subject.name),element('small',lessons.filter(s=>Tracker.has(s.id)).length+'/'+lessons.length));if(subject.id===current.subject.id)link.setAttribute('aria-current','true');$('subjects').append(link);});
   $('lesson-heading').textContent=current.subject.icon+' '+current.subject.name+' · บทเรียนและข้อสอบท้ายบท';
@@ -36,13 +36,14 @@ function updateSidebar(){
 }
 // "สำหรับคุณพ่อ": everything shown comes from progress on this device plus what the Sheet delivered with the last sync.
 function renderParent(){
+ if(!window.ParentDashboard||!window.Dashboard)return;
  const today=Countdown.today(),activities=ParentTools.activities();
  ParentDashboard.render($('pd-root'),{config,tracker:Tracker,schedule:window.StudyPlan?StudyPlan.schedule(config,Tracker)||{}:{},today,subjectsInOrder:subjectsInOrder(),extras:latestExtras,
   nextActivity:Dashboard.eventGroups(activities,today)[0]||null,activityCount:activities.events.length,boostText:Dashboard.boost(),examDate:Tracker.examDate(),resultDate:Tracker.resultDate()});
 }
 // Multi-student dashboard for parents
 function renderParentMulti(students, states) {
- if (!Array.isArray(students) || students.length < 2) return; // not a multi-student parent
+ if (!Array.isArray(students) || students.length < 2 || !window.ParentMultiDashboard) return; // not a multi-student parent
  const today = Countdown.today();
  const trackers = students.map(email => ({
    syncPayload: () => states[email] || {marks: {}, attempts: [], settings: {}},
@@ -58,7 +59,7 @@ function renderParentMulti(students, states) {
 }
 document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});
 function update(){
- if(!config)return;
+ if(!config||!window.Dashboard)return;
  Dashboard.render(config,ParentTools.activities(),Tracker);
  if(page==='parent'&&!isParentAccount)renderParent();
  if(page==='lesson'){updateSidebar();const button=$('complete-button');if(button)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';}
@@ -92,6 +93,7 @@ function show(kind){
 }
 // Exams get their own page with no lesson summary next to them; the answers stay hidden until "ส่งข้อสอบ".
 async function quizPage(subject,step,token){
+ if(!window.Dashboard)return;
  const box=$('quiz-content'),parent=Catalog.parentOf(subject,step.id);
  const back=parent?{href:'#'+subject.id+'/'+parent.id,label:'← กลับไปบทเรียน '+partName(parent)}:{href:'#'+subject.id+'/'+Dashboard.subjectTarget(subject,Tracker).id,label:'← กลับไปห้องเรียน'+subject.name};
  const backLink=()=>{const a=element('a',back.label,'secondary-link quiz-back');a.href=back.href;return a;};
