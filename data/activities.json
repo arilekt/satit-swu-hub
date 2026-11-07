@@ -1,7 +1,66 @@
 {
-  "title": "SATIT ACADEMIC FAIR 2026",
-  "source_note": "ถอดจากภาพกำหนดการและโปสเตอร์ที่คุณพ่อส่ง · เวลาประเทศไทย",
+  "title": "SATIT ACADEMIC FAIR 2026 · SPSM TEST 2027 ม.1",
+  "source_note": "SPSM TEST ถอดจากประกาศ 6 พ.ย. 2569 · ACADEMIC FAIR ถอดจากภาพกำหนดการที่คุณพ่อส่ง · เวลาประเทศไทย",
   "events": [
+    {
+      "id": "spsm-registration-open",
+      "date": "2026-11-09",
+      "start": "00:00",
+      "end": "19:00",
+      "title": "SPSM TEST 2027 · เปิดรับสมัครออนไลน์",
+      "location": "https://home.e-spsm.online",
+      "description": "เปิดรับสมัครผ่านระบบออนไลน์ที่เว็บไซต์เสริม"
+    },
+    {
+      "id": "spsm-registration-close",
+      "date": "2027-01-06",
+      "start": "00:00",
+      "end": "19:00",
+      "title": "SPSM TEST 2027 · ปิดรับสมัครออนไลน์",
+      "location": "https://home.e-spsm.online",
+      "description": "วันสิ้นสุดการรับสมัครออนไลน์ (ก่อน 19:00 น.)"
+    },
+    {
+      "id": "spsm-eligible-announce",
+      "date": "2027-01-11",
+      "title": "SPSM TEST 2027 · ประกาศรายชื่อผู้มีสิทธิ์สอบ",
+      "location": "https://home.e-spsm.online",
+      "description": "ประกาศรายชื่อผู้สมัครที่มีสิทธิ์เข้าสอบ"
+    },
+    {
+      "id": "spsm-videos-start",
+      "date": "2027-01-28",
+      "start": "18:00",
+      "end": "20:00",
+      "title": "SPSM TEST 2027 · ชมวิดีโอบริการวิชาการ (วันที่ 1)",
+      "location": "Microsoft Teams",
+      "description": "เข้าชมวิดีโอบริการวิชาการผ่าน Microsoft Teams"
+    },
+    {
+      "id": "spsm-videos-end",
+      "date": "2027-02-03",
+      "start": "18:00",
+      "end": "20:00",
+      "title": "SPSM TEST 2027 · ชมวิดีโอบริการวิชาการ (วันที่สุดท้าย)",
+      "location": "Microsoft Teams",
+      "description": "วันสิ้นสุดการชมวิดีโอบริการวิชาการผ่าน Microsoft Teams"
+    },
+    {
+      "id": "spsm-interview",
+      "date": "2027-02-06",
+      "start": "09:00",
+      "end": "17:00",
+      "title": "SPSM TEST 2027 · สัมภาษณ์ผู้ปกครองและนักเรียนต้องการพิเศษ",
+      "location": "โรงเรียนสาธิต มศว ประสานมิตร (ฝ่ายมัธยม)",
+      "description": "สัมภาษณ์ผู้ปกครองและนักเรียนที่มีความต้องการพิเศษ"
+    },
+    {
+      "id": "spsm-results-announce",
+      "date": "2027-02-10",
+      "title": "SPSM TEST 2027 · ประกาศผลสอบ",
+      "location": "https://home.e-spsm.online",
+      "description": "ประกาศผลการสอบเข้า ม.1 ภาคปกติ"
+    },
     {
       "id": "fair-registration-day1",
       "date": "2026-12-12",

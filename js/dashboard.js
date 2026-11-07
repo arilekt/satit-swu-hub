@@ -192,6 +192,9 @@ function render(config,activities,tracker){
   more.hidden=!(details&&focus.phase==='pretest');if(more.hidden)panel.hidden=true;
   if(!more.hidden){pretestDetails(panel,details,config.subjects,ticketUrl(regular.pretest_ticket_url),httpsUrl(regular.results_url));if(!more.onclick)more.onclick=()=>{panel.hidden=!panel.hidden;more.setAttribute('aria-expanded',String(!panel.hidden));more.textContent=panel.hidden?'📋 รายละเอียดวันสอบ':'✕ ปิดรายละเอียด';if(!panel.hidden)panel.scrollIntoView({behavior:'smooth',block:'start'});};}
   ticket($('exam-ticket'),regular.exam_ticket_url,true);
+  const examDetails=regular.exam_details,examMore=$('exam-more'),examPanel=$('exam-details');
+  examMore.hidden=!examDetails;if(examMore.hidden)examPanel.hidden=true;
+  if(!examMore.hidden){pretestDetails(examPanel,examDetails,config.subjects,ticketUrl(regular.exam_ticket_url),httpsUrl(regular.results_url));if(!examMore.onclick)examMore.onclick=()=>{examPanel.hidden=!examPanel.hidden;examMore.setAttribute('aria-expanded',String(!examPanel.hidden));examMore.textContent=examPanel.hidden?'📋 รายละเอียดวันสอบจริง':'✕ ปิดรายละเอียด';if(!examPanel.hidden)examPanel.scrollIntoView({behavior:'smooth',block:'start'});};}}
   $('result-notice').hidden=true;
   const groups=eventGroups(activities,Countdown.today()),list=$('activity-summary');list.replaceChildren();
   if(!groups.length)list.append(node('li','ยังไม่มีกิจกรรมอื่นตอนนี้','muted'));
