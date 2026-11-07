@@ -2,6 +2,7 @@
 'use strict';
 let config,current=null,page='dashboard',request=0,lastHash='',statusTimeout;
 const $=id=>document.getElementById(id);
+if(window.AppVersion){const vDisplay=$('version-display');if(vDisplay)vDisplay.textContent=window.AppVersion.display();const buildInfo=$('build-info');if(buildInfo)buildInfo.textContent=window.AppVersion.full();}
 const element=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 function notify(text){$('status').textContent=text;clearTimeout(statusTimeout);statusTimeout=setTimeout(()=>$('status').textContent='',10000);}
 window.addEventListener('storage-warning',e=>notify(e.detail));
