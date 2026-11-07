@@ -2,7 +2,6 @@
 'use strict';
 let config,current=null,page='dashboard',request=0,lastHash='',statusTimeout;
 const $=id=>document.getElementById(id);
-if(window.AppVersion){const vDisplay=$('version-display');if(vDisplay)vDisplay.textContent=window.AppVersion.display();const buildInfo=$('build-info');if(buildInfo)buildInfo.textContent=window.AppVersion.full();}
 const element=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 function notify(text){$('status').textContent=text;clearTimeout(statusTimeout);statusTimeout=setTimeout(()=>$('status').textContent='',10000);}
 window.addEventListener('storage-warning',e=>notify(e.detail));
@@ -58,14 +57,10 @@ function renderParentMulti(students, states) {
  if (data) ParentMultiDashboard.render($('pd-root'), data);
 }
 document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});
-function setupAvatarHandler(){const avatarImg=$('avatar');if(!avatarImg)return;avatarImg.style.cursor='pointer';avatarImg.addEventListener('click',async()=>{const input=document.createElement('input');input.type='file';input.accept='image/*';input.onchange=async e=>{const file=e.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=async ev=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),maxWidth=128;canvas.width=maxWidth;canvas.height=Math.round(img.height*maxWidth/img.width);ctx.drawImage(img,0,0,canvas.width,canvas.height);const compressed=canvas.toDataURL('image/jpeg',0.7);Tracker.setAvatar(compressed);avatarImg.src=compressed;notify('บันทึกรูปภาพแล้ว');};img.src=ev.target.result;};reader.readAsDataURL(file);};input.click();});}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',setupAvatarHandler);}else{setupAvatarHandler();}
 function update(){
  if(!config)return;
  Dashboard.render(config,ParentTools.activities(),Tracker);
- const greetingName=$('learner-greeting-name');if(greetingName)greetingName.textContent=window.Config?.learnerName||'ผู้เรียน';
- const avatarImg=$('avatar');if(avatarImg){avatarImg.title=window.Config?.learnerEmail||'ผู้เรียน';const stored=Tracker.getAvatar();if(stored)avatarImg.src=stored;}
- if(page==='parent')renderParent();
+ if(page==='parent'&&!isParentAccount)renderParent();
  if(page==='lesson'){updateSidebar();const button=$('complete-button');if(button)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';}
 }
 function video(url){
@@ -176,6 +171,19 @@ $('history-button').onclick=()=>{
  const attempts=Tracker.attempts().reverse();if(!attempts.length)list.append(element('p','ยังไม่มีประวัติข้อสอบ','muted'));
  for(const attempt of attempts){const row=element('div',undefined,'answer');row.append(element('strong',attempt.title+' · '+attempt.score+'/'+attempt.total),element('p',new Date(attempt.date).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'})));list.append(row);}
 };
+// Avatar menu: show account details and parent status
+let currentEmail=null,isParentAccount=false;
+const updateAvatarInfo=()=>{
+ const email=$('avatar-email'),role=$('avatar-role'),dropdown=$('avatar-dropdown');
+ if(currentEmail){email.textContent=currentEmail;role.textContent=isParentAccount?'บัญชีคุณพ่อ':'บัญชีนักเรียน';}
+ $('nav-parent').hidden=!isParentAccount;
+};
+$('avatar-button')?.addEventListener('click',e=>{const dropdown=$('avatar-dropdown');dropdown.hidden=!dropdown.hidden;if(!dropdown.hidden)updateAvatarInfo();});
+$('avatar-change-photo')?.addEventListener('click',e=>{notify('ส่วนเปลี่ยนรูปมาจาก Google Account ได้ที่ accounts.google.com');});
+$('avatar-close')?.addEventListener('click',e=>{$('avatar-dropdown').hidden=true;});
+document.addEventListener('click',e=>{const dropdown=$('avatar-dropdown'),btn=$('avatar-button');if(!dropdown?.hidden&&e.target!==btn&&!btn?.contains(e.target)&&!dropdown?.contains(e.target))dropdown.hidden=true;});
+window.addEventListener('parent-data-loaded',e=>{isParentAccount=true;updateAvatarInfo();});
+window.addEventListener('email-changed',e=>{if(e.detail){currentEmail=e.detail;updateAvatarInfo();}});
 // Study plan: data/config.json is the default; the plan tabs in Google Sheet override it after sync.
 const PLAN_KEY='satit-swu-hub:plan';let defaultPlan=null;
 // daily_plan.override in data/config.json is a re-plan that wins over the Sheet and the defaults: a later start date,
