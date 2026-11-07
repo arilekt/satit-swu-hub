@@ -18,7 +18,9 @@
 
 function setupAllSheets() {
   var book = SpreadsheetApp.getActiveSpreadsheet();
-  Object.keys(SHEETS).forEach(function (name) {
+  var sharedOnly = ['log', 'sessions', 'ผู้ใช้', 'พ่อและศิษย์', 'สเปรดชีตของแต่ละคน', 'กำหนดการ', 'กิจกรรม', 'กำลังใจ', 'เกณฑ์คะแนน',
+                     'แผน-วิธีใช้', 'แผน-ตั้งค่า', 'แผน-ช่วงเวลา', 'แผน-วิชา', 'แผน-วันพิเศษ', 'แผน-คลาส'];
+  sharedOnly.forEach(function (name) {
     if (!book.getSheetByName(name)) {
       sheet(name);
       Logger.log('Created sheet: ' + name);
@@ -45,13 +47,14 @@ function migrateEmptyEmails() {
 }
 
 var SHEETS = {
-  marks: ['step_id', 'done', 'updated_at', 'email'],
-  attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json', 'email'],
-  settings: ['key', 'value', 'updated_at', 'email'],
+  marks: ['step_id', 'done', 'updated_at'],
+  attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json'],
+  settings: ['key', 'value', 'updated_at'],
   log: ['time', 'email', 'action', 'detail'],
   sessions: ['hash', 'email', 'created_at', 'expires_at', 'last_seen', 'device', 'revoked'],
   'ผู้ใช้': ['อีเมล'],
   'พ่อและศิษย์': ['parent_email', 'student_email'],
+  'สเปรดชีตของแต่ละคน': ['email', 'spreadsheet_id', 'created_at'],
   'กำหนดการ': ['หัวข้อ', 'วันที่', 'คำอธิบาย'],
   'กิจกรรม': ['วันที่', 'เริ่ม', 'สิ้นสุด', 'ชื่อกิจกรรม', 'สถานที่', 'รายละเอียด', 'ชุดเดียวกัน', 'แสดง'],
   'กำลังใจ': ['ข้อความ', 'วันที่ (ไม่บังคับ)'],
@@ -178,7 +181,7 @@ var SUBJECT_ALIASES = {'คณิต': 'math', 'คณิตศาสตร์':
   'ไทย': 'thai', 'ภาษาไทย': 'thai', 'thai': 'thai', 'สังคม': 'social', 'สังคมศึกษา': 'social', 'social': 'social',
   'อังกฤษ': 'english', 'ภาษาอังกฤษ': 'english', 'english': 'english'};
 var DAY_CODES = {'อา': 0, 'จ': 1, 'อ': 2, 'พ': 3, 'พฤ': 4, 'ศ': 5, 'ส': 6};
-var SETTING_KEYS = ['examDate', 'resultDate'];
+var SETTING_KEYS = ['examDate', 'resultDate', 'avatar'];
 var MAX_ATTEMPTS_RETURNED = 100;
 var SESSION_DAYS = 90;
 var SESSION_RENEW_MS = 24 * 60 * 60 * 1000; // renew the expiry at most once a day
@@ -459,7 +462,9 @@ function doPost(e) {
     var lock = LockService.getScriptLock();
     lock.waitLock(20000);
     try {
-      Object.keys(SHEETS).forEach(function (name) {
+      var sharedOnly = ['log', 'sessions', 'ผู้ใช้', 'พ่อและศิษย์', 'สเปรดชีตของแต่ละคน', 'กำหนดการ', 'กิจกรรม', 'กำลังใจ', 'เกณฑ์คะแนน',
+                         'แผน-วิธีใช้', 'แผน-ตั้งค่า', 'แผน-ช่วงเวลา', 'แผน-วิชา', 'แผน-วันพิเศษ', 'แผน-คลาส'];
+      sharedOnly.forEach(function (name) {
         if (!SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name)) sheet(name);
       });
       var incoming = cleanPayload(body.state);
@@ -482,7 +487,10 @@ function doLogin(email, body) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    Object.keys(SHEETS).forEach(function (name) { sheet(name); });
+    var sharedOnly = ['log', 'sessions', 'ผู้ใช้', 'พ่อและศิษย์', 'สเปรดชีตของแต่ละคน', 'กำหนดการ', 'กิจกรรม', 'กำลังใจ', 'เกณฑ์คะแนน',
+                       'แผน-วิธีใช้', 'แผน-ตั้งค่า', 'แผน-ช่วงเวลา', 'แผน-วิชา', 'แผน-วันพิเศษ', 'แผน-คลาส'];
+    sharedOnly.forEach(function (name) { sheet(name); });
+    getOrCreateLearnerSpreadsheet(email);
     var now = new Date(), token = newSessionToken(), device = String(body.device || '').slice(0, 80);
     var session = {hash: hashSession(token), email: email, created_at: now.toISOString(), last_seen: now.toISOString(),
       expires_at: new Date(now.getTime() + SESSION_DAYS * 86400000).toISOString(), device: device, revoked: false};
@@ -636,24 +644,77 @@ function getStudentsForParent(parentEmail) {
   return students.length ? students : [];
 }
 
+function getOrCreateLearnerSpreadsheet(email) {
+  var emailLower = String(email || '').toLowerCase();
+  try {
+    var mappingTab = sheet('สเปรดชีตของแต่ละคน');
+    var data = mappingTab.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0] || '').toLowerCase() === emailLower && data[i][1]) {
+        try {
+          return SpreadsheetApp.openById(String(data[i][1]));
+        } catch (_) { /* spreadsheet was deleted */ }
+      }
+    }
+  } catch (_) { /* mapping sheet doesn't exist yet */ }
+  var newBook = SpreadsheetApp.create('SPSM - ' + emailLower);
+  newBook.removeSheet(newBook.getSheets()[0]);
+  Object.keys(SHEETS).forEach(function (name) {
+    if (['log', 'sessions', 'ผู้ใช้', 'พ่อและศิษย์', 'สเปรดชีตของแต่ละคน'].indexOf(name) < 0) {
+      var newTab = newBook.insertSheet(name);
+      initTab(newTab, name);
+    }
+  });
+  recordLearnerSpreadsheet(emailLower, newBook.getId());
+  return newBook;
+}
+
+function recordLearnerSpreadsheet(email, spreadsheetId) {
+  var emailLower = String(email || '').toLowerCase();
+  var mappingTab = sheet('สเปรดชีตของแต่ละคน');
+  var data = mappingTab.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0] || '').toLowerCase() === emailLower) {
+      mappingTab.getRange(i + 1, 2, 1, 1).setValue(spreadsheetId);
+      return;
+    }
+  }
+  mappingTab.appendRow([emailLower, spreadsheetId, text(new Date().toISOString())]);
+}
+
 function readState(email) {
   var state = {marks: {}, attempts: [], settings: {}};
-  var emailLower = String(email || '').toLowerCase();
-  rows('marks').forEach(function (r) {
-    if (!r[0] || emailLower && String(r[3] || '').toLowerCase() !== emailLower) return;
-    state.marks[r[0]] = {done: r[1] === true || r[1] === 'TRUE', at: iso(r[2])};
-  });
-  rows('attempts').forEach(function (r) {
-    if (!r[0] || emailLower && String(r[9] || '').toLowerCase() !== emailLower) return;
-    var answers;
-    try { answers = r[8] ? JSON.parse(r[8]) : undefined; } catch (_) { answers = undefined; }
-    state.attempts.push({id: String(r[1]), title: String(r[2]), score: Number(r[3]), total: Number(r[4]), date: iso(r[5]),
-      elapsed_seconds: r[6] === '' ? null : Number(r[6]), timedOut: r[7] === true || r[7] === 'TRUE', answers: answers});
-  });
-  rows('settings').forEach(function (r) {
-    if (SETTING_KEYS.indexOf(r[0]) < 0 || emailLower && String(r[3] || '').toLowerCase() !== emailLower) return;
-    state.settings[r[0]] = {value: r[1] ? iso(r[1]).slice(0, 10) : null, at: iso(r[2])};
-  });
+  try {
+    var book = getOrCreateLearnerSpreadsheet(email);
+    var marksTab = book.getSheetByName('marks');
+    if (marksTab) {
+      var marksData = marksTab.getLastRow() > 1 ? marksTab.getDataRange().getValues().slice(1) : [];
+      marksData.forEach(function (r) {
+        if (r[0]) state.marks[r[0]] = {done: r[1] === true || r[1] === 'TRUE', at: iso(r[2])};
+      });
+    }
+    var attemptsTab = book.getSheetByName('attempts');
+    if (attemptsTab) {
+      var attemptsData = attemptsTab.getLastRow() > 1 ? attemptsTab.getDataRange().getValues().slice(1) : [];
+      attemptsData.forEach(function (r) {
+        if (r[0]) {
+          var answers;
+          try { answers = r[8] ? JSON.parse(r[8]) : undefined; } catch (_) { answers = undefined; }
+          state.attempts.push({id: String(r[1]), title: String(r[2]), score: Number(r[3]), total: Number(r[4]), date: iso(r[5]),
+            elapsed_seconds: r[6] === '' ? null : Number(r[6]), timedOut: r[7] === true || r[7] === 'TRUE', answers: answers});
+        }
+      });
+    }
+    var settingsTab = book.getSheetByName('settings');
+    if (settingsTab) {
+      var settingsData = settingsTab.getLastRow() > 1 ? settingsTab.getDataRange().getValues().slice(1) : [];
+      settingsData.forEach(function (r) {
+        if (SETTING_KEYS.indexOf(r[0]) >= 0) state.settings[r[0]] = {value: r[1] ? iso(r[1]).slice(0, 10) : null, at: iso(r[2])};
+      });
+    }
+  } catch (e) {
+    Logger.log('readState error for ' + email + ': ' + String(e));
+  }
   return state;
 }
 
@@ -668,15 +729,40 @@ function upsert(name, key, row, email) {
 }
 
 function writeChanges(changed, incoming, email) {
-  changed.marks.forEach(function (id) { upsert('marks', id, [id, incoming.marks[id].done, text(incoming.marks[id].at), email], email); });
-  if (changed.attempts.length) {
-    var tab = sheet('attempts');
-    var values = changed.attempts.map(function (a) {
-      return [attemptKey(a), a.id, a.title, a.score, a.total, text(a.date), a.elapsed_seconds === null ? '' : a.elapsed_seconds, a.timedOut, a.answers ? JSON.stringify(a.answers) : '', email];
+  try {
+    var book = getOrCreateLearnerSpreadsheet(email);
+    changed.marks.forEach(function (id) {
+      var tab = book.getSheetByName('marks');
+      if (!tab) { tab = book.insertSheet('marks'); initTab(tab, 'marks'); }
+      var data = tab.getLastRow() > 1 ? tab.getDataRange().getValues().slice(1) : [];
+      var found = false;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i][0] === id) { tab.getRange(i + 2, 1, 1, 3).setValues([[id, incoming.marks[id].done, text(incoming.marks[id].at)]]); found = true; break; }
+      }
+      if (!found) tab.appendRow([id, incoming.marks[id].done, text(incoming.marks[id].at)]);
     });
-    tab.getRange(tab.getLastRow() + 1, 1, values.length, values[0].length).setValues(values);
+    if (changed.attempts.length) {
+      var attemptsTab = book.getSheetByName('attempts');
+      if (!attemptsTab) { attemptsTab = book.insertSheet('attempts'); initTab(attemptsTab, 'attempts'); }
+      var values = changed.attempts.map(function (a) {
+        return [attemptKey(a), a.id, a.title, a.score, a.total, text(a.date), a.elapsed_seconds === null ? '' : a.elapsed_seconds, a.timedOut, a.answers ? JSON.stringify(a.answers) : ''];
+      });
+      attemptsTab.getRange(attemptsTab.getLastRow() + 1, 1, values.length, values[0].length).setValues(values);
+    }
+    changed.settings.forEach(function (key) {
+      var settingsTab = book.getSheetByName('settings');
+      if (!settingsTab) { settingsTab = book.insertSheet('settings'); initTab(settingsTab, 'settings'); }
+      var data = settingsTab.getLastRow() > 1 ? settingsTab.getDataRange().getValues().slice(1) : [];
+      var found = false;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i][0] === key) { settingsTab.getRange(i + 2, 1, 1, 3).setValues([[key, incoming.settings[key].value ? text(incoming.settings[key].value) : '', text(incoming.settings[key].at)]]); found = true; break; }
+      }
+      if (!found) settingsTab.appendRow([key, incoming.settings[key].value ? text(incoming.settings[key].value) : '', text(incoming.settings[key].at)]);
+    });
+  } catch (e) {
+    Logger.log('writeChanges error for ' + email + ': ' + String(e));
+    throw e;
   }
-  changed.settings.forEach(function (key) { upsert('settings', key, [key, incoming.settings[key].value ? text(incoming.settings[key].value) : '', text(incoming.settings[key].at), email], email); });
 }
 
 /** Sheets may turn typed dates/times into Date objects; read them back as the text the parent typed. */
