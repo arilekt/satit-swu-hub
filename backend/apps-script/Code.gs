@@ -4,11 +4,14 @@
  *
  * Every request carries a Google ID token from the website's Sign-In button. The token is
  * verified with Google, its audience must equal GOOGLE_CLIENT_ID and its email must be in
- * ALLOWED_EMAILS (Script properties). Nothing secret lives in the website itself.
+ * ALLOWED_EMAILS. Nothing secret lives in the website itself.
+ *
+ * Allowed emails are read from Sheet tab "ผู้ใช้" (column 1: อีเมล). Fallback to Script
+ * properties if the sheet doesn't exist yet.
  *
  * Script properties (Project Settings → Script properties):
  *   GOOGLE_CLIENT_ID  OAuth Web client ID used by the site
- *   ALLOWED_EMAILS    comma separated, e.g. dad@gmail.com,porjai@gmail.com
+ *   ALLOWED_EMAILS    comma separated, e.g. dad@gmail.com,porjai@gmail.com (fallback only)
  */
 
 function setupAllSheets() {
@@ -28,6 +31,7 @@ var SHEETS = {
   settings: ['key', 'value', 'updated_at', 'email'],
   log: ['time', 'email', 'action', 'detail'],
   sessions: ['hash', 'email', 'created_at', 'expires_at', 'last_seen', 'device', 'revoked'],
+  'ผู้ใช้': ['อีเมล'],
   'กำหนดการ': ['หัวข้อ', 'วันที่', 'คำอธิบาย'],
   'กิจกรรม': ['วันที่', 'เริ่ม', 'สิ้นสุด', 'ชื่อกิจกรรม', 'สถานที่', 'รายละเอียด', 'ชุดเดียวกัน', 'แสดง'],
   'กำลังใจ': ['ข้อความ', 'วันที่ (ไม่บังคับ)'],
@@ -129,6 +133,11 @@ var PLAN_SEED = {
     ["ความสงสัยเล็ก ๆ วันนี้ อาจกลายเป็นเรื่องโปรดในวันหน้า", ''],
     ["เรียนเสร็จแล้วออกไปมองไกล ๆ ให้ตาได้พักบ้าง", ''],
     ["วันนี้ทำได้เท่าไหร่ก็เท่านั้น พรุ่งนี้ค่อยต่ออีกนิด", '']
+  ],
+  'ผู้ใช้': [
+    ['dad@gmail.com'],
+    ['porjai@gmail.com'],
+    ['jaturon.pantasuma@gmail.com']
   ],
   'เกณฑ์คะแนน': [
     ['ต้องฝึกเพิ่ม', 0, 'ตั้งแต่', '🌱'],
@@ -503,8 +512,21 @@ function useSession(token) {
 }
 
 function allowedEmails() {
-  var allowed = String(PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '').split(',').map(function (x) { return x.trim().toLowerCase(); }).filter(String);
-  if (!allowed.length) throw authError('config', 'ยังไม่ได้ตั้งค่า ALLOWED_EMAILS ใน Script properties');
+  var allowed = [];
+  try {
+    var tab = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('ผู้ใช้');
+    if (tab) {
+      var values = tab.getDataRange().getValues();
+      for (var i = 1; i < values.length; i++) {
+        var email = String(values[i][0] || '').trim().toLowerCase();
+        if (email && email.indexOf('@') > 0) allowed.push(email);
+      }
+    }
+  } catch (e) { /* sheet may not exist yet, use fallback */ }
+  if (!allowed.length) {
+    allowed = String(PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '').split(',').map(function (x) { return x.trim().toLowerCase(); }).filter(String);
+  }
+  if (!allowed.length) throw authError('config', 'ยังไม่มีบัญชีผู้ใช้ ให้เพิ่มอีเมลในแท็บ ผู้ใช้ หรือตั้งค่า ALLOWED_EMAILS ใน Script properties');
   return allowed;
 }
 
