@@ -13,6 +13,7 @@
  *   GOOGLE_CLIENT_ID  OAuth Web client ID used by the site
  *   ALLOWED_EMAILS    comma separated, e.g. dad@gmail.com,porjai@gmail.com (fallback only)
  *   LEARNER_EMAIL     primary learner's email for data migration (used by migrateEmptyEmails())
+ *   PARENT_EMAILS     comma separated email addresses of parent accounts (for multi-student dashboard)
  */
 
 function setupAllSheets() {
@@ -50,6 +51,7 @@ var SHEETS = {
   log: ['time', 'email', 'action', 'detail'],
   sessions: ['hash', 'email', 'created_at', 'expires_at', 'last_seen', 'device', 'revoked'],
   'ผู้ใช้': ['อีเมล'],
+  'พ่อและศิษย์': ['parent_email', 'student_email'],
   'กำหนดการ': ['หัวข้อ', 'วันที่', 'คำอธิบาย'],
   'กิจกรรม': ['วันที่', 'เริ่ม', 'สิ้นสุด', 'ชื่อกิจกรรม', 'สถานที่', 'รายละเอียด', 'ชุดเดียวกัน', 'แสดง'],
   'กำลังใจ': ['ข้อความ', 'วันที่ (ไม่บังคับ)'],
@@ -423,11 +425,12 @@ function doGet() { return json({ok: true, service: 'satit-swu-hub-sync'}); }
 
 /**
  * Actions:
- *   login       {id_token, device}  Google token -> new 90-day device session {session, expires_at}
- *   whoami      {session | id_token}
- *   sync        {session | id_token, state}
- *   logout      {session}           revoke this device
- *   logout_all  {session}           revoke every device of this account
+ *   login           {id_token, device}  Google token -> new 90-day device session {session, expires_at}
+ *   whoami          {session | id_token}
+ *   sync            {session | id_token, state}
+ *   logout          {session}           revoke this device
+ *   logout_all      {session}           revoke every device of this account
+ *   listStudents    {session | id_token}  parent only: returns {students: [email, ...]}
  * Only a SHA-256 hash of a session is stored in the sheet; the allowlist is re-checked on every call.
  */
 function doPost(e) {
@@ -437,6 +440,21 @@ function doPost(e) {
     if (body.action === 'logout' || body.action === 'logout_all') return doLogout(body, body.action === 'logout_all');
     var email = authenticate(body);
     if (body.action === 'whoami') return json({ok: true, email: email});
+    if (body.action === 'listStudents') {
+      if (!isParentAccount(email)) throw authError('denied', 'บัญชี ' + email + ' ไม่ใช่บัญชีผู้ปกครอง');
+      return json({ok: true, students: getStudentsForParent(email)});
+    }
+    if (body.action === 'readMultipleStates') {
+      if (!isParentAccount(email)) throw authError('denied', 'บัญชี ' + email + ' ไม่ใช่บัญชีผู้ปกครอง');
+      var allowed = getStudentsForParent(email);
+      if (!Array.isArray(body.students)) throw new Error('students must be an array');
+      var states = {};
+      body.students.slice(0, 10).forEach(function (studentEmail) {
+        var normalizedEmail = String(studentEmail || '').toLowerCase();
+        if (allowed.indexOf(normalizedEmail) >= 0) states[normalizedEmail] = readState(normalizedEmail);
+      });
+      return json({ok: true, states: states});
+    }
     if (body.action !== 'sync') throw new Error('ไม่รู้จักคำสั่ง');
     var lock = LockService.getScriptLock();
     lock.waitLock(20000);
@@ -595,6 +613,28 @@ function rows(name) {
 function text(value) { return "'" + value; } // keep timestamps as exact text, never parsed by Sheets
 
 function iso(value) { return value instanceof Date ? value.toISOString() : String(value); }
+
+function isParentAccount(email) {
+  var parents = PropertiesService.getScriptProperties().getProperty('PARENT_EMAILS') || '';
+  return parents.split(',').map(function (e) { return e.trim().toLowerCase(); }).indexOf(String(email || '').toLowerCase()) >= 0;
+}
+
+function getStudentsForParent(parentEmail) {
+  var students = [];
+  try {
+    var tab = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('พ่อและศิษย์');
+    if (tab) {
+      var data = tab.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0] && String(data[i][0]).toLowerCase() === String(parentEmail || '').toLowerCase()) {
+          var student = String(data[i][1] || '').trim().toLowerCase();
+          if (student) students.push(student);
+        }
+      }
+    }
+  } catch (_) { /* sheet does not exist */ }
+  return students.length ? students : [];
+}
 
 function readState(email) {
   var state = {marks: {}, attempts: [], settings: {}};
