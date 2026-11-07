@@ -25,6 +25,21 @@ function setupAllSheets() {
   return 'เสร็จสิ้น: สร้างแท็บที่ขาดหายไปครบทุกแท็บแล้ว';
 }
 
+function migrateEmptyEmails() {
+  var defaultEmail = 'dad@gmail.com', updated = 0;
+  ['marks', 'attempts', 'settings'].forEach(function (name) {
+    var tab = sheet(name), data = tab.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      var email = String(data[i][data[i].length - 1] || '').trim();
+      if (!email && data[i][0]) {
+        tab.getRange(i + 1, data[i].length, 1, 1).setValue(defaultEmail);
+        updated++;
+      }
+    }
+  });
+  return 'โยกย้ายข้อมูลเดิม ' + updated + ' แถว → ' + defaultEmail;
+}
+
 var SHEETS = {
   marks: ['step_id', 'done', 'updated_at', 'email'],
   attempts: ['key', 'id', 'title', 'score', 'total', 'date', 'elapsed_seconds', 'timed_out', 'answers_json', 'email'],
@@ -427,7 +442,7 @@ function doPost(e) {
         if (!SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name)) sheet(name);
       });
       var incoming = cleanPayload(body.state);
-      var result = mergeState(readState(), incoming);
+      var result = mergeState(readState(email), incoming);
       writeChanges(result.changed, incoming, email);
       appendLog(email, 'sync', result.changed.marks.length + ' marks, ' + result.changed.attempts.length + ' attempts, ' + result.changed.settings.length + ' settings');
       return json({ok: true, email: email, state: responseState(result.merged), plan: readPlan(), extras: readExtras()});
@@ -578,30 +593,39 @@ function text(value) { return "'" + value; } // keep timestamps as exact text, n
 
 function iso(value) { return value instanceof Date ? value.toISOString() : String(value); }
 
-function readState() {
+function readState(email) {
   var state = {marks: {}, attempts: [], settings: {}};
-  rows('marks').forEach(function (r) { if (r[0]) state.marks[r[0]] = {done: r[1] === true || r[1] === 'TRUE', at: iso(r[2])}; });
+  var emailLower = String(email || '').toLowerCase();
+  rows('marks').forEach(function (r) {
+    if (!r[0] || emailLower && String(r[3] || '').toLowerCase() !== emailLower) return;
+    state.marks[r[0]] = {done: r[1] === true || r[1] === 'TRUE', at: iso(r[2])};
+  });
   rows('attempts').forEach(function (r) {
-    if (!r[0]) return;
+    if (!r[0] || emailLower && String(r[9] || '').toLowerCase() !== emailLower) return;
     var answers;
     try { answers = r[8] ? JSON.parse(r[8]) : undefined; } catch (_) { answers = undefined; }
     state.attempts.push({id: String(r[1]), title: String(r[2]), score: Number(r[3]), total: Number(r[4]), date: iso(r[5]),
       elapsed_seconds: r[6] === '' ? null : Number(r[6]), timedOut: r[7] === true || r[7] === 'TRUE', answers: answers});
   });
-  rows('settings').forEach(function (r) { if (SETTING_KEYS.indexOf(r[0]) >= 0) state.settings[r[0]] = {value: r[1] ? iso(r[1]).slice(0, 10) : null, at: iso(r[2])}; });
+  rows('settings').forEach(function (r) {
+    if (SETTING_KEYS.indexOf(r[0]) < 0 || emailLower && String(r[3] || '').toLowerCase() !== emailLower) return;
+    state.settings[r[0]] = {value: r[1] ? iso(r[1]).slice(0, 10) : null, at: iso(r[2])};
+  });
   return state;
 }
 
-function upsert(name, key, row) {
-  var tab = sheet(name), keys = tab.getLastRow() > 1 ? tab.getRange(2, 1, tab.getLastRow() - 1, 1).getValues() : [];
-  for (var i = 0; i < keys.length; i++) {
-    if (keys[i][0] === key) { tab.getRange(i + 2, 1, 1, row.length).setValues([row]); return; }
+function upsert(name, key, row, email) {
+  var tab = sheet(name), data = tab.getLastRow() > 1 ? tab.getDataRange().getValues().slice(1) : [];
+  email = String(email || '').toLowerCase();
+  for (var i = 0; i < data.length; i++) {
+    var rowEmail = String(data[i][data[i].length - 1] || '').toLowerCase();
+    if (data[i][0] === key && (name === 'log' || rowEmail === email)) { tab.getRange(i + 2, 1, 1, row.length).setValues([row]); return; }
   }
   tab.appendRow(row);
 }
 
 function writeChanges(changed, incoming, email) {
-  changed.marks.forEach(function (id) { upsert('marks', id, [id, incoming.marks[id].done, text(incoming.marks[id].at), email]); });
+  changed.marks.forEach(function (id) { upsert('marks', id, [id, incoming.marks[id].done, text(incoming.marks[id].at), email], email); });
   if (changed.attempts.length) {
     var tab = sheet('attempts');
     var values = changed.attempts.map(function (a) {
@@ -609,7 +633,7 @@ function writeChanges(changed, incoming, email) {
     });
     tab.getRange(tab.getLastRow() + 1, 1, values.length, values[0].length).setValues(values);
   }
-  changed.settings.forEach(function (key) { upsert('settings', key, [key, incoming.settings[key].value ? text(incoming.settings[key].value) : '', text(incoming.settings[key].at), email]); });
+  changed.settings.forEach(function (key) { upsert('settings', key, [key, incoming.settings[key].value ? text(incoming.settings[key].value) : '', text(incoming.settings[key].at), email], email); });
 }
 
 /** Sheets may turn typed dates/times into Date objects; read them back as the text the parent typed. */

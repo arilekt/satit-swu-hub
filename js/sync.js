@@ -10,6 +10,11 @@
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   let onAuthorized = null, settings = null, token = null, session = null, email = null, timer = null, busy = false, lastSync = null, lastError = '', errorKind = '', gisReady = null, accessGranted = false, loginValidated = false;
   const $ = id => document.getElementById(id);
+  const nameFromEmail = email => {
+    if (!email || typeof email !== 'string') return 'ผู้เรียน';
+    const match = email.match(/^([^.@]+)/);
+    return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : 'ผู้เรียน';
+  };
 
   function decode(jwt) {
     try {
@@ -213,6 +218,7 @@
     try {
       const data = await call('sync', {state: Tracker.syncPayload()});
       Tracker.applyRemote(data.state);
+      if (data.email && typeof data.email === 'string') { Tracker.setEmail(data.email); if (window.Config) window.Config.learnerName = nameFromEmail(data.email); }
       window.dispatchEvent(new CustomEvent('plan-remote', {detail: data.plan && typeof data.plan === 'object' ? data.plan : null}));
       if (data.extras && typeof data.extras === 'object') window.dispatchEvent(new CustomEvent('extras-remote', {detail: data.extras})); // absent on an older backend, null if the tabs could not be read
       email = data.email || email; lastSync = new Date(); lastError = ''; errorKind = '';

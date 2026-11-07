@@ -2,7 +2,9 @@
 (() => {
   'use strict';
   const Catalog = window.Catalog;
-  const KEY = 'satit-swu-hub:v1';
+  let currentEmail = null;
+  const keyFor = email => 'satit-swu-hub:v1:' + (email ? email.toLowerCase().replace(/[^a-z0-9]/g, '_') : '');
+  const KEY = keyFor(null);
   const blank = () => ({version:1, completed:[], attempts:[], examDate:null, resultDate:null, marks:{}, settingsAt:{}});
   const EPOCH = '1970-01-01T00:00:00.000Z';
   const cleanMarks = raw => {const marks={};if(raw&&typeof raw==='object'&&!Array.isArray(raw))for(const [id,m] of Object.entries(raw))if(m&&typeof m.done==='boolean'&&typeof m.at==='string'&&!isNaN(new Date(m.at).getTime()))marks[id]={done:m.done,at:m.at};return marks;};
@@ -10,20 +12,24 @@
   let state = blank(), writable = true, sheetDates = {};
   const dateValid = value => {if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const date=new Date(value+'T00:00:00Z');return !isNaN(date.getTime())&&date.toISOString().slice(0,10)===value;};
   function warning(message) { window.dispatchEvent(new CustomEvent('storage-warning', {detail:message})); }
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const data = JSON.parse(raw);
-      if (!data || data.version !== 1 || !Array.isArray(data.completed) || !Array.isArray(data.attempts)) throw new Error('invalid state');
-      state = {version:1, completed:[...new Set(data.completed.filter(x=>typeof x==='string'))], attempts:data.attempts.filter(x=>x && typeof x.id==='string' && typeof x.date==='string' && Number.isFinite(x.score) && Number.isInteger(x.total) && x.total>0 && x.score>=0 && x.score<=x.total).slice(-100), examDate:dateValid(data.examDate)?data.examDate:null, resultDate:dateValid(data.resultDate)?data.resultDate:null, marks:cleanMarks(data.marks), settingsAt:cleanSettingsAt(data.settingsAt)};
+  function loadFromKey(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const data = JSON.parse(raw);
+        if (!data || data.version !== 1 || !Array.isArray(data.completed) || !Array.isArray(data.attempts)) throw new Error('invalid state');
+        return {version:1, completed:[...new Set(data.completed.filter(x=>typeof x==='string'))], attempts:data.attempts.filter(x=>x && typeof x.id==='string' && typeof x.date==='string' && Number.isFinite(x.score) && Number.isInteger(x.total) && x.total>0 && x.score>=0 && x.score<=x.total).slice(-100), examDate:dateValid(data.examDate)?data.examDate:null, resultDate:dateValid(data.resultDate)?data.resultDate:null, marks:cleanMarks(data.marks), settingsAt:cleanSettingsAt(data.settingsAt)};
+      }
+    } catch (_) {
+      writable = false;
+      setTimeout(()=>warning('อ่านข้อมูลเดิมไม่ได้ ใช้งานชั่วคราวได้ แต่ยังบันทึกไม่ได้ กรุณาตรวจการอนุญาตพื้นที่จัดเก็บใน Safari หรือสำรองข้อมูลเดิมก่อนล้างข้อมูลเว็บ'),0);
     }
-  } catch (_) {
-    writable = false;
-    setTimeout(()=>warning('อ่านข้อมูลเดิมไม่ได้ ใช้งานชั่วคราวได้ แต่ยังบันทึกไม่ได้ กรุณาตรวจการอนุญาตพื้นที่จัดเก็บใน Safari หรือสำรองข้อมูลเดิมก่อนล้างข้อมูลเว็บ'),0);
+    return null;
   }
+  state = loadFromKey(KEY) || blank();
   function save(source) {
     if (writable) {
-      try { localStorage.setItem(KEY,JSON.stringify(state)); }
+      try { localStorage.setItem(keyFor(currentEmail),JSON.stringify(state)); }
       catch (_) { warning('บันทึกไม่สำเร็จ ความคืบหน้ารอบนี้อยู่ชั่วคราว กรุณาเปิดพื้นที่จัดเก็บหรือออกจากโหมดส่วนตัว'); }
     } else warning('ข้อมูลรอบนี้ยังไม่ถูกบันทึกลงเครื่อง');
     window.dispatchEvent(new CustomEvent('progress-changed',{detail:{source:source||'local'}}));
@@ -40,7 +46,8 @@
 
   window.Tracker = {
     validateBackup,
-    restore(data) {if(!writable)throw Error("พื้นที่จัดเก็บยังไม่พร้อม กรุณาตรวจการอนุญาตก่อน");const next=validateBackup(data);localStorage.setItem(KEY,JSON.stringify(next));state=next;window.dispatchEvent(new Event("progress-changed"));},
+    setEmail(email) { if(email && typeof email==='string') { currentEmail=email; const loadedState=loadFromKey(keyFor(email)); if(loadedState) state=loadedState; else save(); } },
+    restore(data) {if(!writable)throw Error("พื้นที่จัดเก็บยังไม่พร้อม กรุณาตรวจการอนุญาตก่อน");const next=validateBackup(data);localStorage.setItem(keyFor(currentEmail),JSON.stringify(next));state=next;window.dispatchEvent(new Event("progress-changed"));},
     has:id=>state.completed.includes(id)||state.attempts.some(a=>a.id===id),
     toggle(id) { const done=!this.has(id);state.completed = done?[...state.completed,id]:state.completed.filter(x=>x!==id);state.marks={...state.marks,[id]:{done,at:new Date().toISOString()}}; save(); },
     addAttempt(attempt) { if(typeof attempt.id==='string'&&!attempt.id.endsWith(':mini')){state.completed=[...new Set([...state.completed,attempt.id])];state.marks={...state.marks,[attempt.id]:{done:true,at:new Date().toISOString()}};}state.attempts.push({...attempt,date:new Date().toISOString()});state.attempts=state.attempts.slice(-100);save(); },
