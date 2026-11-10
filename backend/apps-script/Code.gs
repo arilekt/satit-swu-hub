@@ -1,6 +1,6 @@
 /**
  * SPSM เส้นทางสู่ ม.1 sync backend (Google Apps Script bound to one Google Sheet).
- * Generated: 2026-11-07 14:00 Bangkok (build 20261107-140000)
+ * Generated: 2026-11-10 10:00 Bangkok (build 20261110-100000)
  *
  * Every request carries a Google ID token from the website's Sign-In button. The token is
  * verified with Google, its audience must equal GOOGLE_CLIENT_ID and its email must be in
@@ -15,6 +15,8 @@
  *   LEARNER_EMAIL     primary learner's email for data migration (used by migrateLearnerData())
  *   PARENT_EMAILS     comma separated email addresses of parent accounts (for multi-student dashboard)
  */
+
+var BACKEND_BUILD = '20261110-100000';
 
 function setupAllSheets() {
   var book = SpreadsheetApp.getActiveSpreadsheet();
@@ -477,7 +479,7 @@ function checkClaims(claims, clientId, allowed, nowSeconds) {
 
 /* ---------- Apps Script runtime ---------- */
 
-function doGet() { return json({ok: true, service: 'satit-swu-hub-sync'}); }
+function doGet() { return json({ok: true, service: 'satit-swu-hub-sync', build: BACKEND_BUILD}); }
 
 /**
  * Actions:
@@ -495,7 +497,7 @@ function doPost(e) {
     if (body.action === 'login') return doLogin(verify(body.id_token), body);
     if (body.action === 'logout' || body.action === 'logout_all') return doLogout(body, body.action === 'logout_all');
     var email = authenticate(body);
-    if (body.action === 'whoami') return json({ok: true, email: email});
+    if (body.action === 'whoami') return json({ok: true, email: email, build: BACKEND_BUILD});
     if (body.action === 'listStudents') {
       if (!isParentAccount(email)) throw authError('denied', 'บัญชี ' + email + ' ไม่ใช่บัญชีผู้ปกครอง');
       return json({ok: true, students: getStudentsForParent(email)});
@@ -509,7 +511,7 @@ function doPost(e) {
         var normalizedEmail = String(studentEmail || '').toLowerCase();
         if (allowed.indexOf(normalizedEmail) >= 0) states[normalizedEmail] = readState(normalizedEmail);
       });
-      return json({ok: true, states: states});
+      return json({ok: true, states: states, activity: readActivity(Object.keys(states))});
     }
     if (body.action === 'resetProgress') {
       return doResetProgress(email);
@@ -703,11 +705,11 @@ function text(value) { return "'" + value; } // keep timestamps as exact text, n
 
 function iso(value) { return value instanceof Date ? value.toISOString() : String(value); }
 
-function isParentAccount(email) {
-  var parents = PropertiesService.getScriptProperties().getProperty('PARENT_EMAILS') || '';
-  return parents.split(',').map(function (e) { return e.trim().toLowerCase(); }).indexOf(String(email || '').toLowerCase()) >= 0;
-}
+// พี่ decided (2026-11-07): every allowed account is both learner and parent. authenticate() has already
+// proven the caller is on the allowlist, so no extra PARENT_EMAILS check is needed.
+function isParentAccount(email) { return !!email; }
 
+// Students a parent can see: rows of tab "พ่อและศิษย์" if any, otherwise every allowed account (nothing hardcoded).
 function getStudentsForParent(parentEmail) {
   var students = [];
   try {
@@ -717,12 +719,47 @@ function getStudentsForParent(parentEmail) {
       for (var i = 1; i < data.length; i++) {
         if (data[i][0] && String(data[i][0]).toLowerCase() === String(parentEmail || '').toLowerCase()) {
           var student = String(data[i][1] || '').trim().toLowerCase();
-          if (student) students.push(student);
+          if (student && students.indexOf(student) < 0) students.push(student);
         }
       }
     }
   } catch (_) { /* sheet does not exist */ }
-  return students.length ? students : [];
+  if (!students.length) students = allowedEmails().map(function (e) { return String(e).toLowerCase(); });
+  return students;
+}
+
+// Login/sync activity per account from tabs log and sessions (read only; last 4000 log rows).
+function readActivity(emails) {
+  var want = {}, out = {};
+  emails.forEach(function (e) { want[e] = true; out[e] = {last_login: null, logins: 0, last_sync: null, last_seen: null, active_sessions: 0}; });
+  try {
+    var logTab = sheet('log'), last = logTab.getLastRow();
+    if (last > 1) {
+      var from = Math.max(2, last - 3999);
+      logTab.getRange(from, 1, last - from + 1, 3).getValues().forEach(function (r) {
+        var who = String(r[1] || '').toLowerCase();
+        if (!want[who]) return;
+        var t = iso(r[0]), a = String(r[2]);
+        if (a === 'login' || a === 'sync') {
+          var key = a === 'login' ? 'last_login' : 'last_sync';
+          if (a === 'login') out[who].logins++;
+          if (!out[who][key] || t > out[who][key]) out[who][key] = t;
+        }
+      });
+    }
+    var sesTab = sheet('sessions'), sl = sesTab.getLastRow();
+    if (sl > 1) {
+      var now = Date.now();
+      sesTab.getRange(2, 1, sl - 1, 7).getValues().forEach(function (r) {
+        var who = String(r[1] || '').toLowerCase();
+        if (!want[who]) return;
+        var seen = iso(r[4]);
+        if (!out[who].last_seen || seen > out[who].last_seen) out[who].last_seen = seen;
+        if (!(r[6] === true || r[6] === 'TRUE') && Date.parse(iso(r[3])) > now) out[who].active_sessions++;
+      });
+    }
+  } catch (e) { Logger.log('readActivity error: ' + String(e)); }
+  return out;
 }
 
 function getOrCreateLearnerSpreadsheet(email) {

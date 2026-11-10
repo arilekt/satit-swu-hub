@@ -1,81 +1,77 @@
-/* Multi-student parent dashboard: shows comparative stats between multiple learners (e.g., พอใจ and นาโน) */
+/* Multi-student parent dashboard: per learner progress, exam results and login activity.
+   compute() is pure; render() builds DOM with textContent only, never HTML strings. */
 (() => {
 'use strict';
 
-function compute({students, trackers, config, today, subjectsInOrder}) {
-  if (!Array.isArray(students) || !Array.isArray(trackers)) return null;
+const HOUR = 3600000, DAY = 86400000;
+const bangkok = t => new Date(t + 7 * HOUR);
+const fmtTime = t => { const d = bangkok(t); return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0') + ' น.'; };
+const fmtDate = t => new Intl.DateTimeFormat('th-TH', {timeZone: 'UTC', day: 'numeric', month: 'short'}).format(bangkok(t));
+const dayOf = t => Math.floor((t + 7 * HOUR) / DAY);
 
-  // compute() is from parent-dashboard.js - reuse it for each student
-  const results = students.map((studentEmail, i) => {
+// "วันนี้ 08:30 น." / "เมื่อวาน 19:05 น." / "3 วันก่อน · 7 พ.ย." / "ยังไม่เคย"
+function when(iso, now = Date.now()) {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return {text: 'ยังไม่เคย', days: null};
+  const days = dayOf(now) - dayOf(t);
+  if (days <= 0) return {text: 'วันนี้ ' + fmtTime(t), days: 0};
+  if (days === 1) return {text: 'เมื่อวาน ' + fmtTime(t), days};
+  return {text: days + ' วันก่อน · ' + fmtDate(t), days};
+}
+
+function compute({students, trackers, config, today, subjectsInOrder, scheduleFor, activity = {}, now = Date.now()}) {
+  if (!Array.isArray(students) || !Array.isArray(trackers)) return null;
+  const results = students.map((email, i) => {
     const tracker = trackers[i];
     if (!tracker) return null;
     try {
+      const schedule = typeof scheduleFor === 'function' ? scheduleFor(tracker) : {};
+      const base = window.ParentDashboard.compute({config, tracker, schedule, today, subjectsInOrder});
+      const a = activity[email] || {};
       return {
-        email: studentEmail,
-        ...window.ParentDashboard?.compute?.({config, tracker, today, subjectsInOrder})
+        email, ...base,
+        activity: {
+          lastLogin: when(a.last_login, now), lastSync: when(a.last_sync, now), lastSeen: when(a.last_seen, now),
+          logins: a.logins || 0, activeSessions: a.active_sessions || 0, known: !!activity[email]
+        }
       };
     } catch (_) { return null; }
-  }).filter(x => x);
-
-  if (!results.length) return null;
-
-  // Comparative metrics
-  return {
-    students: results,
-    comparison: {
-      overall: results.map(r => ({email: r.email, ...r.overall})),
-      exams: results.map(r => ({email: r.email, count: r.exams?.count || 0, average: r.exams?.average || null}))
-    }
-  };
+  }).filter(Boolean);
+  return results.length ? {students: results} : null;
 }
+
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
+const row = (label, value, tone) => { const r = el('div', 'sc-row'); r.append(el('span', 'sc-k', label), el('span', 'sc-v' + (tone ? ' sc-' + tone : ''), value)); return r; };
 
 function render(root, data) {
   if (!root || !data) return;
   root.textContent = '';
-
-  const container = document.createElement('div');
-  container.className = 'parent-multi-dashboard';
-
-  // Title
-  const title = document.createElement('h2');
-  title.textContent = 'ความคืบหน้าของผู้เรียน';
-  container.append(title);
-
-  // Student comparison cards
-  const cardsContainer = document.createElement('div');
-  cardsContainer.className = 'student-cards';
-
-  data.students.forEach(student => {
-    const card = document.createElement('article');
-    card.className = 'student-card';
-
-    const name = student.email.split('@')[0];
-    const progress = student.overall;
-
-    const cardTitle = document.createElement('h3');
-    cardTitle.textContent = name.charAt(0).toUpperCase() + name.slice(1);
-    card.append(cardTitle);
-
-    const stats = document.createElement('div');
-    stats.className = 'student-stats';
-
-    const percent = document.createElement('div');
-    percent.className = 'stat-percent';
-    percent.textContent = progress.percent + '%';
-
-    const label = document.createElement('div');
-    label.className = 'stat-label';
-    label.textContent = progress.done + '/' + progress.total + ' ภารกิจ';
-
-    stats.append(percent, label);
+  const container = el('div', 'parent-multi-dashboard');
+  container.append(el('h2', undefined, 'ความคืบหน้าของผู้เรียน'));
+  const cards = el('div', 'student-cards');
+  data.students.forEach(s => {
+    const card = el('article', 'student-card');
+    const name = s.email.split('@')[0];
+    card.append(el('h3', undefined, name), el('div', 'sc-email', s.email));
+    const stats = el('div', 'student-stats');
+    stats.append(el('div', 'stat-percent', s.overall.percent + '%'), el('div', 'stat-label', 'จบ ' + s.overall.done + '/' + s.overall.total + ' ภารกิจ · ' + s.overall.label));
     card.append(stats);
 
-    cardsContainer.append(card);
+    const a = s.activity, never = a.known && a.lastLogin.days === null;
+    const box = el('div', 'sc-rows');
+    box.append(row('ล็อกอินล่าสุด', a.known ? (never ? 'ยังไม่เคยเข้าสู่ระบบ' : a.lastLogin.text) : 'ไม่มีข้อมูล', never ? 'warn' : a.lastLogin.days != null && a.lastLogin.days >= 3 ? 'warn' : ''));
+    if (a.known && !never) {
+      box.append(row('ซิงก์ล่าสุด', a.lastSync.text), row('จำนวนครั้งที่ล็อกอิน', a.logins + ' ครั้ง'));
+    }
+    const e = s.exams;
+    box.append(row('ข้อสอบที่ทำแล้ว', e.count ? e.count + ' ครั้ง · เฉลี่ย ' + e.average + '%' : 'ยังไม่ได้ทำ'));
+    if (e.last) box.append(row('ล่าสุด', e.last.score + '/' + e.last.total + ' · ' + (e.last.title || '')));
+    card.append(box);
+    cards.append(card);
   });
-
-  container.append(cardsContainer);
+  container.append(cards);
   root.append(container);
 }
 
-window.ParentMultiDashboard = {compute, render};
+window.ParentMultiDashboard = {compute, render, when};
 })();

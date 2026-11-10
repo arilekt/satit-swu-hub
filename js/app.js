@@ -41,9 +41,11 @@ function renderParent(){
  ParentDashboard.render($('pd-root'),{config,tracker:Tracker,schedule:window.StudyPlan?StudyPlan.schedule(config,Tracker)||{}:{},today,subjectsInOrder:subjectsInOrder(),extras:latestExtras,
   nextActivity:Dashboard.eventGroups(activities,today)[0]||null,activityCount:activities.events.length,boostText:Dashboard.boost(),examDate:Tracker.examDate(),resultDate:Tracker.resultDate()});
 }
-// Multi-student dashboard for parents
-function renderParentMulti(students, states) {
- if (!Array.isArray(students) || students.length < 2 || !window.ParentMultiDashboard) return; // not a multi-student parent
+// Multi-student dashboard for parents: progress, exam results and login activity of every learner the account can see.
+let lastParentData=null;
+function renderParentMulti(students, states, activity) {
+ if (!Array.isArray(students) || !students.length || !window.ParentMultiDashboard) return false;
+ states = states || {}; activity = activity || {};
  const today = Countdown.today();
  const trackers = students.map(email => ({
    syncPayload: () => states[email] || {marks: {}, attempts: [], settings: {}},
@@ -54,14 +56,17 @@ function renderParentMulti(students, states) {
    examDate: () => null,
    resultDate: () => null
  }));
- const data = ParentMultiDashboard.compute({students, trackers, config, today, subjectsInOrder: subjectsInOrder()});
- if (data) ParentMultiDashboard.render($('pd-root'), data);
+ const scheduleFor = tracker => { try { return window.StudyPlan ? StudyPlan.schedule(config, tracker) || {} : {}; } catch (_) { return {}; } };
+ const data = ParentMultiDashboard.compute({students, trackers, config, today, subjectsInOrder: subjectsInOrder(), scheduleFor, activity});
+ if (!data) return false;
+ ParentMultiDashboard.render($('pd-root'), data);
+ return true;
 }
 document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});
 function update(){
  if(!config||!window.Dashboard)return;
  Dashboard.render(config,ParentTools.activities(),Tracker);
- if(page==='parent'&&!isParentAccount)renderParent();
+ if(page==='parent'&&!(lastParentData&&renderParentMulti(lastParentData.students,lastParentData.states,lastParentData.activity)))renderParent();
  if(page==='lesson'){updateSidebar();const button=$('complete-button');if(button)button.textContent=Tracker.has(current.step.id)?'✓ เรียนจบแล้ว · คลิกเพื่อยกเลิก':'เรียนจบแล้ว..คลิก ✓';}
 }
 function video(url){
@@ -245,7 +250,7 @@ function applyExtras(extras,save){
  return true;
 }
 window.addEventListener('extras-remote',e=>{if(applyExtras(e.detail,true)&&started)update();});
-window.addEventListener('parent-data-loaded',e=>{if(page==='parent'&&e.detail?.students&&e.detail?.states)renderParentMulti(e.detail.students,e.detail.states);});
+window.addEventListener('parent-data-loaded',e=>{if(e.detail?.students){lastParentData=e.detail;if(page==='parent')renderParentMulti(e.detail.students,e.detail.states,e.detail.activity);}});
 async function start(){
  defaultPlan={...config.daily_plan,source:'default'};defaultPlan=pinDefaults({...defaultPlan});config.daily_plan=defaultPlan;
  try{const cached=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');if(cached)applyPlan(cached,false);}catch(_){/* use default */}
