@@ -5,6 +5,15 @@
     const v=document.getElementById('version-display');if(v)v.textContent=window.AppVersion.display();
     const f=document.getElementById('build-info');if(f)f.textContent=window.AppVersion.full();
   }
+  // A page cannot contain the hash of its own commit, so ask GitHub (public repo) which commit main is at now.
+  // Compare it with the commit shown in the repo to tell whether the deploy is the latest. Silent when offline/rate limited.
+  const vd=document.getElementById('version-display');
+  if(vd)fetch('https://api.github.com/repos/arilekt/satit-swu-hub/commits/main',{headers:{Accept:'application/vnd.github+json'}}).then(r=>r.ok?r.json():Promise.reject()).then(c=>{
+    if(!c||typeof c.sha!=='string'||!/^[0-9a-f]{40}$/.test(c.sha))return;
+    const line=document.createElement('span');line.style.display='block';
+    line.textContent='commit ล่าสุดบน main · '+c.sha.slice(0,7);
+    vd.append(line);
+  }).catch(()=>{});
   const label=document.getElementById('build-info');
   fetch('./data/build.json',{cache:'no-store'}).then(response=>{
     if(!response.ok)throw Error('Build manifest unavailable');
