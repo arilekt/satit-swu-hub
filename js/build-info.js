@@ -1,5 +1,10 @@
 (() => {
   'use strict';
+  // Login page + footer show the version from js/version.js (single source); this line was lost in v1.6.x.
+  if(window.AppVersion){
+    const v=document.getElementById('version-display');if(v)v.textContent=window.AppVersion.display();
+    const f=document.getElementById('build-info');if(f)f.textContent=window.AppVersion.full();
+  }
   const label=document.getElementById('build-info');
   fetch('./data/build.json',{cache:'no-store'}).then(response=>{
     if(!response.ok)throw Error('Build manifest unavailable');
