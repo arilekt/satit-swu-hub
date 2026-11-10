@@ -1,7 +1,7 @@
 window.AppVersion = {
-  version: 'v1.6.8',
-  build: '20261107-121500',
-  buildDate: '07/11/2026 12:15 น.',
+  version: 'v1.6.9',
+  build: '20261110-012510',
+  buildDate: '10/11/2026 01:25 น.',
   display: function() { return this.version + ' · build ' + this.build; },
   full: function() { return this.version + ' · build ' + this.build + ' · อัปเดต ' + this.buildDate + ' (ไทย)'; }
 };
