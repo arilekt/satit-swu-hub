@@ -1,6 +1,6 @@
 /**
  * SPSM เส้นทางสู่ ม.1 sync backend (Google Apps Script bound to one Google Sheet).
- * Generated: 2026-11-10 10:00 Bangkok (build 20261110-100000)
+ * Generated: 2026-11-11 21:45 Bangkok (build 20261111-214500)
  *
  * Every request carries a Google ID token from the website's Sign-In button. The token is
  * verified with Google, its audience must equal GOOGLE_CLIENT_ID and its email must be in
@@ -16,7 +16,7 @@
  *   PARENT_EMAILS     comma separated email addresses of parent accounts (for multi-student dashboard)
  */
 
-var BACKEND_BUILD = '20261110-100000';
+var BACKEND_BUILD = '20261111-214500';
 
 function setupAllSheets() {
   var book = SpreadsheetApp.getActiveSpreadsheet();
@@ -211,11 +211,6 @@ var PLAN_SEED = {
     ["ความสงสัยเล็ก ๆ วันนี้ อาจกลายเป็นเรื่องโปรดในวันหน้า", ''],
     ["เรียนเสร็จแล้วออกไปมองไกล ๆ ให้ตาได้พักบ้าง", ''],
     ["วันนี้ทำได้เท่าไหร่ก็เท่านั้น พรุ่งนี้ค่อยต่ออีกนิด", '']
-  ],
-  'ผู้ใช้': [
-    ['dad@gmail.com'],
-    ['porjai@gmail.com'],
-    ['jaturon.pantasuma@gmail.com']
   ],
   'เกณฑ์คะแนน': [
     ['ต้องฝึกเพิ่ม', 0, 'ตั้งแต่', '🌱'],
@@ -650,9 +645,11 @@ function allowedEmails() {
       }
     }
   } catch (e) { /* sheet may not exist yet, use fallback */ }
-  if (!allowed.length) {
-    allowed = String(PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '').split(',').map(function (x) { return x.trim().toLowerCase(); }).filter(String);
-  }
+  // Script property ALLOWED_EMAILS always counts too: a starter/partial tab must never lock out accounts listed there.
+  String(PropertiesService.getScriptProperties().getProperty('ALLOWED_EMAILS') || '').split(',').forEach(function (x) {
+    x = x.trim().toLowerCase();
+    if (x && allowed.indexOf(x) < 0) allowed.push(x);
+  });
   if (!allowed.length) throw authError('config', 'ยังไม่มีบัญชีผู้ใช้ ให้เพิ่มอีเมลในแท็บ ผู้ใช้ หรือตั้งค่า ALLOWED_EMAILS ใน Script properties');
   return allowed;
 }
