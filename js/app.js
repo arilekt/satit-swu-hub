@@ -263,7 +263,7 @@ function applyExtras(extras,save){
  return true;
 }
 window.addEventListener('extras-remote',e=>{if(applyExtras(e.detail,true)&&started)update();});
-window.addEventListener('parent-data-error',e=>{lastParentData=null;const box=$('pd-switch');if(!box)return;box.textContent='';const note=element('div','ดูผู้เรียนคนอื่นไม่ได้ตอนนี้: '+(e.detail?.message||'ไม่ทราบสาเหตุ')+(e.detail?.code==='denied'?' · น่าจะยังไม่ได้อัปเดต Code.gs เป็นเวอร์ชันล่าสุด (ดูหมายเลข Backend ในเมนูรูปโปรไฟล์ ควรเป็น 20261110-100000)':' · ลองกด "ซิงก์ตอนนี้"'),'pd-error');note.setAttribute('role','alert');box.append(note);});
+window.addEventListener('parent-data-error',e=>{lastParentData=null;const box=$('pd-switch');if(!box)return;box.textContent='';const note=element('div','ดูผู้เรียนคนอื่นไม่ได้ตอนนี้: '+(e.detail?.message||'ไม่ทราบสาเหตุ')+(e.detail?.code==='denied'?' · น่าจะยังไม่ได้อัปเดต Code.gs เป็นเวอร์ชันล่าสุด (ดูหมายเลข Backend ในเมนูรูปโปรไฟล์ ควรเป็น 20261111-214500)':' · ลองกด "ซิงก์ตอนนี้"'),'pd-error');note.setAttribute('role','alert');box.append(note);});
 window.addEventListener('parent-data-loaded',e=>{if(e.detail?.students){lastParentData=e.detail;if(page==='parent')renderParentMulti(e.detail.students,e.detail.states,e.detail.activity);}});
 async function start(){
  defaultPlan={...config.daily_plan,source:'default'};defaultPlan=pinDefaults({...defaultPlan});config.daily_plan=defaultPlan;
