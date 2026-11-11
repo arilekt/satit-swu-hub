@@ -137,7 +137,7 @@ function sparkline(values) {
 }
 
 function renderHero(model) {
-  const left = card('ภาพรวมวันนี้ · ' + window.Countdown.label(model.today), 'พอใจเรียนถึงไหนแล้ว');
+  const left = card('ภาพรวมวันนี้ · ' + window.Countdown.label(model.today), (model.learnerName || 'พอใจ') + 'เรียนถึงไหนแล้ว');
   const text = el('div'), pillLine = el('p');
   pillLine.append(el('span', 'pd-pill pd-' + model.overall.state, model.overall.label));
   text.append(el('p', 'pd-big', 'เรียนจบ ' + model.overall.done + ' จาก ' + model.overall.total + ' ภารกิจ'), pillLine, el('p', 'pd-muted', 'สัปดาห์นี้เรียน ' + model.week.activeDays + ' วัน' + (model.week.streak > 1 ? ' · ต่อเนื่อง 🔥 ' + model.week.streak + ' วัน' : '')));
@@ -236,6 +236,7 @@ function renderSheets(ctx) {
 /* Rebuilt only when the words on screen change, so the once-a-minute refresh does not replay the bar animations. */
 function render(root, input) {
   const model = compute(input), exams = el('div', 'pd-cols'), next = el('div');
+  model.learnerName = input.learnerName;
   exams.append(renderExams(model), renderWeak(model));
   next.append(renderHero(model), renderSubjects(model), exams, renderWeek(model), renderSheets(input));
   const text = next.textContent + '|' + [...next.querySelectorAll('a')].map(a => a.href).join(',');
