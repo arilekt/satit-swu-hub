@@ -267,7 +267,7 @@
         const {states, activity} = await readMultipleStates(students);
         window.dispatchEvent(new CustomEvent('parent-data-loaded', {detail: {students, states: states || {}, activity: activity || {}}}));
       }
-    } catch (_) { /* not a parent account or network error */ }
+    } catch (error) { window.dispatchEvent(new CustomEvent('parent-data-error', {detail: {message: String(error && error.message || error), code: error && error.code || ''}})); }
   }
 
   async function resetProgress() {
