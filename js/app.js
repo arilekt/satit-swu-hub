@@ -37,29 +37,42 @@ function updateSidebar(){
 // "สำหรับคุณพ่อ": everything shown comes from progress on this device plus what the Sheet delivered with the last sync.
 function renderParent(){
  if(!window.ParentDashboard||!window.Dashboard)return;
+ if($('pd-switch'))$('pd-switch').textContent='';
  const today=Countdown.today(),activities=ParentTools.activities();
  ParentDashboard.render($('pd-root'),{config,tracker:Tracker,schedule:window.StudyPlan?StudyPlan.schedule(config,Tracker)||{}:{},today,subjectsInOrder:subjectsInOrder(),extras:latestExtras,
   nextActivity:Dashboard.eventGroups(activities,today)[0]||null,activityCount:activities.events.length,boostText:Dashboard.boost(),examDate:Tracker.examDate(),resultDate:Tracker.resultDate()});
 }
-// Multi-student dashboard for parents: progress, exam results and login activity of every learner the account can see.
-let lastParentData=null;
+// Multi-student dashboard for parents: pick a learner (dropdown or card) and see the same full dashboard as for พอใจ.
+let lastParentData=null,selectedLearner=null;
+const learnerName=email=>(config?.learner_names&&config.learner_names[email])||String(email).split('@')[0];
 function renderParentMulti(students, states, activity) {
  if (!Array.isArray(students) || !students.length || !window.ParentMultiDashboard) return false;
  states = states || {}; activity = activity || {};
  const today = Countdown.today();
- const trackers = students.map(email => ({
+ const stub = email => ({
    syncPayload: () => states[email] || {marks: {}, attempts: [], settings: {}},
    applyRemote: () => {},
-   has: id => {const m = (states[email]?.marks || {})[id]; return !!(m && m.done);},
+   has: id => {const m = (states[email]?.marks || {})[id]; return !!(m && m.done) || (states[email]?.attempts || []).some(a => a.id === id);},
    attempts: () => states[email]?.attempts || [],
    exportData: () => states[email] || {marks: {}, attempts: []},
-   examDate: () => null,
-   resultDate: () => null
- }));
+   examDate: () => Tracker.examDate(),
+   resultDate: () => Tracker.resultDate()
+ });
+ const trackers = students.map(stub);
  const scheduleFor = tracker => { try { return window.StudyPlan ? StudyPlan.schedule(config, tracker) || {} : {}; } catch (_) { return {}; } };
  const data = ParentMultiDashboard.compute({students, trackers, config, today, subjectsInOrder: subjectsInOrder(), scheduleFor, activity});
  if (!data) return false;
- ParentMultiDashboard.render($('pd-root'), data);
+ if (!selectedLearner || !students.includes(selectedLearner)) {
+  try { selectedLearner = localStorage.getItem('satit-swu-hub:selected-learner'); } catch (_) { selectedLearner = null; }
+  if (!students.includes(selectedLearner)) selectedLearner = students.includes(currentEmail) ? currentEmail : students[0];
+ }
+ const choose = email => { selectedLearner = email; try { localStorage.setItem('satit-swu-hub:selected-learner', email); } catch (_) {} const d = lastParentData; if (d) renderParentMulti(d.students, d.states, d.activity); };
+ ParentMultiDashboard.render($('pd-switch'), data, {selected: selectedLearner, nameOf: learnerName, onSelect: choose});
+ const tracker = trackers[students.indexOf(selectedLearner)], activities = ParentTools.activities();
+ const root = $('pd-root'); root.dataset.text = '';
+ ParentDashboard.render(root, {config, tracker, schedule: scheduleFor(tracker), today, subjectsInOrder: subjectsInOrder(), extras: latestExtras,
+  nextActivity: Dashboard.eventGroups(activities, today)[0] || null, activityCount: activities.events.length, boostText: Dashboard.boost(),
+  examDate: Tracker.examDate(), resultDate: Tracker.resultDate(), learnerName: learnerName(selectedLearner)});
  return true;
 }
 document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('[data-copy]');if(!button)return;navigator.clipboard.writeText(button.dataset.copy).then(()=>notify('คัดลอกคำสั่งแล้ว'),()=>notify('คัดลอกไม่ได้ ลองเลือกข้อความเอง'));});

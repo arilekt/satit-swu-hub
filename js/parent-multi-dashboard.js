@@ -43,27 +43,34 @@ function compute({students, trackers, config, today, subjectsInOrder, scheduleFo
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
 const row = (label, value, tone) => { const r = el('div', 'sc-row'); r.append(el('span', 'sc-k', label), el('span', 'sc-v' + (tone ? ' sc-' + tone : ''), value)); return r; };
 
-function render(root, data) {
+function render(root, data, {selected, nameOf = e => e.split('@')[0], onSelect} = {}) {
   if (!root || !data) return;
   root.textContent = '';
   const container = el('div', 'parent-multi-dashboard');
-  container.append(el('h2', undefined, 'ความคืบหน้าของผู้เรียน'));
+  const head = el('div', 'pm-head');
+  head.append(el('h2', undefined, 'ความคืบหน้าของผู้เรียน'));
+  if (data.students.length > 1) {
+    const label = el('label', 'pm-picker'); label.append(el('span', undefined, 'ดูของ '));
+    const select = el('select'); select.setAttribute('aria-label', 'เลือกผู้เรียน');
+    data.students.forEach(s => { const o = el('option', undefined, nameOf(s.email)); o.value = s.email; if (s.email === selected) o.selected = true; select.append(o); });
+    select.addEventListener('change', () => onSelect && onSelect(select.value));
+    label.append(select); head.append(label);
+  }
+  container.append(head);
   const cards = el('div', 'student-cards');
   data.students.forEach(s => {
-    const card = el('article', 'student-card');
-    const name = s.email.split('@')[0];
-    card.append(el('h3', undefined, name), el('div', 'sc-email', s.email));
+    const card = el('article', 'student-card' + (s.email === selected ? ' is-selected' : ''));
+    if (onSelect) { card.tabIndex = 0; card.setAttribute('role', 'button'); card.addEventListener('click', () => onSelect(s.email)); card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(s.email); } }); }
+    card.append(el('h3', undefined, nameOf(s.email)), el('div', 'sc-email', s.email));
     const stats = el('div', 'student-stats');
     stats.append(el('div', 'stat-percent', s.overall.percent + '%'), el('div', 'stat-label', 'จบ ' + s.overall.done + '/' + s.overall.total + ' ภารกิจ · ' + s.overall.label));
     card.append(stats);
-
     const a = s.activity, never = a.known && a.lastLogin.days === null;
     const box = el('div', 'sc-rows');
     box.append(row('ล็อกอินล่าสุด', a.known ? (never ? 'ยังไม่เคยเข้าสู่ระบบ' : a.lastLogin.text) : 'ไม่มีข้อมูล', never ? 'warn' : a.lastLogin.days != null && a.lastLogin.days >= 3 ? 'warn' : ''));
-    if (a.known && !never) {
-      box.append(row('ซิงก์ล่าสุด', a.lastSync.text), row('จำนวนครั้งที่ล็อกอิน', a.logins + ' ครั้ง'));
-    }
+    if (a.known && !never) box.append(row('ซิงก์ล่าสุด', a.lastSync.text), row('จำนวนครั้งที่ล็อกอิน', a.logins + ' ครั้ง'));
     const e = s.exams;
+    if (a.known && !never && s.overall.done === 0 && !e.count) box.append(row('สถานะ', 'เปิดเว็บแล้ว แต่ยังไม่ได้ทำภารกิจ/ข้อสอบ', 'warn'));
     box.append(row('ข้อสอบที่ทำแล้ว', e.count ? e.count + ' ครั้ง · เฉลี่ย ' + e.average + '%' : 'ยังไม่ได้ทำ'));
     if (e.last) box.append(row('ล่าสุด', e.last.score + '/' + e.last.total + ' · ' + (e.last.title || '')));
     card.append(box);

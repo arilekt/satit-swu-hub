@@ -1,6 +1,10 @@
 {
   "learner": "พอใจ",
   "learner_email": "porjai.tummontree@gmail.com",
+  "learner_names": {
+    "porjai.tummontree@gmail.com": "พอใจ",
+    "jaturon.pantasuma@gmail.com": "นาโน"
+  },
   "exam_date": "2027-02-07",
   "subjects": [
     {

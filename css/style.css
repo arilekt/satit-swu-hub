@@ -523,3 +523,8 @@ a.pd-sheet:hover{transform:translateY(-2px);border-color:var(--red-line);box-sha
 .sc-rows{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);display:grid;gap:7px;text-align:left}
 .sc-row{display:flex;justify-content:space-between;gap:12px;font-size:14px}
 .sc-k{color:var(--muted)}.sc-v{font-weight:600;text-align:right}.sc-warn{color:var(--red)}
+.pm-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.pm-head h2{margin:0}.pm-picker{display:flex;align-items:center;gap:8px;font-weight:600}
+.pm-picker select{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--ink);min-height:40px}
+.student-card[role=button]{cursor:pointer}.student-card.is-selected{border-color:var(--red);box-shadow:0 0 0 2px var(--red) inset}
+#pd-switch:empty{display:none}
