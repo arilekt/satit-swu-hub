@@ -528,3 +528,4 @@ a.pd-sheet:hover{transform:translateY(-2px);border-color:var(--red-line);box-sha
 .pm-picker select{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--ink);min-height:40px}
 .student-card[role=button]{cursor:pointer}.student-card.is-selected{border-color:var(--red);box-shadow:0 0 0 2px var(--red) inset}
 #pd-switch:empty{display:none}
+.pd-error{background:#fff4e5;border:1px solid #f0c27b;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:14.5px}
