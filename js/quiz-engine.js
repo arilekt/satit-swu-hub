@@ -5,10 +5,12 @@
   let active = null;
   const el = (tag,text,cls) => {const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
   const LETTERS=['ก','ข','ค','ง','จ','ฉ'];
+  // Reading text / dialogue shared by several questions (stays in the order of the real paper, shown once per group).
+  function passageBox(text,label,open){const box=el('details',undefined,'q-passage');if(open!==false)box.open=true;box.append(el('summary',label||'📄 ข้อความ/บทสนทนา'),el('div',text,'p-body'));return box;}
   function shuffle(list) { const copy=[...list];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy; }
   function validate(questions) {
     if (!Array.isArray(questions)||!questions.length) throw new Error('ชุดข้อสอบไม่มีคำถาม');
-    questions.forEach(q=>{if(!q || typeof q.question!=='string'||!Array.isArray(q.options)||q.options.length<2||!q.options.every(x=>typeof x==='string')||!Number.isInteger(q.answer)||q.answer<0||q.answer>=q.options.length||typeof q.explanation!=='string')throw new Error('รูปแบบคำถามไม่ถูกต้อง');});
+    questions.forEach(q=>{if(!q || typeof q.question!=='string'||!Array.isArray(q.options)||q.options.length<2||!q.options.every(x=>typeof x==='string')||!Number.isInteger(q.answer)||q.answer<0||q.answer>=q.options.length||typeof q.explanation!=='string'||(q.passage!==undefined&&typeof q.passage!=='string'))throw new Error('รูปแบบคำถามไม่ถูกต้อง');});
   }
   const clock=seconds=>{const s=Math.max(0,Math.round(seconds)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),pad=n=>String(n).padStart(2,'0');return (h?h+':'+pad(m):pad(m))+':'+pad(s%60);};
   // Shared by every exam (end-of-chapter, mock exams) and the mini check in lessons.
@@ -19,7 +21,7 @@
     if(!Number.isFinite(minutes)||minutes<=0||minutes>180)throw new Error('เวลาข้อสอบต้องอยู่ระหว่าง 0 ถึง 180 นาที');
     const limit=Math.round(minutes*60);
     const intro=el('div',undefined,'quiz-intro'),rules=el('ul',undefined,'quiz-rules');
-    for(const text of [questions.length+' ข้อ · ข้อละ 1 คะแนน · เลือกคำตอบที่ถูกที่สุด','⏱ เวลาแนะนำ '+minutes+' นาที นาฬิกานับขึ้น ถ้าเกินเวลาทำต่อได้ จะได้รู้ว่าใช้เวลาเท่าไร','🔀 ลำดับคำถามสลับทุกครั้ง','📝 กด “ส่งข้อสอบ” แล้วจะเห็นข้อที่เลือก ข้อที่ถูก เหตุผล และคะแนน'])rules.append(el('li',text));
+    for(const text of [questions.length+' ข้อ · ข้อละ 1 คะแนน · เลือกคำตอบที่ถูกที่สุด','⏱ เวลาแนะนำ '+minutes+' นาที นาฬิกานับขึ้น ถ้าเกินเวลาทำต่อได้ จะได้รู้ว่าใช้เวลาเท่าไร',(meta.ordered?'📋 เรียงข้อตามข้อสอบจริง ไม่สลับข้อ':'🔀 ลำดับคำถามสลับทุกครั้ง'),'📝 กด “ส่งข้อสอบ” แล้วจะเห็นข้อที่เลือก ข้อที่ถูก เหตุผล และคะแนน'])rules.append(el('li',text));
     intro.append(rules);
     // history (an array, or a function returning one) = this exam's earlier attempts: show the statistics component
     if(meta.history&&window.ExamStats)intro.append(window.ExamStats.render(typeof meta.history==='function'?meta.history():meta.history));
@@ -29,13 +31,18 @@
     start.onclick=()=>run();
     function run(){
       window.QuizEngine.dispose();
-      const ordered=shuffle(questions),answers=new Array(ordered.length).fill(null),began=Date.now();
+      const ordered=meta.ordered?[...questions]:shuffle(questions),answers=new Array(ordered.length).fill(null),began=Date.now();
       container.replaceChildren();
       const bar=el('div',undefined,'quiz-bar'),count=el('span',undefined,'quiz-count'),timer=el('span',undefined,'quiz-timer'),barSubmit=el('button','ส่งข้อสอบ','primary quiz-submit');barSubmit.type='button';
       bar.append(count,timer,barSubmit);
       const form=el('form',undefined,'quiz-form'),labels=[];
       ordered.forEach((q,i)=>{
-        const field=el('fieldset',undefined,'question'),legend=el('legend');legend.append(el('span',String(i+1),'q-no'),el('span',q.question,'q-text'));field.append(legend);labels[i]=[];
+        if(q.passage){
+          if(meta.ordered){
+            if(i===0||ordered[i-1].passage!==q.passage){let j=i;while(j+1<ordered.length&&ordered[j+1].passage===q.passage)j++;form.append(passageBox(q.passage,'📄 ข้อความ/บทสนทนา · อ่านแล้วตอบข้อ '+(i+1)+(j>i?'–'+(j+1):'')));}
+          }
+        }
+        const field=el('fieldset',undefined,'question'),legend=el('legend');legend.append(el('span',String(i+1),'q-no'),el('span',q.question,'q-text'));field.append(legend);if(q.passage&&!meta.ordered)field.append(passageBox(q.passage));labels[i]=[];
         q.options.forEach((option,j)=>{
           const label=el('label',undefined,'option'),radio=el('input');radio.type='radio';radio.name='q'+i;radio.value=String(j);
           radio.onchange=()=>{answers[i]=j;labels[i].forEach((l,k)=>{l.className='option'+(k===j?' chosen':'');});update();};
@@ -76,6 +83,7 @@
       ordered.forEach((q,i)=>{
         const ok=answers[i]===q.answer,box=el('article',undefined,'review '+(ok?'right':answers[i]===null?'skipped':'wrong')),head=el('div',undefined,'review-head');
         head.append(el('span',String(i+1),'q-no'),el('span',q.question,'q-text'),el('span',ok?'✓ ถูก':answers[i]===null?'— ไม่ได้ตอบ':'✗ ผิด','verdict'));box.append(head);
+        if(q.passage)box.append(passageBox(q.passage,'📄 ดูข้อความ/บทสนทนา',false));
         q.options.forEach((text,j)=>{const chosen=answers[i]===j,correct=q.answer===j;box.append(option(correct?'correct':chosen?'chosen-wrong':'',text,j,correct&&chosen?'✓ พอใจตอบข้อนี้ ถูกต้อง':correct?'✓ ข้อที่ถูก':chosen?'✗ ข้อที่พอใจเลือก':''));});
         const why=el('p',undefined,'why');why.append(el('b','💡 เหตุผล: '),el('span',q.explanation));box.append(why);cards.push({box,ok});list.append(box);
       });

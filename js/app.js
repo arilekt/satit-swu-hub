@@ -107,7 +107,8 @@ function videoMatch(match){
 function show(kind){
  page=kind;
  for(const id of ['dashboard','lesson','quiz','parent'])$(id+'-page').hidden=id!==kind;
- for(const [id,kindName] of [['dashboard','dashboard'],['learn','lesson'],['parent','parent']]){const a=$('nav-'+id);if(kind===kindName||(kind==='quiz'&&kindName==='lesson'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
+ const real=kind==='quiz'&&location.hash.startsWith('#realexam');
+ for(const [id,kindName] of [['dashboard','dashboard'],['learn','lesson'],['parent','parent'],['realexam','realexam']]){const a=$('nav-'+id);if(!a)continue;if(real?kindName==='realexam':(kind===kindName||(kind==='quiz'&&kindName==='lesson')))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}
 }
 // Exams get their own page with no lesson summary next to them; the answers stay hidden until "ส่งข้อสอบ".
 async function quizPage(subject,step,token){
@@ -135,6 +136,41 @@ async function quizPage(subject,step,token){
    onfinish:()=>{box.firstChild.hidden=false;head.classList.remove('compact');window.scrollTo({top:0,behavior:'auto'});update();}},data.meta.questions);
  }catch(error){if(token!==request)return;box.replaceChildren(backLink(),head,element('p','ยังเปิดข้อสอบไม่ได้: '+error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;box.append(retry);}
 }
+// ซ้อมสอบจริง: past real papers (Trilingual round) kept apart from the lessons. config.real_exam = {title, note, sets:[{id,title,file,questions,time_limit_minutes,icon,subject}]}.
+async function realExamPage(setId,token){
+ const box=$('quiz-content'),real=config.real_exam,sets=(real&&Array.isArray(real.sets))?real.sets:[];
+ const backTo=(href,label)=>{const a=element('a',label,'secondary-link quiz-back');a.href=href;return a;};
+ const head=element('header',undefined,'quiz-head');
+ if(!sets.length){box.replaceChildren(backTo('#dashboard','← กลับหน้าหลัก'),element('p','ยังไม่มีชุดซ้อมสอบจริง','notice'));return;}
+ const set=setId?sets.find(s=>s.id===setId):null;
+ const stat=id=>{const list=Tracker.attempts().filter(a=>a.id===id);return list.length?{count:list.length,best:Math.max(...list.map(a=>a.score/a.total))}:null;};
+ if(!set){
+  head.append(element('span','🎯 ซ้อมสอบจริง','tag'),element('h2',real.title||'ซ้อมสอบจริง','title'));
+  if(real.note)head.append(element('p',real.note,'meta'));
+  const grid=element('div',undefined,'real-grid');
+  for(const s of sets){const a=element('a',undefined,'real-card');a.href='#realexam/'+s.id;const st=stat(s.id);
+   a.append(element('span',s.icon||'📝','real-icon'),element('strong',s.title),element('span',s.questions+' ข้อ · เวลาแนะนำ '+s.time_limit_minutes+' นาที','meta'),element('span',st?'ทำแล้ว '+st.count+' ครั้ง · ดีที่สุด '+Math.round(st.best*100)+'%':'ยังไม่เคยทำ','real-stat'));grid.append(a);}
+  box.replaceChildren(backTo('#dashboard','← กลับหน้าหลัก'),head,grid);return;
+ }
+ const back={href:'#realexam',label:'← กลับไปรายการซ้อมสอบจริง'};
+ head.append(element('span','🎯 ซ้อมสอบจริง · '+(real.round||'รอบไตรภาษา'),'tag'),element('h2',set.title,'title'));
+ box.replaceChildren(backTo(back.href,back.label),head,element('p','กำลังเปิดข้อสอบ…'));
+ try{
+  await ensureMarkdown();if(token!==request)return;
+  const data=parse(await get(set.file));if(token!==request)return;
+  if(data.meta.id!==set.id)throw Error('id ในข้อสอบไม่ตรงกับ config');
+  QuizEngine.validate(data.meta.questions);
+  const minutes=Number(data.meta.time_limit_minutes)||Number(set.time_limit_minutes)||30;
+  if(real.note)head.append(element('p',real.note,'meta'));
+  head.append(element('span',data.meta.questions.length+' ข้อ · เวลาแนะนำ '+minutes+' นาที','meta'));
+  const panel=element('section',undefined,'quiz-panel');
+  box.replaceChildren(backTo(back.href,back.label),head,panel);
+  const last=Tracker.attempts().filter(a=>a.id===set.id).pop();
+  QuizEngine.mount(panel,{id:set.id,title:set.title,time_limit_minutes:minutes,ordered:data.meta.ordered===true,history:()=>Tracker.attempts().filter(a=>a.id===set.id),last:last?{score:last.score,total:last.total,elapsed_seconds:last.elapsed_seconds}:null,back,
+   onstart:()=>{box.firstChild.hidden=true;head.classList.add('compact');window.scrollTo({top:0,behavior:'auto'});},
+   onfinish:()=>{box.firstChild.hidden=false;head.classList.remove('compact');window.scrollTo({top:0,behavior:'auto'});update();}},data.meta.questions);
+ }catch(error){if(token!==request)return;box.replaceChildren(backTo(back.href,back.label),head,element('p','ยังเปิดข้อสอบไม่ได้: '+error.message,'notice'));const retry=element('button','ลองอีกครั้ง','secondary');retry.onclick=route;box.append(retry);}
+}
 async function route(){
  if(!config)return;
  if(QuizEngine.isActive()&&location.hash!==lastHash&&!confirm('เปลี่ยนหน้าตอนนี้ไหม? ข้อสอบรอบที่ยังไม่ส่งจะไม่ถูกบันทึก')){history.replaceState(null,'',lastHash);return;}
@@ -142,6 +178,7 @@ async function route(){
  const [subjectId,stepId]=location.hash.slice(1).split('/');
  if(!subjectId||subjectId==='dashboard'||subjectId==='main'){show('dashboard');update();return;}
  if(subjectId==='parent'){show('parent');update();return;}
+ if(subjectId==='realexam'){show('quiz');update();await realExamPage(stepId,token);return;}
  const subject=subjectId==='learn'?(current?.subject||subjectsInOrder().find(s=>s.steps.some(x=>x.file))||subjectsInOrder()[0]):config.subjects.find(s=>s.id===subjectId);
  if(!subject){show('dashboard');update();notify('ไม่พบหน้านี้ กลับหน้าหลักก่อนนะ');return;}
  const step=[...Catalog.items(subject),...(subject.exams||[])].find(s=>s.id===stepId)||(subjectId==='learn'&&current?current.step:Dashboard.subjectTarget(subject,Tracker));
