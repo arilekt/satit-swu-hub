@@ -149,11 +149,11 @@ async function realExamPage(setId,token){
   if(real.note)head.append(element('p',real.note,'meta'));
   const grid=element('div',undefined,'real-grid');
   for(const s of sets){const a=element('a',undefined,'real-card');a.href='#realexam/'+s.id;const st=stat(s.id);
-   a.append(element('span',s.icon||'📝','real-icon'),element('strong',s.title),element('span',s.questions+' ข้อ · เวลาแนะนำ '+s.time_limit_minutes+' นาที','meta'),element('span',st?'ทำแล้ว '+st.count+' ครั้ง · ดีที่สุด '+Math.round(st.best*100)+'%':'ยังไม่เคยทำ','real-stat'));grid.append(a);}
+   a.append(element('span',s.icon||'📝','real-icon'),element('strong',s.title),element('span',s.questions+' ข้อ · เวลาแนะนำ '+s.time_limit_minutes+' นาที','meta'),...(s.source?[element('span','แหล่งที่มา: '+s.source,'meta real-source')]:[]),element('span',st?'ทำแล้ว '+st.count+' ครั้ง · ดีที่สุด '+Math.round(st.best*100)+'%':'ยังไม่เคยทำ','real-stat'));grid.append(a);}
   box.replaceChildren(backTo('#dashboard','← กลับหน้าหลัก'),head,grid);return;
  }
  const back={href:'#realexam',label:'← กลับไปรายการซ้อมสอบจริง'};
- head.append(element('span','🎯 ซ้อมสอบจริง · '+(real.round||'รอบไตรภาษา'),'tag'),element('h2',set.title,'title'));
+ head.append(element('span','🎯 ซ้อมสอบจริง · '+(set.round||real.round||'รอบไตรภาษา'),'tag'),element('h2',set.title,'title'));
  box.replaceChildren(backTo(back.href,back.label),head,element('p','กำลังเปิดข้อสอบ…'));
  try{
   await ensureMarkdown();if(token!==request)return;
@@ -161,7 +161,8 @@ async function realExamPage(setId,token){
   if(data.meta.id!==set.id)throw Error('id ในข้อสอบไม่ตรงกับ config');
   QuizEngine.validate(data.meta.questions);
   const minutes=Number(data.meta.time_limit_minutes)||Number(set.time_limit_minutes)||30;
-  if(real.note)head.append(element('p',real.note,'meta'));
+  if(set.source)head.append(element('p','แหล่งที่มา: '+set.source,'meta'));
+  if(set.note||real.note)head.append(element('p',set.note||real.note,'meta'));
   head.append(element('span',data.meta.questions.length+' ข้อ · เวลาแนะนำ '+minutes+' นาที','meta'));
   const panel=element('section',undefined,'quiz-panel');
   box.replaceChildren(backTo(back.href,back.label),head,panel);
