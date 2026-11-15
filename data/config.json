@@ -1272,5 +1272,36 @@
     "apps_script_url": "https://script.google.com/macros/s/AKfycbw3nF8y7GeEJoTWXHUsmW3_CuT5Bv-9r0aEt1N06RIlZHZU-ECDGZ1c8iznqFxG_hIy/exec",
     "sheet_url": "https://docs.google.com/spreadsheets/d/1RBCcYE6RoVjMDt3oOw70DUQ5LnDr25D1_ushOAY6X7U/edit?gid=1258865635#gid=1258865635",
     "note": "ค่าสาธารณะ ไม่ใช่รหัสลับ ใส่หลังทำตาม docs/GOOGLE-SHEET-SYNC.md เว้นว่างไว้ = เก็บผลเรียนเฉพาะเครื่อง"
+  },
+  "real_exam": {
+    "title": "ซ้อมสอบจริง",
+    "round": "รอบไตรภาษา",
+    "note": "ข้อสอบจริงของรอบที่แล้ว เป็นรอบของหลักสูตรไตรภาษา (Trilingual) ใช้ซ้อมจับเวลาและดูรูปแบบข้อสอบ ไม่ใช่รอบห้องเรียนปกติ",
+    "sets": [
+      {
+        "id": "realexam-trilingual-thai",
+        "title": "ภาษาไทย",
+        "icon": "📖",
+        "file": "./data/exams/realexam-trilingual-thai.md",
+        "questions": 30,
+        "time_limit_minutes": 45
+      },
+      {
+        "id": "realexam-trilingual-english",
+        "title": "ภาษาอังกฤษ · Part A: Dialogue",
+        "icon": "💬",
+        "file": "./data/exams/realexam-trilingual-english.md",
+        "questions": 15,
+        "time_limit_minutes": 20
+      },
+      {
+        "id": "realexam-trilingual-math",
+        "title": "คณิตศาสตร์ · ข้อ 14",
+        "icon": "➗",
+        "file": "./data/exams/realexam-trilingual-math.md",
+        "questions": 1,
+        "time_limit_minutes": 5
+      }
+    ]
   }
 }
