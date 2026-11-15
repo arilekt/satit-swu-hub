@@ -540,3 +540,4 @@ a.pd-sheet:hover{transform:translateY(-2px);border-color:var(--red-line);box-sha
 .real-card:hover,.real-card:focus-visible{border-color:var(--red);box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .real-icon{font-size:28px}
 .real-stat{font-size:var(--fs-sm);color:var(--muted)}
+.real-source{line-height:1.5}
