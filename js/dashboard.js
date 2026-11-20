@@ -142,7 +142,7 @@ function ticket(container,value,show){
 }
 function pretestDetails(box,d,subjects,ticketHref,resultsHref){
   box.replaceChildren();
-  const head=node('header',undefined,'pd-head');head.append(node('span','รายละเอียดวันสอบ Pre-Test','eyebrow'),node('h2',d.title||'Pre-Test'));if(d.school)head.append(node('p',d.school,'muted'));box.append(head);
+  const head=node('header',undefined,'pd-head');head.append(node('span',d.eyebrow||'รายละเอียดวันสอบ Pre-Test','eyebrow'),node('h2',d.title||'Pre-Test'));if(d.school)head.append(node('p',d.school,'muted'));box.append(head);
   const facts=node('div',undefined,'pd-facts');
   for(const [icon,label,value] of [['📅','วันสอบ',d.date_text&&d.time_text?d.date_text+' · '+d.time_text:d.date_text],['🏫','อาคารสอบ',d.building],['🚪','ห้องสอบ',d.room],['📣','ประกาศผลสอบ',d.results_text]])if(value){const f=node('div',undefined,'pd-fact');f.append(node('span',icon+' '+label,'pd-label'),node('strong',value));facts.append(f);}
   box.append(facts);
